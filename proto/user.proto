@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package user;
+option go_package = "shared/proto/user;user";
+
+message RegisterRequest {
+  string full_name = 1;
+  string email = 2;
+  string password = 3;
+}
+message RegisterResponse {
+  int64 id = 1;
+  string full_name = 2;
+  string email = 3;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+message LoginResponse {
+  int64 id = 1;
+  string full_name = 2;
+  string email = 3;
+  string role = 4;
+}
+
+message GetProfileRequest {
+  int64 user_id = 1; 
+}
+message GetProfileResponse {
+  int64 id = 1;
+  string full_name = 2;
+  string email = 3;
+  string role = 4;
+}
+
+message GetAllUsersRequest {
+  int32 page = 1;        
+  int32 page_size = 2;   
+}
+
+message GetAllUsersResponse {
+  repeated GetProfileResponse users = 1;  
+  int32 page = 2;                         
+  int32 page_size = 3;                    
+  int64 total = 4;                        
+  int32 total_pages = 5;                 
+}
+
+message DeleteUserRequest {
+  int64 id = 1;
+}
+
+message DeleteUserResponse {
+  bool success = 1;
+}
+
+message UpdateUserRoleRequest {
+  int64 id = 1;
+  string role = 2;
+}
+
+message UpdateUserRoleResponse {
+  bool success = 1;
+}
+
+message UpdateUserRequest {
+  int64 id = 1;
+  string full_name = 2;
+  string email = 3;
+}
+
+message UpdateUserResponse {
+  int64 id = 1;
+  string full_name = 2;
+  string email = 3;
+  string role = 4;
+}
+
+message UpdatePasswordRequest {
+  int64 id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
+
+message UpdatePasswordResponse {
+  bool success = 1;
+}
+
+message GetUserCountRequest {}
+
+message GetUserCountResponse { int64 count = 1; }
+
+service UserService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc UpdateUserRole(UpdateUserRoleRequest) returns (UpdateUserRoleResponse);
+
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse);
+  rpc GetUserCount(GetUserCountRequest) returns (GetUserCountResponse);
+}
+

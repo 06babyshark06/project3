@@ -1,0 +1,194 @@
+syntax = "proto3";
+
+package exam;
+
+option go_package = "shared/proto/exam;exam";
+
+service ExamService {
+  rpc CreateTopic(CreateTopicRequest) returns (CreateTopicResponse);
+  rpc GetTopics(GetTopicsRequest) returns (GetTopicsResponse);
+
+  rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
+  
+  rpc CreateExam(CreateExamRequest) returns (CreateExamResponse);
+  rpc GetExamDetails(GetExamDetailsRequest) returns (GetExamDetailsResponse); // Dùng cho học viên làm bài
+
+  rpc SubmitExam(SubmitExamRequest) returns (SubmitExamResponse);
+  rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
+  rpc GetExamCount(GetExamCountRequest) returns (GetExamCountResponse);
+
+  rpc GetExams(GetExamsRequest) returns (GetExamsResponse);
+  rpc PublishExam(PublishExamRequest) returns (PublishExamResponse);
+  rpc UpdateQuestion(UpdateQuestionRequest) returns (UpdateQuestionResponse);
+  rpc DeleteQuestion(DeleteQuestionRequest) returns (DeleteQuestionResponse);
+  rpc UpdateExam(UpdateExamRequest) returns (UpdateExamResponse);
+  rpc DeleteExam(DeleteExamRequest) returns (DeleteExamResponse);
+}
+
+message Topic {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+}
+message CreateTopicRequest {
+  string name = 1;
+  string description = 2;
+}
+message CreateTopicResponse {
+  Topic topic = 1;
+}
+message GetTopicsRequest {}
+message GetTopicsResponse {
+  repeated Topic topics = 1;
+}
+
+// === Question Messages ===
+message ChoiceInput {
+  string content = 1;
+  bool is_correct = 2;
+}
+message CreateQuestionRequest {
+  int64 topic_id = 1; 
+  string content = 2;
+  string question_type = 3;
+  string difficulty = 4;
+  string explanation = 5;
+  repeated ChoiceInput choices = 6;
+  int64 creator_id = 7;
+  int64 exam_id = 8;
+}
+message CreateQuestionResponse {
+  int64 id = 1;
+  string content = 2;
+}
+
+message CreateExamRequest {
+  string title = 1;
+  string description = 2;
+  int64 topic_id = 3;
+  repeated int64 question_ids = 4;
+  int32 duration_minutes = 5;
+  int64 creator_id = 6;
+}
+message CreateExamResponse {
+  int64 id = 1;
+  string title = 2;
+}
+
+message ChoiceDetails {
+  int64 id = 1;
+  string content = 2;
+}
+message QuestionDetails {
+  int64 id = 1;
+  string content = 2;
+  repeated ChoiceDetails choices = 3;
+  string question_type = 4;
+}
+message GetExamDetailsRequest {
+  int64 exam_id = 1;
+}
+message GetExamDetailsResponse {
+  int64 id = 1;
+  string title = 2;
+  int32 duration_minutes = 3;
+  repeated QuestionDetails questions = 4;
+  int64 topic_id = 5;
+  bool is_published = 6;
+}
+
+message UserAnswer {
+  int64 question_id = 1;
+  int64 chosen_choice_id = 2;
+}
+message SubmitExamRequest {
+  int64 exam_id = 1;
+  int64 user_id = 2;
+  repeated UserAnswer answers = 3;
+}
+message SubmitExamResponse {
+  int64 submission_id = 1;
+  float score = 2;
+  int32 correct_count = 3;
+  int32 total_questions = 4;
+}
+
+message GetSubmissionRequest {
+  int64 submission_id = 1;
+  int64 user_id = 2;
+}
+
+message GetSubmissionResponse {
+  int64 id = 1;
+  string exam_title = 2;
+  float score = 3;
+  int32 correct_count = 4;
+  int32 total_questions = 5;
+  string status = 6;
+  string submitted_at = 7;
+}
+
+message GetExamCountRequest {}
+
+message GetExamCountResponse { int64 count = 1; }
+
+message ExamListItem {
+  int64 id = 1;
+  string title = 2;
+  int32 duration_minutes = 3;
+  int64 topic_id = 4;
+  int64 creator_id = 5;
+  bool is_published = 6;
+}
+
+message GetExamsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  int64 creator_id = 3;
+}
+
+message GetExamsResponse {
+  repeated ExamListItem exams = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}
+
+message PublishExamRequest {
+  int64 exam_id = 1;
+  bool is_published = 2;
+}
+message PublishExamResponse {
+  bool success = 1;
+}
+
+message UpdateQuestionRequest {
+  int64 question_id = 1;
+  string content = 2;
+  string question_type = 3;
+  string difficulty = 4;
+  string explanation = 5;
+  repeated ChoiceInput choices = 6;
+}
+message UpdateQuestionResponse { bool success = 1; }
+
+message DeleteQuestionRequest {
+  int64 question_id = 1;
+}
+message DeleteQuestionResponse {
+  bool success = 1;
+}
+
+message UpdateExamRequest {
+  int64 exam_id = 1;
+  string title = 2;
+  string description = 3;
+  int32 duration_minutes = 4;
+  int64 topic_id = 5;
+}
+message UpdateExamResponse {
+  bool success = 1;
+}
+
+message DeleteExamRequest { int64 exam_id = 1; }
+message DeleteExamResponse { bool success = 1; }

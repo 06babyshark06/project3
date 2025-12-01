@@ -1,0 +1,25 @@
+package contracts
+
+type UserRegisteredEvent struct {
+	UserID   int64  `json:"user_id"`
+	Email    string `json:"email"`
+	FullName string `json:"full_name"`
+}
+
+type ExamSubmittedEvent struct {
+	UserID       int64   `json:"user_id"`
+	ExamID       int64   `json:"exam_id"`
+	SubmissionID int64   `json:"submission_id"`
+	ExamTitle    string  `json:"exam_title"`
+	Score        float64 `json:"score"`
+	// TODO: Thêm Email và FullName nếu bạn cập nhật .proto
+	// Email     string  `json:"email"`
+	// FullName  string  `json:"full_name"`
+}
+
+type CourseEnrolledEvent struct {
+	UserID      int64  `json:"user_id"`
+	CourseID    int64  `json:"course_id"`
+	CourseTitle string `json:"course_title"`
+	// TODO: Thêm Email và FullName nếu bạn cập nhật .proto
+}
