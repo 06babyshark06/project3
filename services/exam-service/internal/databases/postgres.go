@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	// Đảm bảo đường dẫn này trỏ đúng đến file domain.go của exam-service
 	"github.com/06babyshark06/JQKStudy/services/exam-service/internal/domain"
 	"github.com/06babyshark06/JQKStudy/shared/env"
 )
@@ -32,25 +31,19 @@ func Connect() {
 		log.Fatalf("❌ Failed to connect to DB: %v", err)
 	}
 
-	// Auto migrate tất cả các model của Exam Service
-	// Thứ tự này quan trọng để xử lý khóa ngoại
 	if err := db.AutoMigrate(
-		// 1. Các bảng tra cứu (Lookup tables) - Không phụ thuộc
 		&domain.TopicModel{},
 		&domain.QuestionDifficultyModel{},
 		&domain.QuestionTypeModel{},
 		&domain.SubmissionStatusModel{},
 
-		// 2. Các bảng chính - Phụ thuộc vào các bảng trên
 		&domain.QuestionModel{},
 		&domain.ExamModel{},
 
-		// 3. Các bảng phụ - Phụ thuộc vào bảng chính
 		&domain.ChoiceModel{},
-		&domain.ExamQuestionModel{}, // Bảng join many-to-many
+		&domain.ExamQuestionModel{},
 		&domain.ExamSubmissionModel{},
 
-		// 4. Bảng chi tiết - Phụ thuộc vào bảng phụ
 		&domain.UserAnswerModel{},
 	); err != nil {
 		log.Fatalf("❌ Migration failed: %v", err)
@@ -59,13 +52,10 @@ func Connect() {
 	DB = db
 	log.Println("✅ Database connected and migrated")
 
-	// Seed dữ liệu cho các bảng tra cứu
 	seedExamData(db)
 }
 
-// seedExamData dùng để điền các giá trị mặc định cho các bảng lookup
 func seedExamData(db *gorm.DB) {
-	// Seed Difficulties
 	difficulties := []domain.QuestionDifficultyModel{
 		{Difficulty: "easy"},
 		{Difficulty: "medium"},
@@ -75,7 +65,6 @@ func seedExamData(db *gorm.DB) {
 		db.FirstOrCreate(&d, domain.QuestionDifficultyModel{Difficulty: d.Difficulty})
 	}
 
-	// Seed Types
 	types := []domain.QuestionTypeModel{
 		{Type: "single_choice"},
 		{Type: "multiple_choice"},

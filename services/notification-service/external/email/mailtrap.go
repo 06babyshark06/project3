@@ -13,17 +13,14 @@ import (
 	"github.com/06babyshark06/JQKStudy/shared/env"
 )
 
-// Mailtrap API Endpoint
 const mailtrapAPIURL = "https://send.api.mailtrap.io/api/send"
 
-// mailtrapProvider implements the domain.EmailProvider interface
 type mailtrapProvider struct {
 	apiToken    string
 	senderEmail string
 	httpClient  *http.Client
 }
 
-// NewMailtrapProvider creates a new email provider for Mailtrap
 func NewMailtrapProvider() (domain.EmailProvider, error) {
 	token := env.GetString("MAILTRAP_API_TOKEN", "b37a230f5c8ceb229308f43093aa999f")
 	sender := env.GetString("MAILTRAP_SENDER_EMAIL", "")
@@ -36,12 +33,10 @@ func NewMailtrapProvider() (domain.EmailProvider, error) {
 		apiToken:    token,
 		senderEmail: sender,
 		httpClient: &http.Client{
-			Timeout: 10 * time.Second, // Đặt timeout 10 giây
+			Timeout: 10 * time.Second,
 		},
 	}, nil
 }
-
-// --- Mailtrap API Payload Structs ---
 
 type mailtrapEmail struct {
 	Email string `json:"email"`
@@ -55,14 +50,11 @@ type mailtrapPayload struct {
 	HTML    string        `json:"html"`
 }
 
-// SendEmail implements the domain.EmailProvider interface
 func (p *mailtrapProvider) SendEmail(ctx context.Context, toEmail string, subject string, htmlBody string) error {
-	
-	// 1. Chuẩn bị payload theo định dạng Mailtrap
 	payload := mailtrapPayload{
 		From: mailtrapEmail{
 			Email: p.senderEmail,
-			Name:  "JQK Study", // Tên người gửi (tùy chọn)
+			Name:  "JQK Study",
 		},
 		To: []mailtrapEmail{
 			{Email: toEmail},
@@ -71,35 +63,28 @@ func (p *mailtrapProvider) SendEmail(ctx context.Context, toEmail string, subjec
 		HTML:    htmlBody,
 	}
 
-	// 2. Marshal payload thành JSON
 	jsonBody, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("lỗi marshal payload: %w", err)
 	}
 
-	// 3. Tạo HTTP request
 	req, err := http.NewRequestWithContext(ctx, "POST", mailtrapAPIURL, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return fmt.Errorf("lỗi tạo http request: %w", err)
 	}
 
-	// 4. Thêm Headers
 	req.Header.Set("Authorization", "Bearer "+p.apiToken)
 	req.Header.Set("Content-Type", "application/json")
 
-	// 5. Gửi request
 	resp, err := p.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("lỗi gửi request đến Mailtrap: %w", err)
 	}
 	defer resp.Body.Close()
 
-	// 6. Kiểm tra response status
 	if resp.StatusCode != http.StatusOK {
-		// (Trong thực tế nên đọc body để lấy chi tiết lỗi)
 		return fmt.Errorf("Mailtrap trả về lỗi: %s", resp.Status)
 	}
 
-	// Nếu thành công (200 OK)
 	return nil
 }

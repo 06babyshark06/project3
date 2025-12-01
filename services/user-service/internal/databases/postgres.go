@@ -62,7 +62,6 @@ func seedRoles(db *gorm.DB) {
 }
 
 func seedUsers(db *gorm.DB) {
-	// 1. Lấy ID của các vai trò
 	var studentRole domain.Role
 	db.Where("name = ?", "student").First(&studentRole)
 

@@ -16,7 +16,6 @@ type UserHandler struct {
 	userClient pb.UserServiceClient
 }
 
-// NewUserHandler tạo handler với kết nối gRPC
 func NewUserHandler(client *grpcclients.UserServiceClient) *UserHandler {
 	return &UserHandler{userClient: client.Client}
 }
@@ -32,7 +31,6 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 		pageSize = 10
 	}
 
-	// Gọi gRPC tới user service
 	resp, err := h.userClient.GetAllUsers(
 		c.Request.Context(),
 		&pb.GetAllUsersRequest{

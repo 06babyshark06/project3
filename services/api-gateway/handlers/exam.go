@@ -8,17 +8,16 @@ import (
 
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
-	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam" // THAY ĐỔI
+	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
 type ExamHandler struct {
-	examClient pb.ExamServiceClient // THAY ĐỔI
+	examClient pb.ExamServiceClient
 }
 
-// NewExamHandler tạo handler với kết nối gRPC
-func NewExamHandler(client *grpcclients.ExamServiceClient) *ExamHandler { // THAY ĐỔI
+func NewExamHandler(client *grpcclients.ExamServiceClient) *ExamHandler {
 	return &ExamHandler{examClient: client.Client}
 }
 
@@ -32,8 +31,6 @@ func getUserIDFromContext(c *gin.Context) (int64, error) {
 	}
 	return userID, nil
 }
-
-// --- Topic Handlers ---
 
 func (h *ExamHandler) GetTopics(c *gin.Context) {
 	resp, err := h.examClient.GetTopics(c.Request.Context(), &pb.GetTopicsRequest{})
@@ -50,14 +47,6 @@ func (h *ExamHandler) CreateTopic(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Lấy creator_id từ JWT
-	// userID, err := getUserIDFromContext(c)
-	// if err != nil {
-	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-	// 	return
-	// }
-	// req.CreatorId = userID
 
 	resp, err := h.examClient.CreateTopic(c.Request.Context(), &req)
 	if err != nil {
@@ -234,7 +223,6 @@ func (h *ExamHandler) GetInstructorExams(c *gin.Context) {
 }
 
 func (h *ExamHandler) UpdateQuestion(c *gin.Context) {
-	// 1. Lấy Question ID từ URL
 	idStr := c.Param("id")
 	questionID, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -242,8 +230,6 @@ func (h *ExamHandler) UpdateQuestion(c *gin.Context) {
 		return
 	}
 
-	// 2. Xác thực người dùng (Chỉ instructor/admin mới được sửa)
-	// (Middleware Authorize đã lo phần role, ở đây ta lấy ID để log hoặc logic sau này)
 	_, err = getUserIDFromContext(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -258,10 +244,10 @@ func (h *ExamHandler) UpdateQuestion(c *gin.Context) {
 	}
 	var req struct {
 		Content      string      `json:"content" binding:"required"`
-		QuestionType string      `json:"question_type" binding:"required"` // "single_choice", "multiple_choice"
-		Difficulty   string      `json:"difficulty" binding:"required"`    // "easy", "medium", "hard"
+		QuestionType string      `json:"question_type" binding:"required"`
+		Difficulty   string      `json:"difficulty" binding:"required"` 
 		Explanation  string      `json:"explanation"`
-		Choices      []ChoiceReq `json:"choices" binding:"required,min=2"` // Ít nhất 2 lựa chọn
+		Choices      []ChoiceReq `json:"choices" binding:"required,min=2"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -269,7 +255,6 @@ func (h *ExamHandler) UpdateQuestion(c *gin.Context) {
 		return
 	}
 
-	// 4. Map sang Proto Request
 	var pbChoices []*pb.ChoiceInput
 	for _, ch := range req.Choices {
 		pbChoices = append(pbChoices, &pb.ChoiceInput{
@@ -303,8 +288,6 @@ func (h *ExamHandler) DeleteQuestion(c *gin.Context) {
 		return
 	}
 
-	// Gọi gRPC (Giả sử proto đã có DeleteQuestionRequest)
-	// Nếu chưa có trong proto, bạn cần thêm vào proto exam và build lại
 	_, err = h.examClient.DeleteQuestion(c.Request.Context(), &pb.DeleteQuestionRequest{QuestionId: questionID})
 	
 	if err != nil {
@@ -335,15 +318,12 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 		return
 	}
 
-	// Gọi gRPC UpdateExam (Cần đảm bảo proto đã có RPC này)
-	// Chúng ta đã dùng UpdateExamRequest trong service ở các bước trước
 	_, err = h.examClient.UpdateExam(c.Request.Context(), &pb.UpdateExamRequest{
 		ExamId:          examID,
 		Title:           req.Title,
 		Description:     req.Description,
 		DurationMinutes: int32(req.DurationMinutes),
 		TopicId:         int64(req.TopicId),
-		// CreatorId: lấy từ token nếu cần check quyền
 	})
 
 	if err != nil {
@@ -364,4 +344,23 @@ func (h *ExamHandler) DeleteExam(c *gin.Context) {
         return
     }
     c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{"message": "Exam deleted"}})
+}
+
+func (h *ExamHandler) GetMyExamStats(c *gin.Context) {
+    userID, err := getUserIDFromContext(c)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+        return
+    }
+
+    resp, err := h.examClient.GetUserExamStats(c.Request.Context(), &pb.GetUserExamStatsRequest{
+        UserId: userID,
+    })
+    
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }

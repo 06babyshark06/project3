@@ -38,11 +38,9 @@ func main() {
 	grpcServer := grpcserver.NewServer()
 	grpc.NewGRPCHandler(grpcServer, service)
 
-	// Channel nhận tín hiệu hệ thống
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-	// Chạy gRPC server trong goroutine riêng
 	go func() {
 		log.Printf("🚀 gRPC server is running on %s", addr)
 		if err := grpcServer.Serve(lis); err != nil {
@@ -50,7 +48,6 @@ func main() {
 		}
 	}()
 
-	// Đợi tín hiệu dừng
 	sig := <-sigChan
 	log.Printf("Received signal: %v. Shutting down gracefully...", sig)
 

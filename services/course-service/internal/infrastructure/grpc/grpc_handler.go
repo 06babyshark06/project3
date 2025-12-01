@@ -3,15 +3,12 @@ package grpc
 import (
 	"context"
 
-	// THAY ĐỔI: Trỏ đến domain của course-service
 	"github.com/06babyshark06/JQKStudy/services/course-service/internal/domain"
-	// THAY ĐỔI: Import proto của COURSE
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/course"
 	"google.golang.org/grpc"
 )
 
 type gRPCHandler struct {
-	// THAY ĐỔI: Implement server của COURSE
 	pb.UnimplementedCourseServiceServer
 	service domain.CourseService
 }
@@ -21,14 +18,9 @@ func NewGRPCHandler(server *grpc.Server, service domain.CourseService) *gRPCHand
 		service: service,
 	}
 
-	// THAY ĐỔI: Register COURSE server
 	pb.RegisterCourseServiceServer(server, handler)
 	return handler
 }
-
-// 4. THAY ĐỔI: Implement tất cả các phương thức của CourseService
-
-// === Course Management (for Instructors) ===
 
 func (h *gRPCHandler) CreateCourse(ctx context.Context, req *pb.CreateCourseRequest) (*pb.CreateCourseResponse, error) {
 	resp, err := h.service.CreateCourse(ctx, req)
@@ -54,8 +46,6 @@ func (h *gRPCHandler) CreateLesson(ctx context.Context, req *pb.CreateLessonRequ
 	return resp, nil
 }
 
-// === Course (for Students/Public) ===
-
 func (h *gRPCHandler) GetCourses(ctx context.Context, req *pb.GetCoursesRequest) (*pb.GetCoursesResponse, error) {
 	resp, err := h.service.GetCourses(ctx, req)
 	if err != nil {
@@ -71,8 +61,6 @@ func (h *gRPCHandler) GetCourseDetails(ctx context.Context, req *pb.GetCourseDet
 	}
 	return resp, nil
 }
-
-// === Enrollment & Progress (for Students) ===
 
 func (h *gRPCHandler) EnrollCourse(ctx context.Context, req *pb.EnrollCourseRequest) (*pb.EnrollCourseResponse, error) {
 	resp, err := h.service.EnrollCourse(ctx, req)
@@ -97,8 +85,6 @@ func (h *gRPCHandler) MarkLessonCompleted(ctx context.Context, req *pb.MarkLesso
 	}
 	return resp, nil
 }
-
-// === File Upload ===
 
 func (h *gRPCHandler) GetUploadURL(ctx context.Context, req *pb.GetUploadURLRequest) (*pb.GetUploadURLResponse, error) {
 	resp, err := h.service.GetUploadURL(ctx, req)

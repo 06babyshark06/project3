@@ -33,7 +33,6 @@ func (h *StatsHandler) GetAdminStats(c *gin.Context) {
 	var userCount, courseCount, examCount int64
 	var errUser, errCourse, errExam error
 
-	// Gọi song song (Concurrent) 3 service để tiết kiệm thời gian
 	go func() {
 		defer wg.Done()
 		resp, err := h.userClient.GetUserCount(c.Request.Context(), &userpb.GetUserCountRequest{})
@@ -54,9 +53,9 @@ func (h *StatsHandler) GetAdminStats(c *gin.Context) {
 
 	wg.Wait()
 
-	// Nếu có lỗi, log lại nhưng vẫn trả về các số liệu lấy được (partial response)
 	if errUser != nil || errCourse != nil || errExam != nil {
-		// log.Println("Stats partial error:", errUser, errCourse, errExam)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get stats"})
+		return
 	}
 
 	c.JSON(http.StatusOK, contracts.APIResponse{

@@ -8,12 +8,10 @@ import (
 	"github.com/06babyshark06/JQKStudy/services/user-service/internal/domain"
 )
 
-// kafkaProducer triển khai interface
 type kafkaProducer struct {
 	producer *kafka.Producer
 }
 
-// NewKafkaProducer tạo một producer mới và kết nối tới Confluent
 func NewKafkaProducer() (domain.EventProducer, error) {
 	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "pkc-921jm.us-east-2.aws.confluent.cloud:9092")
 	apiKey := env.GetString("KAFKA_API_KEY", "4Q7GDTN7GVOXGSWJ")
@@ -29,9 +27,7 @@ func NewKafkaProducer() (domain.EventProducer, error) {
 		"sasl.mechanisms":   "PLAIN",
 		"sasl.username":     apiKey,
 		"sasl.password":     apiSecret,
-		
-		// Cấu hình quan trọng cho producer
-		"acks": "all", // Chờ tất cả broker xác nhận (an toàn nhất)
+		"acks": "all",
 	}
 
 	p, err := kafka.NewProducer(config)
@@ -41,8 +37,6 @@ func NewKafkaProducer() (domain.EventProducer, error) {
 
 	log.Println("✅ Kafka Producer đã kết nối (User Service)")
 
-	// QUAN TRỌNG: Chạy một goroutine để lắng nghe Delivery Reports
-	// Kafka produce là bất đồng bộ, đây là cách duy nhất để biết message đã GỬI THÀNH CÔNG
 	go func() {
 		for e := range p.Events() {
 			switch ev := e.(type) {
@@ -60,20 +54,16 @@ func NewKafkaProducer() (domain.EventProducer, error) {
 	return &kafkaProducer{producer: p}, nil
 }
 
-// Produce gửi message (bất đồng bộ)
 func (kp *kafkaProducer) Produce(topic string, key []byte, message []byte) error {
-	// Gửi message vào hàng đợi nội bộ của producer
-	// Goroutine ở trên sẽ xử lý kết quả
 	return kp.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
 		Key:            key,
 		Value:          message,
-	}, nil) // nil deliveryChan để dùng chung
+	}, nil)
 }
 
 // Close dọn dẹp producer
 func (kp *kafkaProducer) Close() {
-	// Chờ (flush) tất cả các message đang chờ gửi
-	kp.producer.Flush(5 * 1000) // 5 giây timeout
+	kp.producer.Flush(5 * 1000)
 	kp.producer.Close()
 }

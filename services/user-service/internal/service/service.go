@@ -23,7 +23,6 @@ func NewUserService(repo domain.UserRepository, producer domain.EventProducer) d
 	return &userService{repo: repo, producer: producer}
 }
 
-// GetProfile implements domain.UserService.
 func (s *userService) GetProfile(ctx context.Context, userId *pb.GetProfileRequest) (*pb.GetProfileResponse, error) {
 	user, err := s.repo.GetUserById(ctx, userId.UserId)
 	if err != nil {
@@ -38,7 +37,6 @@ func (s *userService) GetProfile(ctx context.Context, userId *pb.GetProfileReque
 	}, nil
 }
 
-// Login implements domain.UserService.
 func (s *userService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	user, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
@@ -58,13 +56,11 @@ func (s *userService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 }
 
 func (s *userService) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	// Kiểm tra email trùng
 	existing, _ := s.repo.GetUserByEmail(ctx, req.Email)
 	if existing != nil {
 		return nil, errors.New("email already registered")
 	}
 
-	// Hash mật khẩu
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -76,7 +72,7 @@ func (s *userService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		FullName:  req.FullName,
 		Email:     req.Email,
 		Password:  string(hash),
-		RoleId:    1, // mặc định user bình thường, có thể thay đổi sau
+		RoleId:    1,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -94,16 +90,11 @@ func (s *userService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 	eventBytes, err := json.Marshal(eventPayload)
 
 	if err != nil {
-		// Ghi log lỗi, nhưng KHÔNG trả về lỗi cho user.
-		// User đăng ký thành công quan trọng hơn.
 		log.Printf("LỖI: Không thể marshal sự kiện user_registered: %v", err)
 	} else {
-		// Gửi (Produce)
-		// Dùng UserID làm key để đảm bảo thứ tự (nếu cần)
 		key := []byte(strconv.FormatInt(createdUser.Id, 10))
 		err = s.producer.Produce("user_events", key, eventBytes)
 		if err != nil {
-			// Chỉ ghi log, không làm hỏng request
 			log.Printf("LỖI: Không thể gửi sự kiện user_registered: %v", err)
 		}
 	}
@@ -136,7 +127,6 @@ func (s *userService) GetAllUsers(ctx context.Context, req *pb.GetAllUsersReques
 		})
 	}
 
-	// Tính tổng số trang
 	totalPages := int32((total + int64(req.PageSize) - 1) / int64(req.PageSize))
 
 	return &pb.GetAllUsersResponse{
@@ -163,19 +153,16 @@ func (s *userService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest)
 }
 
 func (s *userService) UpdateUserRole(ctx context.Context, req *pb.UpdateUserRoleRequest) (*pb.UpdateUserRoleResponse, error) {
-	// a. Tìm user
 	user, err := s.repo.GetUserById(ctx, req.Id)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
 
-	// b. Tìm role mới (dựa trên string "admin", "instructor"...)
 	role, err := s.repo.GetRoleByName(ctx, req.Role)
 	if err != nil {
 		return nil, errors.New("role invalid")
 	}
 
-	// c. Cập nhật
 	user.RoleId = role.Id
 	user.UpdatedAt = time.Now().UTC()
 
@@ -186,7 +173,6 @@ func (s *userService) UpdateUserRole(ctx context.Context, req *pb.UpdateUserRole
 	return &pb.UpdateUserRoleResponse{Success: true}, nil
 }
 
-// === 3. CẬP NHẬT THÔNG TIN (User tự sửa tên) ===
 func (s *userService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error) {
 	user, err := s.repo.GetUserById(ctx, req.Id)
 	if err != nil {
@@ -206,7 +192,6 @@ func (s *userService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 		return nil, err
 	}
 
-	// Trả về thông tin mới để Frontend cập nhật state
 	return &pb.UpdateUserResponse{
 		Id:       updatedUser.Id,
 		FullName: updatedUser.FullName,

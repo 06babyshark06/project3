@@ -24,7 +24,6 @@ func NewJWTMiddleware(userClient *grpcclients.UserServiceClient) (*jwt.GinJWTMid
 		MaxRefresh:  time.Hour * 24 * 7,
 		IdentityKey: identityKey,
 
-		// --- Xử lý đăng nhập ---
 		Authenticator: func(c *gin.Context) (any, error) {
 			var loginVals converters.LoginRequest
 			if err := c.ShouldBindJSON(&loginVals); err != nil {
@@ -66,7 +65,6 @@ func NewJWTMiddleware(userClient *grpcclients.UserServiceClient) (*jwt.GinJWTMid
 			return jwt.MapClaims{}
 		},
 
-		// --- Khi lấy thông tin từ token ---
 		IdentityHandler: func(c *gin.Context) any {
 			claims := jwt.ExtractClaims(c)
 
@@ -81,9 +79,7 @@ func NewJWTMiddleware(userClient *grpcclients.UserServiceClient) (*jwt.GinJWTMid
 			}
 		},
 
-		// --- Kiểm tra token hợp lệ ---
 		Authorizator: func(data any, c *gin.Context) bool {
-			// Có thể gọi VerifyToken từ user service nếu cần
 			return true
 		},
 
@@ -104,7 +100,6 @@ func NewJWTMiddleware(userClient *grpcclients.UserServiceClient) (*jwt.GinJWTMid
 
 func Authorize(allowedRoles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. Lấy role từ context (do IdentityHandler ở trên đặt vào)
 		roleVal, exists := c.Get("role")
 		if !exists {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Không tìm thấy vai trò (role) trong token"})
@@ -117,15 +112,13 @@ func Authorize(allowedRoles ...string) gin.HandlerFunc {
 			return
 		}
 
-		// 2. Kiểm tra xem role của user có trong danh sách được phép không
 		for _, role := range allowedRoles {
 			if userRole == role {
-				c.Next() // Hợp lệ, cho đi tiếp
+				c.Next()
 				return
 			}
 		}
 
-		// 3. Nếu không, cấm truy cập
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Bạn không có quyền truy cập tài nguyên này"})
 	}
 }

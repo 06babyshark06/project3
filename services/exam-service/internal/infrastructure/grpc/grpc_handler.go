@@ -22,8 +22,6 @@ func NewGRPCHandler(server *grpc.Server, service domain.ExamService) *gRPCHandle
 	return handler
 }
 
-
-// === Topic Management ===
 func (h *gRPCHandler) CreateTopic(ctx context.Context, req *pb.CreateTopicRequest) (*pb.CreateTopicResponse, error) {
 	resp, err := h.service.CreateTopic(ctx, req)
 	if err != nil {
@@ -40,7 +38,6 @@ func (h *gRPCHandler) GetTopics(ctx context.Context, req *pb.GetTopicsRequest) (
 	return resp, nil
 }
 
-// === Question Management ===
 func (h *gRPCHandler) CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
 	resp, err := h.service.CreateQuestion(ctx, req)
 	if err != nil {
@@ -49,7 +46,6 @@ func (h *gRPCHandler) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 	return resp, nil
 }
 
-// === Exam Management ===
 func (h *gRPCHandler) CreateExam(ctx context.Context, req *pb.CreateExamRequest) (*pb.CreateExamResponse, error) {
 	resp, err := h.service.CreateExam(ctx, req)
 	if err != nil {
@@ -66,7 +62,6 @@ func (h *gRPCHandler) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 	return resp, nil
 }
 
-// === Submission ===
 func (h *gRPCHandler) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
 	resp, err := h.service.SubmitExam(ctx, req)
 	if err != nil {
@@ -109,4 +104,8 @@ func (h *gRPCHandler) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 
 func (h *gRPCHandler) DeleteExam(ctx context.Context, req *pb.DeleteExamRequest) (*pb.DeleteExamResponse, error) {
 	return h.service.DeleteExam(ctx, req)
+}
+
+func (h *gRPCHandler) GetUserExamStats(ctx context.Context, req *pb.GetUserExamStatsRequest) (*pb.GetUserExamStatsResponse, error) {
+    return h.service.GetUserExamStats(ctx, req)
 }

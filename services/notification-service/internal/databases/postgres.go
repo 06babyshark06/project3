@@ -8,7 +8,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	// THAY ĐỔI: Trỏ đến domain của notification-service
 	"github.com/06babyshark06/JQKStudy/services/notification-service/internal/domain"
 	"github.com/06babyshark06/JQKStudy/shared/env"
 )
@@ -21,7 +20,7 @@ func Connect() {
 		env.GetString("DB_HOST", "postgres"),
 		env.GetString("DB_USER", "admin"),
 		env.GetString("DB_PASSWORD", "1"),
-		env.GetString("DB_NAME", "jqk"), // GIỮ NGUYÊN: Vẫn dùng CSDL 'jqk'
+		env.GetString("DB_NAME", "jqk"),
 		env.GetString("DB_PORT", "5432"),
 	)
 
@@ -32,8 +31,6 @@ func Connect() {
 		log.Fatalf("❌ Failed to connect to DB: %v", err)
 	}
 
-	// THAY ĐỔI: Auto migrate các model của Notification Service
-	// Thứ tự quan trọng (bảng tra cứu trước)
 	if err := db.AutoMigrate(
 		&domain.ChannelTypeModel{},
 		&domain.NotificationStatusModel{},
@@ -46,14 +43,10 @@ func Connect() {
 	DB = db
 	log.Println("✅ Database connected and migrated")
 
-	// THAY ĐỔI: Seed dữ liệu cho notification service
 	seedNotificationData(db)
 }
 
-// THAY ĐỔI: seedRoles -> seedNotificationData
-// Seed dữ liệu mặc định cho các bảng tra cứu
 func seedNotificationData(db *gorm.DB) {
-	// Seed Channel Types
 	defaultTypes := []domain.ChannelTypeModel{
 		{Type: "email"},
 		{Type: "sms"},
@@ -64,7 +57,6 @@ func seedNotificationData(db *gorm.DB) {
 		db.FirstOrCreate(&t, domain.ChannelTypeModel{Type: t.Type})
 	}
 
-	// Seed Statuses
 	defaultStatuses := []domain.NotificationStatusModel{
 		{Status: "pending"},
 		{Status: "sent"},
@@ -89,8 +81,6 @@ func seedNotificationData(db *gorm.DB) {
 		footerStyle    = `text-align: center; padding-top: 20px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #888888;`
 	)
 
-	// Template chung (Wrapper)
-	// %s thứ 1: Nội dung chính
 	baseTemplate := fmt.Sprintf(`
         <div style="background-color: #f9fafb; padding: 40px 0;">
             <div style="%s">
@@ -108,8 +98,6 @@ func seedNotificationData(db *gorm.DB) {
         </div>
     `, containerStyle, headerStyle, logoStyle, contentStyle, footerStyle)
 
-	// 1. Đăng ký tài khoản
-	// %s: FullName
 	userRegisteredBody := fmt.Sprintf(baseTemplate, `
         <h2 style="color: #111827; margin-top: 0;">Chào mừng gia nhập! 🎉</h2>
         <p>Xin chào <strong>%s</strong>,</p>
@@ -120,8 +108,6 @@ func seedNotificationData(db *gorm.DB) {
         </div>
     `)
 
-	// 2. Nộp bài thi
-	// %s: FullName, %s: ExamTitle, %.2f: Score
 	examSubmittedBody := fmt.Sprintf(baseTemplate, `
         <h2 style="color: #111827; margin-top: 0;">Kết quả bài thi 📝</h2>
         <p>Chào <strong>%s</strong>,</p>
@@ -136,8 +122,6 @@ func seedNotificationData(db *gorm.DB) {
         </div>
     `)
 
-	// 3. Đăng ký khóa học
-	// %s: FullName, %s: CourseTitle
 	courseEnrolledBody := fmt.Sprintf(baseTemplate, `
         <h2 style="color: #111827; margin-top: 0;">Đăng ký thành công! 🎓</h2>
         <p>Xin chào <strong>%s</strong>,</p>
@@ -171,10 +155,8 @@ func seedNotificationData(db *gorm.DB) {
     }
 
 	for _, t := range templates {
-		// Kiểm tra xem template đã tồn tại chưa để tránh tạo trùng
 		var existing domain.NotificationTemplateModel
 		if err := db.Where("name = ?", t.Name).First(&existing).Error; err != nil {
-			// Nếu chưa có thì tạo mới
 			db.Create(&t)
 			log.Printf("✅ Đã tạo template: %s", t.Name)
 		}

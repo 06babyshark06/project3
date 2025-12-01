@@ -57,52 +57,38 @@ func main() {
 		AllowOrigins: []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://[::1]:3000"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders: []string{"Content-Type", "Authorization"},
-		// ExposeHeaders:    []string{"Authorization"},
 		AllowCredentials: true,
 	}))
 
-	// Route test
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})
 
-	// API routes
 	api := r.Group("/api/v1")
 	{
-		// === Public Routes (Không cần token) ===
 		api.POST("/login", authHandler.Login)
 		api.POST("/register", authHandler.Register)
 		api.POST("/refresh", authHandler.Refresh)
 
-		// Public GET (Ai cũng có thể xem)
 		api.GET("/courses", courseHandler.GetCourses)
 		api.GET("/topics", examHandler.GetTopics)
 		api.GET("/exams", examHandler.GetExams)
 
-		// Lưu ý: Get-Details nên nằm trong 'auth' vì nó cần userID
-		// để check 'is_enrolled'
-
-		// === Authenticated Routes (Yêu cầu token) ===
 		auth := api.Group("/")
 		auth.Use(jwtMiddleware.MiddlewareFunc())
 		{
-			// --- Routes cho TẤT CẢ user đã login ---
 			auth.POST("/logout", authHandler.Logout)
 			auth.GET("/courses/:id", courseHandler.GetCourseDetails)
 			auth.GET("/exams/:id", examHandler.GetExamDetails)
 
-			// User tự quản lý
 			userSelf := auth.Group("/users")
 			{
 				userSelf.GET("/me", userHandler.GetUserFromToken)
 				userSelf.PUT("/me", userHandler.UpdateUserInfo)
 				userSelf.PUT("/password", userHandler.UpdateUserPassword)
+				userSelf.GET("/me/exam-stats", examHandler.GetMyExamStats)
 			}
 
-			// Lấy chi tiết (cần userID từ token)
-			// Lấy đề
-
-			// --- Admin Only Routes ---
 			adminOnly := auth.Group("/")
 			adminOnly.Use(middlewares.Authorize("admin"))
 			{
@@ -118,11 +104,9 @@ func main() {
 				adminOnly.DELETE("/courses/:id", courseHandler.DeleteCourse)
 			}
 
-			// --- Instructor & Admin Routes ---
 			instructorOnly := auth.Group("/")
 			instructorOnly.Use(middlewares.Authorize("instructor", "admin"))
 			{
-				// Course Management
 				instructorOnly.POST("/courses", courseHandler.CreateCourse)
 				instructorOnly.PUT("/courses/:id", courseHandler.UpdateCourse)
 				instructorOnly.PUT("/courses/:id/publish", courseHandler.PublishCourse)
@@ -137,7 +121,6 @@ func main() {
 				instructorOnly.DELETE("/lessons/:id", courseHandler.DeleteLesson)
 				instructorOnly.POST("/lessons/upload-url", courseHandler.GetUploadURL)
 
-				// Exam Management
 				instructorOnly.POST("/topics", examHandler.CreateTopic)
 				instructorOnly.POST("/questions", examHandler.CreateQuestion)
 				instructorOnly.POST("/exams", examHandler.CreateExam)
@@ -149,7 +132,6 @@ func main() {
 				instructorOnly.DELETE("/exams/:id", examHandler.DeleteExam)
 			}
 
-			// --- Student & Admin Routes ---
 			studentOnly := auth.Group("/")
 			studentOnly.Use(middlewares.Authorize("student", "admin"))
 			{
@@ -162,7 +144,6 @@ func main() {
 		}
 	}
 
-	// HTTP server
 	srv := &http.Server{
 		Addr:    httpAddr,
 		Handler: r,

@@ -5,7 +5,7 @@ import (
 
 	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/exam-service/internal/domain"
-	"gorm.io/gorm" // Thêm import
+	"gorm.io/gorm"
 )
 
 type examRepository struct{}
@@ -14,20 +14,13 @@ func NewExamRepository() domain.ExamRepository {
 	return &examRepository{}
 }
 
-// =================================================================
-// Topic
-// =================================================================
-
-// CreateTopic giờ nhận tx
 func (r *examRepository) CreateTopic(ctx context.Context, tx *gorm.DB, topic *domain.TopicModel) (*domain.TopicModel, error) {
-	// Dùng tx, không dùng database.DB
 	if err := tx.WithContext(ctx).Create(topic).Error; err != nil {
 		return nil, err
 	}
 	return topic, nil
 }
 
-// GetTopicByName (phương thức đọc, giữ nguyên)
 func (r *examRepository) GetTopicByName(ctx context.Context, name string) (*domain.TopicModel, error) {
 	var topic domain.TopicModel
 	if err := database.DB.WithContext(ctx).Where("name = ?", name).First(&topic).Error; err != nil {
@@ -36,7 +29,6 @@ func (r *examRepository) GetTopicByName(ctx context.Context, name string) (*doma
 	return &topic, nil
 }
 
-// GetTopics (phương thức đọc, giữ nguyên)
 func (r *examRepository) GetTopics(ctx context.Context) ([]*domain.TopicModel, error) {
 	var topics []*domain.TopicModel
 	if err := database.DB.WithContext(ctx).Order("created_at DESC").Find(&topics).Error; err != nil {
@@ -45,11 +37,6 @@ func (r *examRepository) GetTopics(ctx context.Context) ([]*domain.TopicModel, e
 	return topics, nil
 }
 
-// =================================================================
-// Question & Choice
-// =================================================================
-
-// CreateQuestion giờ nhận tx
 func (r *examRepository) CreateQuestion(ctx context.Context, tx *gorm.DB, question *domain.QuestionModel) (*domain.QuestionModel, error) {
 	if err := tx.WithContext(ctx).Create(question).Error; err != nil {
 		return nil, err
@@ -57,7 +44,6 @@ func (r *examRepository) CreateQuestion(ctx context.Context, tx *gorm.DB, questi
 	return question, nil
 }
 
-// CreateChoices giờ nhận tx
 func (r *examRepository) CreateChoices(ctx context.Context, tx *gorm.DB, choices []*domain.ChoiceModel) error {
 	if err := tx.WithContext(ctx).Create(choices).Error; err != nil {
 		return err
@@ -65,11 +51,6 @@ func (r *examRepository) CreateChoices(ctx context.Context, tx *gorm.DB, choices
 	return nil
 }
 
-// =================================================================
-// Exam
-// =================================================================
-
-// CreateExam giờ nhận tx
 func (r *examRepository) CreateExam(ctx context.Context, tx *gorm.DB, exam *domain.ExamModel) (*domain.ExamModel, error) {
 	if err := tx.WithContext(ctx).Create(exam).Error; err != nil {
 		return nil, err
@@ -77,7 +58,6 @@ func (r *examRepository) CreateExam(ctx context.Context, tx *gorm.DB, exam *doma
 	return exam, nil
 }
 
-// LinkQuestionsToExam giờ nhận tx
 func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
 	if len(questionIDs) == 0 {
         return nil
@@ -97,7 +77,6 @@ func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, e
 	return nil
 }
 
-// GetExamDetails (phương thức đọc, giữ nguyên)
 func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*domain.ExamModel, error) {
 	var exam domain.ExamModel
 
@@ -114,11 +93,6 @@ func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*dom
 	return &exam, nil
 }
 
-// =================================================================
-// Submission
-// =================================================================
-
-// GetCorrectAnswers (phương thức đọc, giữ nguyên)
 func (r *examRepository) GetCorrectAnswers(ctx context.Context, examID int64) (map[int64][]int64, error) {
 	type CorrectAnswer struct {
 		QuestionID int64
@@ -127,10 +101,11 @@ func (r *examRepository) GetCorrectAnswers(ctx context.Context, examID int64) (m
 	var results []CorrectAnswer
 
 	err := database.DB.WithContext(ctx).
-		Table("choices").
-		Select("choices.question_id, choices.id as choice_id").
-		Joins("JOIN exam_questions eq ON choices.question_id = eq.question_id").
-		Where("eq.exam_id = ? AND choices.is_correct = ?", examID, true).
+		Table("choice_models").
+		Select("choice_models.question_id, choice_models.id as choice_id").
+		Joins("JOIN exam_questions eq ON choice_models.question_id = eq.question_id").
+		Joins("JOIN question_models q ON q.id = choice_models.question_id").
+		Where("eq.exam_id = ? AND choice_models.is_correct = ?", examID, true).
 		Scan(&results).Error
 
 	if err != nil {
@@ -145,7 +120,6 @@ func (r *examRepository) GetCorrectAnswers(ctx context.Context, examID int64) (m
 	return answerMap, nil
 }
 
-// CreateSubmission giờ nhận tx
 func (r *examRepository) CreateSubmission(ctx context.Context, tx *gorm.DB, submission *domain.ExamSubmissionModel) (*domain.ExamSubmissionModel, error) {
 	if err := tx.WithContext(ctx).Create(submission).Error; err != nil {
 		return nil, err
@@ -153,7 +127,6 @@ func (r *examRepository) CreateSubmission(ctx context.Context, tx *gorm.DB, subm
 	return submission, nil
 }
 
-// CreateUserAnswers giờ nhận tx
 func (r *examRepository) CreateUserAnswers(ctx context.Context, tx *gorm.DB, answers []*domain.UserAnswerModel) error {
 	if err := tx.WithContext(ctx).Create(answers).Error; err != nil {
 		return err
@@ -161,7 +134,6 @@ func (r *examRepository) CreateUserAnswers(ctx context.Context, tx *gorm.DB, ans
 	return nil
 }
 
-// UpdateSubmission giờ nhận tx
 func (r *examRepository) UpdateSubmission(ctx context.Context, tx *gorm.DB, submission *domain.ExamSubmissionModel) (*domain.ExamSubmissionModel, error) {
 	if err := tx.WithContext(ctx).Save(submission).Error; err != nil {
 		return nil, err
@@ -169,7 +141,6 @@ func (r *examRepository) UpdateSubmission(ctx context.Context, tx *gorm.DB, subm
 	return submission, nil
 }
 
-// GetSubmissionByID (phương thức đọc, giữ nguyên)
 func (r *examRepository) GetSubmissionByID(ctx context.Context, submissionID int64) (*domain.ExamSubmissionModel, error) {
 	var submission domain.ExamSubmissionModel
 
@@ -230,13 +201,10 @@ func (r *examRepository) DeleteChoicesByQuestionID(ctx context.Context, tx *gorm
 }
 
 func (r *examRepository) DeleteQuestion(ctx context.Context, tx *gorm.DB, questionID int64) error {
-    // 1. Xóa các lựa chọn (Choices) của câu hỏi này
     if err := tx.WithContext(ctx).Where("question_id = ?", questionID).Delete(&domain.ChoiceModel{}).Error; err != nil {
         return err
     }
 
-    // 2. Xóa liên kết trong bảng trung gian (exam_questions)
-    // (Rất quan trọng để tránh lỗi foreign key hoặc dữ liệu rác)
     if err := tx.WithContext(ctx).Where("question_id = ?", questionID).Delete(&domain.ExamQuestionModel{}).Error; err != nil {
         return err
     }
@@ -265,4 +233,15 @@ func (r *examRepository) DeleteExam(ctx context.Context, tx *gorm.DB, examID int
         return err
     }
     return nil
+}
+
+func (r *examRepository) CountSubmissionsByUserID(ctx context.Context, userID int64) (int64, error) {
+	var count int64
+	if err := database.DB.WithContext(ctx).
+		Model(&domain.ExamSubmissionModel{}).
+		Where("user_id = ?", userID).
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }

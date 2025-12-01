@@ -4,30 +4,23 @@ import (
 	"context"
 	"time"
 
-	// THAY ĐỔI: Import proto của Course Service
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/course" 
 	"gorm.io/gorm"
 )
 
-// =================================================================
-// GORM MODELS (Dựa trên cấu trúc database bạn cung cấp)
-// =================================================================
-
-// CourseModel 🎓
 type CourseModel struct {
 	Id           int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	Title        string    `gorm:"size:255;not null" json:"title"`
 	Description  string    `gorm:"type:text" json:"description"`
 	ThumbnailURL string    `gorm:"size:255" json:"thumbnail_url"`
-	InstructorID int64     `gorm:"not null" json:"instructor_id"` // User ID từ User Service
+	InstructorID int64     `gorm:"not null" json:"instructor_id"`
 	Price        float64   `gorm:"not null;default:0" json:"price"`
 	IsPublished  bool      `gorm:"not null;default:false" json:"is_published"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
-	Sections     []SectionModel `gorm:"foreignKey:CourseID" json:"sections"` // Quan hệ một-nhiều
+	Sections     []SectionModel `gorm:"foreignKey:CourseID" json:"sections"`
 }
 
-// SectionModel 📂
 type SectionModel struct {
 	Id         int64         `gorm:"primaryKey;autoIncrement" json:"id"`
 	CourseID   int64         `gorm:"not null;index" json:"course_id"`
@@ -35,16 +28,14 @@ type SectionModel struct {
 	Title      string        `gorm:"size:255;not null" json:"title"`
 	OrderIndex int           `gorm:"not null;default:0" json:"order_index"`
 	CreatedAt  time.Time     `json:"created_at"`
-	Lessons    []LessonModel `gorm:"foreignKey:SectionID" json:"lessons"` // Quan hệ một-nhiều
+	Lessons    []LessonModel `gorm:"foreignKey:SectionID" json:"lessons"`
 }
 
-// LessonTypeModel 📋
 type LessonTypeModel struct {
 	Id   int64  `gorm:"primaryKey;autoIncrement" json:"id"`
-	Type string `gorm:"size:50;uniqueIndex;not null" json:"type"` // "video", "text"
+	Type string `gorm:"size:50;uniqueIndex;not null" json:"type"`
 }
 
-// LessonModel 📖
 type LessonModel struct {
 	Id              int64           `gorm:"primaryKey;autoIncrement" json:"id"`
 	SectionID       int64           `gorm:"not null;index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"section_id"`
@@ -52,54 +43,41 @@ type LessonModel struct {
 	Title           string          `gorm:"size:255;not null" json:"title"`
 	TypeID          int64           `gorm:"not null" json:"type_id"`
 	Type            LessonTypeModel `gorm:"foreignKey:TypeID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"type"`
-	ContentURL      string          `gorm:"size:255" json:"content_url"` // Link R2/S3
+	ContentURL      string          `gorm:"size:255" json:"content_url"`
 	DurationSeconds int             `gorm:"not null;default:0" json:"duration_seconds"`
 	OrderIndex      int             `gorm:"not null;default:0" json:"order_index"`
 	CreatedAt       time.Time       `json:"created_at"`
 }
 
-// EnrollmentModel 🧑‍🎓
 type EnrollmentModel struct {
-	UserID     int64     `gorm:"primaryKey" json:"user_id"`  // Khóa chính kết hợp
-	CourseID   int64     `gorm:"primaryKey" json:"course_id"` // Khóa chính kết hợp
+	UserID     int64     `gorm:"primaryKey" json:"user_id"`
+	CourseID   int64     `gorm:"primaryKey" json:"course_id"`
 	Course     CourseModel `gorm:"foreignKey:CourseID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"course"`
 	EnrolledAt time.Time `json:"enrolled_at"`
 }
 
-// LessonProgressModel 📊
 type LessonProgressModel struct {
-	UserID      int64       `gorm:"primaryKey" json:"user_id"`  // Khóa chính kết hợp
-	LessonID    int64       `gorm:"primaryKey" json:"lesson_id"` // Khóa chính kết hợp
+	UserID      int64       `gorm:"primaryKey" json:"user_id"`
+	LessonID    int64       `gorm:"primaryKey" json:"lesson_id"`
 	Lesson      LessonModel `gorm:"foreignKey:LessonID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"lesson"`
 	CompletedAt time.Time   `json:"completed_at"`
 }
 
-
-// =================================================================
-// INTERFACES (Định nghĩa các "Hợp đồng")
-// =================================================================
-
-// CourseRepository định nghĩa các phương thức tương tác với DB cho CourseService
 type CourseRepository interface {
-	// Course
 	CreateCourse(ctx context.Context, tx *gorm.DB, course *CourseModel) (*CourseModel, error)
 	GetCourseByID(ctx context.Context, courseID int64) (*CourseModel, error)
 	GetCourses(ctx context.Context, search string, minPrice, maxPrice float64, sortBy string, page, limit int, instructorID int64) ([]*CourseModel, int64, error)
-	GetCourseDetails(ctx context.Context, courseID int64) (*CourseModel, error) // Preload Sections.Lessons
-	GetEnrolledCourses(ctx context.Context, userID int64) ([]*CourseModel, error) // Dùng Joins
+	GetCourseDetails(ctx context.Context, courseID int64) (*CourseModel, error)
+	GetEnrolledCourses(ctx context.Context, userID int64) ([]*CourseModel, error)
 
-	// Section
 	CreateSection(ctx context.Context, tx *gorm.DB, section *SectionModel) (*SectionModel, error)
 
-	// Lesson
 	CreateLesson(ctx context.Context, tx *gorm.DB, lesson *LessonModel) (*LessonModel, error)
 	GetLessonType(ctx context.Context, typeName string) (*LessonTypeModel, error)
 
-	// Enrollment
 	CreateEnrollment(ctx context.Context, tx *gorm.DB, enrollment *EnrollmentModel) error
 	GetEnrollment(ctx context.Context, userID int64, courseID int64) (*EnrollmentModel, error)
 
-	// Progress
 	CreateLessonProgress(ctx context.Context, tx *gorm.DB, progress *LessonProgressModel) error
 	GetLessonProgress(ctx context.Context, userID int64, lessonID int64) (*LessonProgressModel, error)
 	GetCompletedLessonIDs(ctx context.Context, userID int64, courseID int64) (map[int64]bool, error)
@@ -119,8 +97,6 @@ type EventProducer interface {
 	Close()
 }
 
-// CourseService định nghĩa các logic nghiệp vụ (business logic)
-// Nó hoạt động trên các Protobuf (pb) structs
 type CourseService interface {
 	CreateCourse(ctx context.Context, req *pb.CreateCourseRequest) (*pb.CreateCourseResponse, error)
 	CreateSection(ctx context.Context, req *pb.CreateSectionRequest) (*pb.CreateSectionResponse, error)

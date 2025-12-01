@@ -4,15 +4,10 @@ import (
 	"context"
 	"time"
 
-	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam" // Sử dụng import path từ ví dụ của bạn
+	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	"gorm.io/gorm"
 )
 
-// =================================================================
-// GORM MODELS (Dựa trên cấu trúc database bạn cung cấp)
-// =================================================================
-
-// TopicModel 📚
 type TopicModel struct {
 	Id          int64     `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name        string    `gorm:"size:255;uniqueIndex;not null" json:"name"`
@@ -20,24 +15,21 @@ type TopicModel struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-// QuestionDifficultyModel 📈
 type QuestionDifficultyModel struct {
 	Id         int64  `gorm:"primaryKey;autoIncrement" json:"id"`
-	Difficulty string `gorm:"size:50;uniqueIndex;not null" json:"difficulty"` // Ví dụ: "Dễ", "Trung bình", "Khó"
+	Difficulty string `gorm:"size:50;uniqueIndex;not null" json:"difficulty"`
 }
 
-// QuestionTypeModel 📋
 type QuestionTypeModel struct {
 	Id   int64  `gorm:"primaryKey;autoIncrement" json:"id"`
-	Type string `gorm:"size:50;uniqueIndex;not null" json:"type"` // Ví dụ: "single_choice", "multiple_choice"
+	Type string `gorm:"size:50;uniqueIndex;not null" json:"type"`
 }
 
-// QuestionModel ❓
 type QuestionModel struct {
 	Id           int64                   `gorm:"primaryKey;autoIncrement" json:"id"`
 	TopicID      int64                   `gorm:"not null;index" json:"topic_id"`
 	Topic        TopicModel              `gorm:"foreignKey:TopicID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"topic"`
-	CreatorID    int64                   `gorm:"not null" json:"creator_id"` // User ID từ User Service
+	CreatorID    int64                   `gorm:"not null" json:"creator_id"`
 	Content      string                  `gorm:"type:text;not null" json:"content"`
 	TypeID       int64                   `gorm:"not null" json:"type_id"`
 	Type         QuestionTypeModel       `gorm:"foreignKey:TypeID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"type"`
@@ -46,20 +38,18 @@ type QuestionModel struct {
 	Explanation  string                  `gorm:"type:text" json:"explanation"`
 	CreatedAt    time.Time               `json:"created_at"`
 	UpdatedAt    time.Time               `json:"updated_at"`
-	Choices      []ChoiceModel           `gorm:"foreignKey:QuestionID" json:"choices"` // Quan hệ một-nhiều
+	Choices      []ChoiceModel           `gorm:"foreignKey:QuestionID" json:"choices"`
 }
 
-// ChoiceModel ✅
 type ChoiceModel struct {
 	Id         int64         `gorm:"primaryKey;autoIncrement" json:"id"`
 	QuestionID int64         `gorm:"not null;index" json:"question_id"`
-	Question   QuestionModel `gorm:"foreignKey:QuestionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"` // Xóa choice nếu question bị xóa
+	Question   QuestionModel `gorm:"foreignKey:QuestionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Content    string        `gorm:"type:text;not null" json:"content"`
 	IsCorrect  bool          `gorm:"not null" json:"is_correct"`
 	CreatedAt  time.Time     `json:"created_at"`
 }
 
-// ExamModel 📝
 type ExamModel struct {
 	Id              int64             `gorm:"primaryKey;autoIncrement" json:"id"`
 	Title           string            `gorm:"size:255;not null" json:"title"`
@@ -67,84 +57,67 @@ type ExamModel struct {
 	DurationMinutes int               `gorm:"not null" json:"duration_minutes"`
 	TopicID         int64             `gorm:"not null;index" json:"topic_id"`
 	Topic           TopicModel        `gorm:"foreignKey:TopicID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"topic"`
-	CreatorID       int64             `gorm:"not null" json:"creator_id"` // User ID từ User Service
+	CreatorID       int64             `gorm:"not null" json:"creator_id"`
 	CreatedAt       time.Time         `json:"created_at"`
 	UpdatedAt       time.Time         `json:"updated_at"`
 	Questions       []*QuestionModel  `gorm:"many2many:exam_questions;joinForeignKey:exam_id;joinReferences:question_id" json:"questions"`
 	IsPublished bool      `gorm:"not null;default:false" json:"is_published"`
 }
 
-// ExamQuestionModel (Bảng trung gian cho GORM, nếu không dùng `many2many` tự động)
 type ExamQuestionModel struct {
 	ExamID     int64 `gorm:"primaryKey" json:"exam_id"`
 	QuestionID int64 `gorm:"primaryKey" json:"question_id"`
 }
 
-// TableName chỉ định tên bảng nếu GORM không tự động đoán đúng `exam_questions`
 func (ExamQuestionModel) TableName() string {
 	return "exam_questions"
 }
 
-// SubmissionStatusModel 📊
 type SubmissionStatusModel struct {
 	Id     int64  `gorm:"primaryKey;autoIncrement" json:"id"`
-	Status string `gorm:"size:50;uniqueIndex;not null" json:"status"` // Ví dụ: "in_progress", "completed"
+	Status string `gorm:"size:50;uniqueIndex;not null" json:"status"`
 }
 
-// ExamSubmissionModel 🚀
 type ExamSubmissionModel struct {
 	Id          int64                 `gorm:"primaryKey;autoIncrement" json:"id"`
 	ExamID      int64                 `gorm:"not null;index" json:"exam_id"`
 	Exam        ExamModel             `gorm:"foreignKey:ExamID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"exam"`
-	UserID      int64                 `gorm:"not null;index" json:"user_id"` // User ID từ User Service
+	UserID      int64                 `gorm:"not null;index" json:"user_id"`
 	StatusID    int64                 `gorm:"not null" json:"status_id"`
 	Status      SubmissionStatusModel `gorm:"foreignKey:StatusID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"status"`
 	Score       float64               `json:"score"`
 	StartedAt   time.Time             `json:"started_at"`
-	SubmittedAt *time.Time            `json:"submitted_at"` // Dùng con trỏ để có thể là NULL
-	UserAnswers []UserAnswerModel     `gorm:"foreignKey:SubmissionID" json:"user_answers"` // Quan hệ một-nhiều
+	SubmittedAt *time.Time            `json:"submitted_at"`
+	UserAnswers []UserAnswerModel     `gorm:"foreignKey:SubmissionID" json:"user_answers"`
 }
 
-// UserAnswerModel 🖋️
 type UserAnswerModel struct {
 	Id             int64               `gorm:"primaryKey;autoIncrement" json:"id"`
 	SubmissionID   int64               `gorm:"not null;index" json:"submission_id"`
 	Submission     ExamSubmissionModel `gorm:"foreignKey:SubmissionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	QuestionID     int64               `gorm:"not null" json:"question_id"`
 	Question       QuestionModel       `gorm:"foreignKey:QuestionID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"question"`
-	ChosenChoiceID *int64              `json:"chosen_choice_id"` // Con trỏ để có thể là NULL (nếu không trả lời)
+	ChosenChoiceID *int64              `json:"chosen_choice_id"`
 	Choice         ChoiceModel         `gorm:"foreignKey:ChosenChoiceID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"choice"`
-	IsCorrect      *bool               `json:"is_correct"` // Con trỏ để có thể là NULL (chưa chấm)
+	IsCorrect      *bool               `json:"is_correct"`
 	CreatedAt      time.Time           `json:"created_at"`
 }
 
-
-// =================================================================
-// INTERFACES (Định nghĩa các "Hợp đồng")
-// =================================================================
-
-// ExamRepository định nghĩa các phương thức tương tác với DB cho ExamService
-// Nó hoạt động trên các GORM models
 type ExamRepository interface {
-	// Topic
 	CreateTopic(ctx context.Context, tx *gorm.DB, topic *TopicModel) (*TopicModel, error)
 	GetTopicByName(ctx context.Context, name string) (*TopicModel, error)
 	GetTopics(ctx context.Context) ([]*TopicModel, error)
 
-	// Question & Choice
 	CreateQuestion(ctx context.Context, tx *gorm.DB, question *QuestionModel) (*QuestionModel, error)
 	CreateChoices(ctx context.Context, tx *gorm.DB, choices []*ChoiceModel) error
-    // (Lưu ý: Bạn có thể gộp CreateQuestion và CreateChoices trong một transaction ở tầng service)
 
-	// Exam
 	CreateExam(ctx context.Context, tx *gorm.DB, exam *ExamModel) (*ExamModel, error)
 	LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error
-	GetExamDetails(ctx context.Context, examID int64) (*ExamModel, error) // Repo này sẽ Preload Questions và Choices (không có is_correct)
+	GetExamDetails(ctx context.Context, examID int64) (*ExamModel, error)
 
-	// Submission
-	GetCorrectAnswers(ctx context.Context, examID int64) (map[int64][]int64, error) // map[question_id] -> []correct_choice_id
+	GetCorrectAnswers(ctx context.Context, examID int64) (map[int64][]int64, error)
 	CreateSubmission(ctx context.Context, tx *gorm.DB, submission *ExamSubmissionModel) (*ExamSubmissionModel, error)
-	CreateUserAnswers(ctx context.Context, tx *gorm.DB, answers []*UserAnswerModel) error // Bulk insert
+	CreateUserAnswers(ctx context.Context, tx *gorm.DB, answers []*UserAnswerModel) error
 	UpdateSubmission(ctx context.Context, tx *gorm.DB, submission *ExamSubmissionModel) (*ExamSubmissionModel, error)
 	GetSubmissionByID(ctx context.Context, submissionID int64) (*ExamSubmissionModel, error)
 	CountExams(ctx context.Context) (int64, error)
@@ -155,6 +128,7 @@ type ExamRepository interface {
 	DeleteQuestion(ctx context.Context, tx *gorm.DB, questionID int64) error
 	UpdateExam(ctx context.Context, tx *gorm.DB, examID int64, updates map[string]interface{}) error
 	DeleteExam(ctx context.Context, tx *gorm.DB, examID int64) error
+	CountSubmissionsByUserID(ctx context.Context, userID int64) (int64, error)
 }
 
 type EventProducer interface {
@@ -177,4 +151,5 @@ type ExamService interface {
 	DeleteQuestion(ctx context.Context, req *pb.DeleteQuestionRequest) (*pb.DeleteQuestionResponse, error)
 	UpdateExam(ctx context.Context, req *pb.UpdateExamRequest) (*pb.UpdateExamResponse, error)
 	DeleteExam(ctx context.Context, req *pb.DeleteExamRequest) (*pb.DeleteExamResponse, error)
+	GetUserExamStats(ctx context.Context, req *pb.GetUserExamStatsRequest) (*pb.GetUserExamStatsResponse, error)
 }

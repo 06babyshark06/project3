@@ -1,6 +1,3 @@
-/*
-Package env provides a simple way to get environment variables.
-*/
 package env
 
 import (

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases" // Import global DB
+	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/exam-service/internal/domain"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
@@ -24,7 +24,6 @@ func NewExamService(repo domain.ExamRepository, producer domain.EventProducer) d
 	return &examService{repo: repo, producer: producer}
 }
 
-// CreateTopic implements domain.ExamService.
 func (s *examService) CreateTopic(ctx context.Context, req *pb.CreateTopicRequest) (*pb.CreateTopicResponse, error) {
 	// 1. Kiểm tra logic (ví dụ: trùng tên)
 	existing, _ := s.repo.GetTopicByName(ctx, req.Name)
@@ -32,7 +31,6 @@ func (s *examService) CreateTopic(ctx context.Context, req *pb.CreateTopicReques
 		return nil, errors.New("chủ đề đã tồn tại")
 	}
 
-	// 2. Map từ proto sang model
 	topic := &domain.TopicModel{
 		Name:        req.Name,
 		Description: req.Description,
@@ -51,28 +49,25 @@ func (s *examService) CreateTopic(ctx context.Context, req *pb.CreateTopicReques
 		return nil, err
 	}
 
-	// 4. Map từ model sang proto response
 	return &pb.CreateTopicResponse{
 		Topic: &pb.Topic{
-			Id:          topic.Id, // Gán trực tiếp
+			Id:          topic.Id,
 			Name:        topic.Name,
 			Description: topic.Description,
 		},
 	}, nil
 }
 
-// GetTopics implements domain.ExamService.
 func (s *examService) GetTopics(ctx context.Context, req *pb.GetTopicsRequest) (*pb.GetTopicsResponse, error) {
 	topics, err := s.repo.GetTopics(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map []*domain.TopicModel sang []*pb.Topic
 	var pbTopics []*pb.Topic
 	for _, t := range topics {
 		pbTopics = append(pbTopics, &pb.Topic{
-			Id:          t.Id, // Gán trực tiếp
+			Id:          t.Id,
 			Name:        t.Name,
 			Description: t.Description,
 		})
@@ -81,13 +76,11 @@ func (s *examService) GetTopics(ctx context.Context, req *pb.GetTopicsRequest) (
 	return &pb.GetTopicsResponse{Topics: pbTopics}, nil
 }
 
-// CreateQuestion implements domain.ExamService.
 func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
 	var createdQuestion *domain.QuestionModel
 
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var err error
-		// 1. Lấy ID của difficulty và type
 		var diff domain.QuestionDifficultyModel
 		if err = tx.WithContext(ctx).Where("difficulty = ?", req.Difficulty).First(&diff).Error; err != nil {
 			return errors.New("difficulty không hợp lệ")
@@ -97,46 +90,41 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 			return errors.New("question type không hợp lệ")
 		}
 
-		// 2. Tạo QuestionModel
 		question := &domain.QuestionModel{
-			TopicID:      req.TopicId,   // Gán trực tiếp
-			CreatorID:    req.CreatorId, // Gán trực tiếp
+			TopicID:      req.TopicId,
+			CreatorID:    req.CreatorId,
 			Content:      req.Content,
 			TypeID:       qtype.Id,
 			DifficultyID: diff.Id,
 			Explanation:  req.Explanation,
 		}
 
-		// 3. Tạo câu hỏi trong DB (SỬ DỤNG REPO)
 		createdQuestion, err = s.repo.CreateQuestion(ctx, tx, question)
 		if err != nil {
 			return err
 		}
 
-		// 4. Tạo các Choices
 		var choiceModels []*domain.ChoiceModel
 		for _, c := range req.Choices {
 			choiceModels = append(choiceModels, &domain.ChoiceModel{
-				QuestionID: createdQuestion.Id, // Lấy ID từ câu hỏi vừa tạo
+				QuestionID: createdQuestion.Id,
 				Content:    c.Content,
 				IsCorrect:  c.IsCorrect,
 			})
 		}
 
-		// 5. Bulk insert các choices (SỬ DỤNG REPO)
 		if err = s.repo.CreateChoices(ctx, tx, choiceModels); err != nil {
 			return err
 		}
 
 		if req.ExamId > 0 {
-            // Gọi hàm repo có sẵn để link
             err = s.repo.LinkQuestionsToExam(ctx, tx, req.ExamId, []int64{createdQuestion.Id})
             if err != nil {
                 return err
             }
         }
 
-		return nil // Commit transaction
+		return nil
 	})
 
 	if err != nil {
@@ -144,40 +132,35 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 	}
 
 	return &pb.CreateQuestionResponse{
-		Id:      createdQuestion.Id, // Gán trực tiếp
+		Id:      createdQuestion.Id,
 		Content: createdQuestion.Content,
 	}, nil
 }
 
-// CreateExam implements domain.ExamService.
 func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest) (*pb.CreateExamResponse, error) {
 	var createdExam *domain.ExamModel
 
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		var err error
 
-		// 1. Tạo Exam
 		exam := &domain.ExamModel{
 			Title:           req.Title,
 			Description:     req.Description,
 			DurationMinutes: int(req.DurationMinutes),
-			TopicID:         req.TopicId,   // Gán trực tiếp
-			CreatorID:       req.CreatorId, // Gán trực tiếp
+			TopicID:         req.TopicId,
+			CreatorID:       req.CreatorId,
 		}
 
-		// SỬ DỤNG REPO
 		createdExam, err = s.repo.CreateExam(ctx, tx, exam)
 		if err != nil {
 			return err
 		}
 
-		// 2. Link các câu hỏi vào exam
-		// req.QuestionIds đã là []int64, không cần loop
 		if err = s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, req.QuestionIds); err != nil {
 			return err
 		}
 
-		return nil // Commit
+		return nil
 	})
 
 	if err != nil {
@@ -185,26 +168,23 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 	}
 
 	return &pb.CreateExamResponse{
-		Id:    createdExam.Id, // Gán trực tiếp
+		Id:    createdExam.Id,
 		Title: createdExam.Title,
 	}, nil
 }
 
-// GetExamDetails implements domain.ExamService.
 func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetailsRequest) (*pb.GetExamDetailsResponse, error) {
-	// Nghiệp vụ này chỉ đọc, dùng Repo
-	examModel, err := s.repo.GetExamDetails(ctx, req.ExamId) // Gán trực tiếp
+	examModel, err := s.repo.GetExamDetails(ctx, req.ExamId)
 	if err != nil {
 		return nil, err
 	}
 
-	// Map domain.ExamModel sang pb.GetExamDetailsResponse
 	pbQuestions := []*pb.QuestionDetails{}
 	for _, q := range examModel.Questions {
 		pbChoices := []*pb.ChoiceDetails{}
 		for _, c := range q.Choices {
 			pbChoices = append(pbChoices, &pb.ChoiceDetails{
-				Id:      c.Id, // Gán trực tiếp
+				Id:      c.Id,
 				Content: c.Content,
 			})
 		}
@@ -213,7 +193,7 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 			qType = q.Type.Type
 		}
 		pbQuestions = append(pbQuestions, &pb.QuestionDetails{
-			Id:      q.Id, // Gán trực tiếp
+			Id:      q.Id,
 			Content: q.Content,
 			Choices: pbChoices,
 			QuestionType: qType,
@@ -221,16 +201,16 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 	}
 
 	return &pb.GetExamDetailsResponse{
-		Id:              examModel.Id, // Gán trực tiếp
+		Id:              examModel.Id,
 		Title:           examModel.Title,
 		DurationMinutes: int32(examModel.DurationMinutes),
 		Questions:       pbQuestions,
 		TopicId:         examModel.TopicID,
 		IsPublished:     examModel.IsPublished,
+		Description:     examModel.Description,
 	}, nil
 }
 
-// SubmitExam implements domain.ExamService.
 func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
 	var correctCount int32 = 0
 	var totalQuestions int32 = 0
@@ -238,7 +218,6 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	var submissionID int64 = 0
 	var examTitle string
 
-	// 1. Lấy đáp án đúng (Thao tác ĐỌC, nên làm BÊN NGOÀI transaction)
 	correctMap, err := s.repo.GetCorrectAnswers(ctx, req.ExamId)
 	if err != nil {
 		return nil, errors.New("lỗi khi lấy đáp án: " + err.Error())
@@ -252,23 +231,20 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	}
 	totalQuestions = int32(len(correctMap))
 
-	// 2. Bắt đầu transaction để GHI dữ liệu
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
 		var exam domain.ExamModel
 		if err := tx.WithContext(ctx).Select("title").First(&exam, req.ExamId).Error; err != nil {
 			return errors.New("không tìm thấy bài thi")
 		}
 		examTitle = exam.Title
-		// 2. Lấy status "in_progress"
 		var inProgressStatus domain.SubmissionStatusModel
 		if err := tx.WithContext(ctx).Where("status = ?", "in_progress").First(&inProgressStatus).Error; err != nil {
 			return errors.New("không tìm thấy status 'in_progress'")
 		}
 		
-		// 3. Tạo ExamSubmission (SỬ DỤNG REPO)
 		submission := &domain.ExamSubmissionModel{
-			ExamID:    req.ExamId, // Gán trực tiếp
-			UserID:    req.UserId, // Gán trực tiếp
+			ExamID:    req.ExamId,
+			UserID:    req.UserId, 
 			StatusID:  inProgressStatus.Id,
 			StartedAt: time.Now().UTC(),
 		}
@@ -276,28 +252,23 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		if err != nil {
 			return err
 		}
-		submissionID = createdSubmission.Id // Lưu ID để trả về
+		submissionID = createdSubmission.Id
 
-		// 4. Chấm điểm và chuẩn bị UserAnswers
 		var userAnswerModels []*domain.UserAnswerModel
-		totalQuestions = int32(len(req.Answers))
+		totalQuestions = int32(len(correctMap))
 
 		for qID, correctChoices := range correctMap {
-			userChoices := userAnswerMap[qID] // Các đáp án user chọn cho câu này
+			userChoices := userAnswerMap[qID]
 
-			// So sánh 2 mảng: User chọn vs Đáp án đúng
 			isCorrect := compareInt64Slices(userChoices, correctChoices)
 
 			if isCorrect {
 				correctCount++
 			}
 
-			// Lưu chi tiết câu trả lời vào DB
-			// Lưu ý: Với Multiple Choice, ta lưu từng lựa chọn của user thành 1 dòng trong DB
 			for _, cID := range userChoices {
-				// Tạo biến tạm để lấy địa chỉ con trỏ
 				choiceIDVal := cID
-				correctVal := isCorrect // Lưu kết quả đúng/sai của CÂU HỎI
+				correctVal := isCorrect
 
 				userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
 					SubmissionID:   createdSubmission.Id,
@@ -308,14 +279,12 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 			}
 		}
 
-		// 5. Bulk insert UserAnswers (SỬ DỤNG REPO)
 		if len(userAnswerModels) > 0 {
 			if err := s.repo.CreateUserAnswers(ctx, tx, userAnswerModels); err != nil {
 				return err
 			}
 		}
 
-		// 6. Tính điểm và cập nhật Submission
 		if totalQuestions > 0 {
 			finalScore = (float64(correctCount) / float64(totalQuestions)) * 10.0
 		}
@@ -330,12 +299,11 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		createdSubmission.Score = finalScore
 		createdSubmission.SubmittedAt = &now
 
-		// SỬ DỤNG REPO
 		if _, err := s.repo.UpdateSubmission(ctx, tx, createdSubmission); err != nil {
 			return err
 		}
 
-		return nil // Commit transaction
+		return nil
 	})
 
 	if err != nil {
@@ -361,7 +329,7 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	}
 
 	return &pb.SubmitExamResponse{
-		SubmissionId:   submissionID, // Gán trực tiếp
+		SubmissionId:   submissionID,
 		Score:          float32(finalScore),
 		CorrectCount:   correctCount,
 		TotalQuestions: totalQuestions,
@@ -373,7 +341,6 @@ func compareInt64Slices(a, b []int64) bool {
 		return false
 	}
 	
-	// Tạo map để đếm tần suất xuất hiện của từng ID
 	countMap := make(map[int64]int)
 	
 	for _, x := range a {
@@ -391,28 +358,74 @@ func compareInt64Slices(a, b []int64) bool {
 }
 
 func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRequest) (*pb.GetSubmissionResponse, error) {
-	// 1. Lấy dữ liệu từ DB
 	submission, err := s.repo.GetSubmissionByID(ctx, req.SubmissionId)
 	if err != nil {
 		return nil, errors.New("không tìm thấy kết quả bài thi")
 	}
 
-	// 2. Bảo mật: Kiểm tra xem người yêu cầu có phải chủ nhân bài thi không
-	// (Trừ khi là admin - logic này có thể mở rộng sau)
 	if submission.UserID != req.UserId {
 		return nil, errors.New("bạn không có quyền xem kết quả này")
 	}
+	examFull, err := s.repo.GetExamDetails(ctx, submission.ExamID)
+	if err != nil {
+		return nil, errors.New("không thể tải nội dung đề thi gốc")
+	}
 
-	// 3. Tính toán số câu đúng/tổng số câu
+	userSelections := make(map[int64]map[int64]bool)
+	
+	questionIsCorrectMap := make(map[int64]bool)
+
+	for _, ua := range submission.UserAnswers {
+		if _, exists := userSelections[ua.QuestionID]; !exists {
+			userSelections[ua.QuestionID] = make(map[int64]bool)
+		}
+		if ua.ChosenChoiceID != nil {
+			userSelections[ua.QuestionID][*ua.ChosenChoiceID] = true
+		}
+		
+		if ua.IsCorrect != nil && *ua.IsCorrect {
+			questionIsCorrectMap[ua.QuestionID] = true
+		}
+	}
+
+	var pbDetails []*pb.SubmissionDetail
+
+	for _, q := range examFull.Questions {
+		var pbChoices []*pb.ChoiceReview
+		
+		for _, c := range q.Choices {
+			pbChoices = append(pbChoices, &pb.ChoiceReview{
+				Id:           c.Id,
+				Content:      c.Content,
+				IsCorrect:    c.IsCorrect,
+				UserSelected: userSelections[q.Id][c.Id],
+			})
+		}
+
+        qType := "single_choice"
+        if q.Type.Type != "" { qType = q.Type.Type }
+
+		pbDetails = append(pbDetails, &pb.SubmissionDetail{
+			QuestionId:      q.Id,
+			QuestionContent: q.Content,
+			Explanation:     q.Explanation,
+			QuestionType:    qType,
+			IsCorrect:       questionIsCorrectMap[q.Id],
+			Choices:         pbChoices,
+		})
+	}
+
 	correctCount := 0
-	totalQuestions := len(submission.UserAnswers)
 	for _, ans := range submission.UserAnswers {
 		if ans.IsCorrect != nil && *ans.IsCorrect {
 			correctCount++
 		}
 	}
+    correctCount = 0
+    for _, v := range questionIsCorrectMap {
+        if v { correctCount++ }
+    }
 
-	// 4. Format thời gian
 	submittedAt := ""
 	if submission.SubmittedAt != nil {
 		submittedAt = submission.SubmittedAt.Format(time.RFC3339)
@@ -423,9 +436,10 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		ExamTitle:      submission.Exam.Title,
 		Score:          float32(submission.Score),
 		CorrectCount:   int32(correctCount),
-		TotalQuestions: int32(totalQuestions),
+		TotalQuestions: int32(len(examFull.Questions)),
 		Status:         submission.Status.Status,
 		SubmittedAt:    submittedAt,
+		Details:        pbDetails,
 	}, nil
 }
 
@@ -456,7 +470,6 @@ func (s *examService) GetExams(ctx context.Context, req *pb.GetExamsRequest) (*p
 		})
 	}
     
-    // Tính total pages
     totalPages := int32((total + int64(limit) - 1) / int64(limit))
 
 	return &pb.GetExamsResponse{
@@ -480,9 +493,6 @@ func (s *examService) PublishExam(ctx context.Context, req *pb.PublishExamReques
 func (s *examService) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error) {
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		
-		// === 1. Lấy ID của Difficulty và QuestionType ===
-		// (Phần này quan trọng để chuyển đổi từ string sang ID trong DB)
-		
 		var diff domain.QuestionDifficultyModel
 		if err := tx.WithContext(ctx).Where("difficulty = ?", req.Difficulty).First(&diff).Error; err != nil {
 			return errors.New("difficulty không hợp lệ: " + req.Difficulty)
@@ -493,43 +503,37 @@ func (s *examService) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestion
 			return errors.New("question type không hợp lệ: " + req.QuestionType)
 		}
 
-		// === 2. Cập nhật bảng QuestionModel ===
 		updates := map[string]interface{}{
 			"content":       req.Content,
 			"explanation":   req.Explanation,
-			"difficulty_id": diff.Id,  // Cập nhật ID mới lấy được
-			"type_id":       qtype.Id, // Cập nhật ID mới lấy được
-			// "updated_at" sẽ được GORM tự động cập nhật
+			"difficulty_id": diff.Id,
+			"type_id":       qtype.Id,
 		}
 		
 		if err := s.repo.UpdateQuestion(ctx, tx, req.QuestionId, updates); err != nil {
 			return err
 		}
 
-		// === 3. Cập nhật Đáp án (Chiến lược: Xóa hết cũ -> Tạo mới) ===
-		
-		// 3a. Xóa các đáp án cũ
 		if err := s.repo.DeleteChoicesByQuestionID(ctx, tx, req.QuestionId); err != nil {
 			return err
 		}
 		
-		// 3b. Tạo danh sách đáp án mới từ request
 		if len(req.Choices) > 0 {
 			var choices []*domain.ChoiceModel
 			for _, c := range req.Choices {
 				choices = append(choices, &domain.ChoiceModel{
-					QuestionID: req.QuestionId, // Link với câu hỏi đang sửa
+					QuestionID: req.QuestionId,
 					Content:    c.Content,
 					IsCorrect:  c.IsCorrect,
 				})
 			}
-			// 3c. Bulk insert đáp án mới
+
 			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil {
 				return err
 			}
 		}
 
-		return nil // Commit transaction
+		return nil
 	})
 
 	if err != nil {
@@ -568,4 +572,14 @@ func (s *examService) DeleteExam(ctx context.Context, req *pb.DeleteExamRequest)
     })
     if err != nil { return nil, err }
     return &pb.DeleteExamResponse{Success: true}, nil
+}
+
+func (s *examService) GetUserExamStats(ctx context.Context, req *pb.GetUserExamStatsRequest) (*pb.GetUserExamStatsResponse, error) {
+    count, err := s.repo.CountSubmissionsByUserID(ctx, req.UserId)
+    if err != nil {
+        return nil, err
+    }
+    return &pb.GetUserExamStatsResponse{
+        TotalExamsTaken: count,
+    }, nil
 }

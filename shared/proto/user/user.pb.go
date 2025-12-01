@@ -141,7 +141,6 @@ func (x *RegisterResponse) GetEmail() string {
 	return ""
 }
 
-// === Login ===
 type LoginRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
@@ -262,7 +261,6 @@ func (x *LoginResponse) GetRole() string {
 	return ""
 }
 
-// === Get Profile ===
 type GetProfileRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -375,7 +373,6 @@ func (x *GetProfileResponse) GetRole() string {
 	return ""
 }
 
-// --- Get All Users (Admin) ---
 type GetAllUsersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
@@ -504,7 +501,6 @@ func (x *GetAllUsersResponse) GetTotalPages() int32 {
 	return 0
 }
 
-// --- Delete User (Admin) ---
 type DeleteUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -593,7 +589,6 @@ func (x *DeleteUserResponse) GetSuccess() bool {
 	return false
 }
 
-// --- Update User Role (Admin) ---
 type UpdateUserRoleRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -690,7 +685,6 @@ func (x *UpdateUserRoleResponse) GetSuccess() bool {
 	return false
 }
 
-// --- Update Own Profile ---
 type UpdateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -819,7 +813,6 @@ func (x *UpdateUserResponse) GetRole() string {
 	return ""
 }
 
-// --- Change Password ---
 type UpdatePasswordRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`

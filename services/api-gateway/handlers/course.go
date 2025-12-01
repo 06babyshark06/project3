@@ -187,7 +187,7 @@ func (h *CourseHandler) MarkLessonCompleted(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	req.UserId = userID // Gán UserID
+	req.UserId = userID
 
 	resp, err := h.courseClient.MarkLessonCompleted(c.Request.Context(), &req)
 	if err != nil {
@@ -206,7 +206,7 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
         c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
         return
     }
-    req.CourseId = courseID // Gán ID từ URL
+    req.CourseId = courseID
 
     resp, err := h.courseClient.UpdateCourse(c.Request.Context(), &req)
     if err != nil {
@@ -216,7 +216,6 @@ func (h *CourseHandler) UpdateCourse(c *gin.Context) {
     c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
-// Update Section
 func (h *CourseHandler) UpdateSection(c *gin.Context) {
     idStr := c.Param("id")
     sectionID, _ := strconv.ParseInt(idStr, 10, 64)
@@ -238,7 +237,6 @@ func (h *CourseHandler) UpdateSection(c *gin.Context) {
     c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
-// Delete Section
 func (h *CourseHandler) DeleteSection(c *gin.Context) {
     idStr := c.Param("id")
     sectionID, _ := strconv.ParseInt(idStr, 10, 64)
@@ -251,7 +249,6 @@ func (h *CourseHandler) DeleteSection(c *gin.Context) {
     c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
-// Delete Lesson
 func (h *CourseHandler) DeleteLesson(c *gin.Context) {
     idStr := c.Param("id")
     lessonID, _ := strconv.ParseInt(idStr, 10, 64)
@@ -273,7 +270,7 @@ func (h *CourseHandler) UpdateLesson(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	req.LessonId = lessonID // Gán ID từ URL
+	req.LessonId = lessonID
 
 	resp, err := h.courseClient.UpdateLesson(c.Request.Context(), &req)
 	if err != nil {
@@ -291,7 +288,7 @@ func (h *CourseHandler) GetInstructorCourses(c *gin.Context) {
     }
 
     page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-    limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100")) // Lấy nhiều để hiển thị hết
+    limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 
     req := &pb.GetCoursesRequest{
         Page:         int32(page),
