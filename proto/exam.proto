@@ -11,6 +11,7 @@ service ExamService {
   rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
   
   rpc CreateExam(CreateExamRequest) returns (CreateExamResponse);
+  rpc GenerateExam(GenerateExamRequest) returns (CreateExamResponse);
   rpc GetExamDetails(GetExamDetailsRequest) returns (GetExamDetailsResponse);
 
   rpc SubmitExam(SubmitExamRequest) returns (SubmitExamResponse);
@@ -24,6 +25,16 @@ service ExamService {
   rpc UpdateExam(UpdateExamRequest) returns (UpdateExamResponse);
   rpc DeleteExam(DeleteExamRequest) returns (DeleteExamResponse);
   rpc GetUserExamStats(GetUserExamStatsRequest) returns (GetUserExamStatsResponse);
+}
+
+message ExamSettings {
+  int32 duration_minutes = 1;
+  int32 max_attempts = 2;
+  string password = 3;
+  string start_time = 4;
+  string end_time = 5;
+  bool shuffle_questions = 6;
+  bool show_result_immediately = 7;
 }
 
 message Topic {
@@ -43,7 +54,6 @@ message GetTopicsResponse {
   repeated Topic topics = 1;
 }
 
-// === Question Messages ===
 message ChoiceInput {
   string content = 1;
   bool is_correct = 2;
@@ -69,11 +79,23 @@ message CreateExamRequest {
   int64 topic_id = 3;
   repeated int64 question_ids = 4;
   int32 duration_minutes = 5;
+  ExamSettings settings = 5;
   int64 creator_id = 6;
 }
 message CreateExamResponse {
   int64 id = 1;
   string title = 2;
+}
+
+message GenerateExamRequest {
+  string title = 1;
+  string description = 2;
+  int64 topic_id = 3;
+  ExamSettings settings = 4;
+  int64 creator_id = 5;
+  int32 easy_count = 6;
+  int32 medium_count = 7;
+  int32 hard_count = 8;
 }
 
 message ChoiceDetails {
@@ -97,6 +119,7 @@ message GetExamDetailsResponse {
   int64 topic_id = 5;
   bool is_published = 6;
   string description = 7;
+  ExamSettings settings = 8;
 }
 
 message UserAnswer {
