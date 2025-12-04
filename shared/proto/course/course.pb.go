@@ -901,6 +901,8 @@ type EnrollCourseRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	CourseId      int64                  `protobuf:"varint,2,opt,name=course_id,json=courseId,proto3" json:"course_id,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	FullName      string                 `protobuf:"bytes,4,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -947,6 +949,20 @@ func (x *EnrollCourseRequest) GetCourseId() int64 {
 		return x.CourseId
 	}
 	return 0
+}
+
+func (x *EnrollCourseRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *EnrollCourseRequest) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
 }
 
 type EnrollCourseResponse struct {
@@ -2145,10 +2161,12 @@ const file_course_proto_rawDesc = "" +
 	"\x06course\x18\x01 \x01(\v2\x0e.course.CourseR\x06course\x12+\n" +
 	"\bsections\x18\x02 \x03(\v2\x0f.course.SectionR\bsections\x12\x1f\n" +
 	"\vis_enrolled\x18\x03 \x01(\bR\n" +
-	"isEnrolled\"K\n" +
+	"isEnrolled\"~\n" +
 	"\x13EnrollCourseRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
-	"\tcourse_id\x18\x02 \x01(\x03R\bcourseId\"0\n" +
+	"\tcourse_id\x18\x02 \x01(\x03R\bcourseId\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x04 \x01(\tR\bfullName\"0\n" +
 	"\x14EnrollCourseResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\".\n" +
 	"\x13GetMyCoursesRequest\x12\x17\n" +

@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/06babyshark06/JQKStudy/services/api-gateway/converters"
@@ -47,19 +48,20 @@ func NewJWTMiddleware(userClient *grpcclients.UserServiceClient) (*jwt.GinJWTMid
 			}
 
 			return map[string]any{
-				"email":   resp.Email,
-				"user_id": resp.Id,
-				"role":    resp.Role,
+				"email":     resp.Email,
+				"user_id":   resp.Id,
+				"role":      resp.Role,
+				"full_name": resp.FullName,
 			}, nil
 		},
 
-		// --- Khi sinh token ---
 		PayloadFunc: func(data any) jwt.MapClaims {
 			if v, ok := data.(map[string]any); ok {
 				return jwt.MapClaims{
-					"email":   v["email"],
-					"user_id": v["user_id"],
-					"role":    v["role"],
+					"email":     v["email"],
+					"user_id":   v["user_id"],
+					"role":      v["role"],
+					"full_name": v["full_name"],
 				}
 			}
 			return jwt.MapClaims{}
@@ -71,11 +73,13 @@ func NewJWTMiddleware(userClient *grpcclients.UserServiceClient) (*jwt.GinJWTMid
 			c.Set("user_id", claims["user_id"])
 			c.Set("email", claims["email"])
 			c.Set("role", claims["role"])
-			
+			c.Set("full_name", claims["full_name"])
+
 			return map[string]any{
-				"user_id": claims["user_id"],
-				"email":   claims["email"],
-				"role":    claims["role"],
+				"user_id":   claims["user_id"],
+				"email":     claims["email"],
+				"role":      claims["role"],
+				"full_name": claims["full_name"],
 			}
 		},
 
@@ -112,11 +116,9 @@ func Authorize(allowedRoles ...string) gin.HandlerFunc {
 			return
 		}
 
-		for _, role := range allowedRoles {
-			if userRole == role {
-				c.Next()
-				return
-			}
+		if slices.Contains(allowedRoles, userRole) {
+			c.Next()
+			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Bạn không có quyền truy cập tài nguyên này"})

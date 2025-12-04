@@ -10,30 +10,9 @@ import (
 
 	database "github.com/06babyshark06/JQKStudy/services/notification-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/notification-service/internal/domain"
+	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	"gorm.io/gorm"
 )
-
-type UserRegisteredEvent struct {
-	UserID   int64  `json:"user_id"`
-	Email    string `json:"email"`
-	FullName string `json:"full_name"`
-}
-
-type ExamSubmittedEvent struct {
-	UserID    int64   `json:"user_id"`
-	Email     string  `json:"email"`
-	FullName  string  `json:"full_name"`
-	ExamTitle string  `json:"exam_title"`
-	Score     float64 `json:"score"`
-}
-
-type CourseEnrolledEvent struct {
-	UserID      int64  `json:"user_id"`
-	CourseID    int64  `json:"course_id"`
-	CourseTitle string `json:"course_title"`
-	Email       string `json:"email"`
-	FullName    string `json:"full_name"`
-}
 
 type notificationService struct {
 	repo  domain.NotificationRepository
@@ -48,7 +27,7 @@ func NewNotificationService(repo domain.NotificationRepository, email domain.Ema
 }
 
 func (s *notificationService) HandleUserRegisteredEvent(ctx context.Context, eventBytes []byte) error {
-	var event UserRegisteredEvent
+	var event contracts.UserRegisteredEvent
 	if err := json.Unmarshal(eventBytes, &event); err != nil {
 		log.Printf("Lỗi parse sự kiện user_registered: %v", err)
 		return errors.New("dữ liệu sự kiện không hợp lệ")
@@ -122,7 +101,7 @@ func (s *notificationService) HandleUserRegisteredEvent(ctx context.Context, eve
 }
 
 func (s *notificationService) HandleExamSubmittedEvent(ctx context.Context, eventBytes []byte) error {
-	var event ExamSubmittedEvent
+	var event contracts.ExamSubmittedEvent
 	if err := json.Unmarshal(eventBytes, &event); err != nil {
 		log.Printf("Lỗi parse sự kiện exam_submitted: %v", err)
 		return errors.New("dữ liệu sự kiện không hợp lệ")
@@ -191,7 +170,7 @@ func (s *notificationService) HandleExamSubmittedEvent(ctx context.Context, even
 }
 
 func (s *notificationService) HandleCourseEnrolledEvent(ctx context.Context, eventBytes []byte) error {
-	var event CourseEnrolledEvent
+	var event contracts.CourseEnrolledEvent
 	if err := json.Unmarshal(eventBytes, &event); err != nil {
 		log.Printf("Lỗi parse sự kiện course_enrolled: %v", err)
 		return errors.New("dữ liệu sự kiện không hợp lệ")

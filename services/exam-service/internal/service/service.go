@@ -316,6 +316,8 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		SubmissionID: submissionID,
 		ExamTitle:    examTitle,
 		Score:        finalScore,
+		Email:        req.Email,    
+		FullName:     req.FullName,
 	}
 	eventBytes, err := json.Marshal(eventPayload)
 	if err != nil {

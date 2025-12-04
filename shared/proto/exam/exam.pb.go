@@ -911,6 +911,8 @@ type SubmitExamRequest struct {
 	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
 	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Answers       []*UserAnswer          `protobuf:"bytes,3,rep,name=answers,proto3" json:"answers,omitempty"`
+	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	FullName      string                 `protobuf:"bytes,5,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -964,6 +966,20 @@ func (x *SubmitExamRequest) GetAnswers() []*UserAnswer {
 		return x.Answers
 	}
 	return nil
+}
+
+func (x *SubmitExamRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *SubmitExamRequest) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
 }
 
 type SubmitExamResponse struct {
@@ -2308,11 +2324,13 @@ const file_exam_proto_rawDesc = "" +
 	"UserAnswer\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\x03R\n" +
 	"questionId\x12(\n" +
-	"\x10chosen_choice_id\x18\x02 \x01(\x03R\x0echosenChoiceId\"q\n" +
+	"\x10chosen_choice_id\x18\x02 \x01(\x03R\x0echosenChoiceId\"\xa4\x01\n" +
 	"\x11SubmitExamRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12*\n" +
-	"\aanswers\x18\x03 \x03(\v2\x10.exam.UserAnswerR\aanswers\"\x9d\x01\n" +
+	"\aanswers\x18\x03 \x03(\v2\x10.exam.UserAnswerR\aanswers\x12\x14\n" +
+	"\x05email\x18\x04 \x01(\tR\x05email\x12\x1b\n" +
+	"\tfull_name\x18\x05 \x01(\tR\bfullName\"\x9d\x01\n" +
 	"\x12SubmitExamResponse\x12#\n" +
 	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x14\n" +
 	"\x05score\x18\x02 \x01(\x02R\x05score\x12#\n" +

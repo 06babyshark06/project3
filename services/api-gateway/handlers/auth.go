@@ -72,9 +72,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	accessToken, _, err := h.jwt.TokenGenerator(map[string]any{
-		"user_id": resp.Id,
-		"email":   resp.Email,
-		"role":    resp.Role,
+		"user_id":   resp.Id,
+		"email":     resp.Email,
+		"role":      resp.Role,
+		"full_name": resp.FullName,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
@@ -82,11 +83,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	refreshClaims := jwtv4.MapClaims{
-		"user_id": resp.Id,
-		"email":   resp.Email,
-		"role":    resp.Role,
-		"exp":     time.Now().Add(7 * 24 * time.Hour).Unix(),
-		"iat":     time.Now().Unix(),
+		"user_id":   resp.Id,
+		"email":     resp.Email,
+		"role":      resp.Role,
+		"full_name": resp.FullName,
+		"exp":       time.Now().Add(7 * 24 * time.Hour).Unix(),
+		"iat":       time.Now().Unix(),
 	}
 	refreshToken := jwtv4.NewWithClaims(jwtv4.SigningMethodHS256, refreshClaims)
 	refreshTokenStr, err := refreshToken.SignedString([]byte("supersecretkey"))
@@ -102,25 +104,25 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	c.SetCookie(
-		"refresh_token", 
-		refreshTokenStr,   
-		int(h.jwt.MaxRefresh.Seconds()), 
-		"/", 
-		"localhost",    
-		false,              
-		true,             
+		"refresh_token",
+		refreshTokenStr,
+		int(h.jwt.MaxRefresh.Seconds()),
+		"/",
+		"localhost",
+		false,
+		true,
 	)
 
 	c.JSON(http.StatusOK, gin.H{
-    "access_token": accessToken,
-    "expires_in":   int(h.jwt.Timeout.Seconds()),
-	"user": gin.H{
-        "id":        resp.Id,
-        "full_name": resp.FullName,
-        "email":     resp.Email,
-        "role":      resp.Role,
-    },
-})
+		"access_token": accessToken,
+		"expires_in":   int(h.jwt.Timeout.Seconds()),
+		"user": gin.H{
+			"id":        resp.Id,
+			"full_name": resp.FullName,
+			"email":     resp.Email,
+			"role":      resp.Role,
+		},
+	})
 }
 
 func (h *AuthHandler) Logout(c *gin.Context) {
@@ -155,12 +157,12 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 
 	c.SetCookie(
 		"refresh_token",
-		"",                
-		-1,                
-		"/api/v1/refresh", 
-		"",                
-		false,             
-		true,              
+		"",
+		-1,
+		"/api/v1/refresh",
+		"",
+		false,
+		true,
 	)
 
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{"message": "logout success"}})
@@ -194,9 +196,10 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	}
 
 	newToken, _, err := h.jwt.TokenGenerator(map[string]any{
-		"user_id": claims["user_id"],
-		"email":   claims["email"],
-		"role":    claims["role"],
+		"user_id":   claims["user_id"],
+		"email":     claims["email"],
+		"role":      claims["role"],
+		"full_name": claims["full_name"],
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
@@ -207,4 +210,3 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 		"access_token": newToken,
 	})
 }
-

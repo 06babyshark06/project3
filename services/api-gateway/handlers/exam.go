@@ -56,8 +56,6 @@ func (h *ExamHandler) CreateTopic(c *gin.Context) {
 	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
 }
 
-// --- Question Handlers ---
-
 func (h *ExamHandler) CreateQuestion(c *gin.Context) {
 	var req pb.CreateQuestionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -79,8 +77,6 @@ func (h *ExamHandler) CreateQuestion(c *gin.Context) {
 	}
 	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
 }
-
-// --- Exam Handlers ---
 
 func (h *ExamHandler) CreateExam(c *gin.Context) {
 	var req pb.CreateExamRequest
@@ -120,6 +116,7 @@ func (h *ExamHandler) GetExamDetails(c *gin.Context) {
 }
 
 func (h *ExamHandler) SubmitExam(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
 	var req pb.SubmitExamRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -131,7 +128,15 @@ func (h *ExamHandler) SubmitExam(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	req.UserId = userID // Gán UserID vào request gRPC
+	req.UserId = userID
+	if email, ok := claims["email"].(string); ok {
+		req.Email = email
+	}
+    if fullName, ok := claims["full_name"].(string); ok {
+		req.FullName = fullName
+	} else {
+		req.FullName = "Unknown User"
+	}
 
 	resp, err := h.examClient.SubmitExam(c.Request.Context(), &req)
 	if err != nil {
@@ -236,8 +241,6 @@ func (h *ExamHandler) UpdateQuestion(c *gin.Context) {
 		return
 	}
 
-	// 3. Bind JSON Body
-	// Định nghĩa struct tạm để hứng JSON
 	type ChoiceReq struct {
 		Content   string `json:"content"`
 		IsCorrect bool   `json:"is_correct"`

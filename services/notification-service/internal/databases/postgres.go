@@ -75,84 +75,86 @@ func seedNotificationData(db *gorm.DB) {
 	const (
 		containerStyle = `font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff; border-radius: 8px; border: 1px solid #e0e0e0;`
 		headerStyle    = `text-align: center; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0;`
-		logoStyle      = `font-size: 24px; font-weight: bold; color: #E11D48; text-decoration: none;` // Màu Rose-600
+		logoStyle      = `font-size: 24px; font-weight: bold; color: #E11D48; text-decoration: none;`
 		contentStyle   = `padding: 30px 0; color: #333333; line-height: 1.6; font-size: 16px;`
 		buttonStyle    = `display: inline-block; padding: 12px 24px; background-color: #E11D48; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px;`
 		footerStyle    = `text-align: center; padding-top: 20px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #888888;`
+		highlightStyle = `color: #E11D48; font-weight: bold;`
+		boxStyle       = `background-color: #fff1f2; border: 1px solid #fda4af; padding: 15px; border-radius: 6px; margin: 20px 0;`
 	)
 
 	baseTemplate := fmt.Sprintf(`
-        <div style="background-color: #f9fafb; padding: 40px 0;">
-            <div style="%s">
-                <div style="%s">
-                    <a href="#" style="%s">JQK Study</a>
-                </div>
-                <div style="%s">
-                    %%s 
-                </div>
-                <div style="%s">
-                    <p>&copy; 2025 JQK Study. All rights reserved.</p>
-                    <p>Học mọi lúc, mọi nơi, kiến tạo tương lai.</p>
-                </div>
-            </div>
-        </div>
-    `, containerStyle, headerStyle, logoStyle, contentStyle, footerStyle)
+		<div style="background-color: #f9fafb; padding: 40px 0;">
+			<div style="%s">
+				<div style="%s">
+					<a href="http://localhost:3000" style="%s">JQK Study</a>
+				</div>
+				<div style="%s">
+					%%s 
+				</div>
+				<div style="%s">
+					<p>&copy; 2025 JQK Study. Nền tảng học tập trực tuyến hàng đầu.</p>
+					<p>Học mọi lúc, mọi nơi, kiến tạo tương lai.</p>
+				</div>
+			</div>
+		</div>
+	`, containerStyle, headerStyle, logoStyle, contentStyle, footerStyle)
 
 	userRegisteredBody := fmt.Sprintf(baseTemplate, `
-        <h2 style="color: #111827; margin-top: 0;">Chào mừng gia nhập! 🎉</h2>
-        <p>Xin chào <strong>%s</strong>,</p>
-        <p>Cảm ơn bạn đã tin tưởng và lựa chọn <strong>JQK Study</strong>. Tài khoản của bạn đã được tạo thành công.</p>
-        <p>Giờ đây, bạn có thể truy cập hàng ngàn khóa học chất lượng và bắt đầu hành trình chinh phục tri thức mới.</p>
-        <div style="text-align: center;">
-            <a href="http://localhost:3000/login" style="`+buttonStyle+`">Đăng Nhập Ngay</a>
-        </div>
-    `)
+		<h2 style="color: #111827; margin-top: 0;">Chào mừng gia nhập! 🎉</h2>
+		<p>Xin chào <strong>%s</strong>,</p>
+		<p>Cảm ơn bạn đã tin tưởng và lựa chọn <strong>JQK Study</strong>. Tài khoản của bạn đã được tạo thành công.</p>
+		<p>Giờ đây, bạn có thể truy cập hàng ngàn khóa học chất lượng và bắt đầu hành trình chinh phục tri thức mới.</p>
+		<div style="text-align: center;">
+			<a href="http://localhost:3000/login" style="`+buttonStyle+`">Đăng Nhập Ngay</a>
+		</div>
+	`)
 
 	examSubmittedBody := fmt.Sprintf(baseTemplate, `
-        <h2 style="color: #111827; margin-top: 0;">Kết quả bài thi 📝</h2>
-        <p>Chào <strong>%s</strong>,</p>
-        <p>Hệ thống đã ghi nhận kết quả bài thi của bạn:</p>
-        <div style="background-color: #fff1f2; border: 1px solid #fda4af; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Bài thi:</strong> %s</p>
-            <p style="margin: 5px 0; font-size: 18px;"><strong>Điểm số:</strong> <span style="color: #E11D48; font-weight: bold;">%.2f / 10</span></p>
-        </div>
-        <p>Hãy tiếp tục cố gắng nhé!</p>
-        <div style="text-align: center;">
-            <a href="http://localhost:3000/dashboard" style="`+buttonStyle+`">Xem Chi Tiết</a>
-        </div>
-    `)
+		<h2 style="color: #111827; margin-top: 0;">Kết quả bài thi 📝</h2>
+		<p>Chào <strong>%s</strong>,</p>
+		<p>Hệ thống đã ghi nhận kết quả bài thi của bạn:</p>
+		<div style="`+boxStyle+`">
+			<p style="margin: 5px 0;"><strong>Bài thi:</strong> %s</p>
+			<p style="margin: 5px 0; font-size: 18px;"><strong>Điểm số:</strong> <span style="`+highlightStyle+`">%.2f / 10</span></p>
+		</div>
+		<p>Hãy xem lại chi tiết bài làm để rút kinh nghiệm nhé!</p>
+		<div style="text-align: center;">
+			<a href="http://localhost:3000/dashboard" style="`+buttonStyle+`">Xem Chi Tiết</a>
+		</div>
+	`)
 
 	courseEnrolledBody := fmt.Sprintf(baseTemplate, `
-        <h2 style="color: #111827; margin-top: 0;">Đăng ký thành công! 🎓</h2>
-        <p>Xin chào <strong>%s</strong>,</p>
-        <p>Chúc mừng bạn đã đăng ký thành công khóa học:</p>
-        <h3 style="color: #E11D48; text-align: center; margin: 20px 0;">%s</h3>
-        <p>Bạn có thể bắt đầu học ngay bây giờ. Chúc bạn có những giờ học thật hiệu quả!</p>
-        <div style="text-align: center;">
-            <a href="http://localhost:3000/my-courses" style="`+buttonStyle+`">Vào Học Ngay</a>
-        </div>
-    `)
+		<h2 style="color: #111827; margin-top: 0;">Đăng ký thành công! 🎓</h2>
+		<p>Xin chào <strong>%s</strong>,</p>
+		<p>Chúc mừng bạn đã đăng ký thành công khóa học:</p>
+		<h3 style="`+highlightStyle+` text-align: center; margin: 20px 0;">%s</h3>
+		<p>Bạn có thể bắt đầu học ngay bây giờ. Chúc bạn có những giờ học thật hiệu quả!</p>
+		<div style="text-align: center;">
+			<a href="http://localhost:3000/my-courses" style="`+buttonStyle+`">Vào Học Ngay</a>
+		</div>
+	`)
 
 	templates := []domain.NotificationTemplateModel{
-        {
-            Name:    "user_registered",
-            TypeID:  emailChannel.Id,
-            Subject: "Chào mừng bạn đến với JQK Study! 🚀",
-            Body:    userRegisteredBody,
-        },
-        {
-            Name:    "exam_submitted",
-            TypeID:  emailChannel.Id,
-            Subject: "Kết quả bài thi: %s",
-            Body:    examSubmittedBody,
-        },
-        {
-            Name:    "course_enrolled",
-            TypeID:  emailChannel.Id,
-            Subject: "Xác nhận đăng ký khóa học: %s",
-            Body:    courseEnrolledBody,
-        },
-    }
+		{
+			Name:    "user_registered",
+			TypeID:  emailChannel.Id,
+			Subject: "Chào mừng bạn đến với JQK Study! 🚀",
+			Body:    userRegisteredBody,
+		},
+		{
+			Name:    "exam_submitted",
+			TypeID:  emailChannel.Id,
+			Subject: "Kết quả bài thi: %s",
+			Body:    examSubmittedBody,
+		},
+		{
+			Name:    "course_enrolled",
+			TypeID:  emailChannel.Id,
+			Subject: "Xác nhận đăng ký khóa học: %s",
+			Body:    courseEnrolledBody,
+		},
+	}
 
 	for _, t := range templates {
 		var existing domain.NotificationTemplateModel

@@ -107,6 +107,8 @@ message SubmitExamRequest {
   int64 exam_id = 1;
   int64 user_id = 2;
   repeated UserAnswer answers = 3;
+  string email = 4;
+  string full_name = 5;
 }
 message SubmitExamResponse {
   int64 submission_id = 1;

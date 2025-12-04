@@ -7,6 +7,7 @@ import (
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/course"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
@@ -93,6 +94,7 @@ func (h *CourseHandler) GetCourseDetails(c *gin.Context) {
 }
 
 func (h *CourseHandler) EnrollCourse(c *gin.Context) {
+	claims := jwt.ExtractClaims(c)
 	var req pb.EnrollCourseRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -105,6 +107,14 @@ func (h *CourseHandler) EnrollCourse(c *gin.Context) {
 		return
 	}
 	req.UserId = userID
+	if email, ok := claims["email"].(string); ok {
+		req.Email = email
+	}
+    if fullName, ok := claims["full_name"].(string); ok {
+		req.FullName = fullName
+	} else {
+		req.FullName = "Unknown User"
+	}
 
 	resp, err := h.courseClient.EnrollCourse(c.Request.Context(), &req)
 	if err != nil {
