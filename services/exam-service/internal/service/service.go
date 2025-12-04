@@ -1,22 +1,32 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/xuri/excelize/v2"
 
 	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/exam-service/internal/domain"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
+	"github.com/06babyshark06/JQKStudy/shared/env"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	"gorm.io/gorm"
 )
 
 type examService struct {
-	repo domain.ExamRepository
+	repo     domain.ExamRepository
 	producer domain.EventProducer
 }
 
@@ -24,153 +34,370 @@ func NewExamService(repo domain.ExamRepository, producer domain.EventProducer) d
 	return &examService{repo: repo, producer: producer}
 }
 
-func (s *examService) CreateTopic(ctx context.Context, req *pb.CreateTopicRequest) (*pb.CreateTopicResponse, error) {
-	// 1. Kiểm tra logic (ví dụ: trùng tên)
-	existing, _ := s.repo.GetTopicByName(ctx, req.Name)
-	if existing != nil {
-		return nil, errors.New("chủ đề đã tồn tại")
+func (s *examService) createR2Client(ctx context.Context) (*s3.PresignClient, error) {
+	accountID := env.GetString("R2_ACCOUNT_ID", "")
+	accessKey := env.GetString("R2_ACCESS_KEY_ID", "")
+	secretKey := env.GetString("R2_SECRET_ACCESS_KEY", "")
+	if accountID == "" || accessKey == "" || secretKey == "" {
+		return nil, errors.New("cấu hình R2 chưa đầy đủ")
 	}
+	endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
 
-	topic := &domain.TopicModel{
-		Name:        req.Name,
-		Description: req.Description,
-	}
-
-	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		createdTopic, err := s.repo.CreateTopic(ctx, tx, topic)
-		if err != nil {
-			return err
-		}
-		topic = createdTopic
-		return nil
-	})
-
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+		config.WithRegion("auto"),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.CreateTopicResponse{
-		Topic: &pb.Topic{
-			Id:          topic.Id,
-			Name:        topic.Name,
-			Description: topic.Description,
-		},
-	}, nil
+	s3Client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(endpoint)
+		o.UsePathStyle = true
+	})
+	return s3.NewPresignClient(s3Client), nil
 }
 
+func (s *examService) GetUploadURL(ctx context.Context, req *pb.GetUploadURLRequest) (*pb.GetUploadURLResponse, error) {
+	bucketName := env.GetString("R2_BUCKET_NAME", "")
+	presignClient, err := s.createR2Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	fileKey := fmt.Sprintf("exams/%s/%d_%s", req.Folder, time.Now().Unix(), req.FileName)
+
+	presignedReq, err := presignClient.PresignPutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(fileKey),
+		ContentType: aws.String(req.ContentType),
+	}, s3.WithPresignExpires(15*time.Minute))
+	if err != nil {
+		return nil, err
+	}
+
+	publicDomain := env.GetString("R2_PUBLIC_DOMAIN", "")
+	finalURL := fmt.Sprintf("https://%s/%s", publicDomain, fileKey)
+
+	return &pb.GetUploadURLResponse{UploadUrl: presignedReq.URL, FinalUrl: finalURL}, nil
+}
+
+func (s *examService) CreateTopic(ctx context.Context, req *pb.CreateTopicRequest) (*pb.CreateTopicResponse, error) {
+	topic := &domain.TopicModel{Name: req.Name, Description: req.Description}
+	created, err := s.repo.CreateTopic(ctx, database.DB, topic)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.CreateTopicResponse{Topic: &pb.Topic{Id: created.Id, Name: created.Name, Description: created.Description}}, nil
+}
 func (s *examService) GetTopics(ctx context.Context, req *pb.GetTopicsRequest) (*pb.GetTopicsResponse, error) {
 	topics, err := s.repo.GetTopics(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	var pbTopics []*pb.Topic
 	for _, t := range topics {
-		pbTopics = append(pbTopics, &pb.Topic{
-			Id:          t.Id,
-			Name:        t.Name,
-			Description: t.Description,
-		})
+		pbTopics = append(pbTopics, &pb.Topic{Id: t.Id, Name: t.Name, Description: t.Description})
 	}
-
 	return &pb.GetTopicsResponse{Topics: pbTopics}, nil
+}
+func (s *examService) CreateSection(ctx context.Context, req *pb.CreateSectionRequest) (*pb.CreateSectionResponse, error) {
+	sec := &domain.SectionModel{Name: req.Name, Description: req.Description, TopicID: req.TopicId}
+	created, err := s.repo.CreateSection(ctx, database.DB, sec)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.CreateSectionResponse{Section: &pb.Section{Id: created.Id, Name: created.Name, Description: created.Description, TopicId: created.TopicID}}, nil
+}
+func (s *examService) GetSections(ctx context.Context, req *pb.GetSectionsRequest) (*pb.GetSectionsResponse, error) {
+	secs, err := s.repo.GetSectionsByTopic(ctx, req.TopicId)
+	if err != nil {
+		return nil, err
+	}
+	var pbSecs []*pb.Section
+	for _, s := range secs {
+		pbSecs = append(pbSecs, &pb.Section{Id: s.Id, Name: s.Name, Description: s.Description, TopicId: s.TopicID})
+	}
+	return &pb.GetSectionsResponse{Sections: pbSecs}, nil
 }
 
 func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
-	var createdQuestion *domain.QuestionModel
-
+	var qID int64
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		var err error
-		var diff domain.QuestionDifficultyModel
-		if err = tx.WithContext(ctx).Where("difficulty = ?", req.Difficulty).First(&diff).Error; err != nil {
-			return errors.New("difficulty không hợp lệ")
-		}
-		var qtype domain.QuestionTypeModel
-		if err = tx.WithContext(ctx).Where("type = ?", req.QuestionType).First(&qtype).Error; err != nil {
-			return errors.New("question type không hợp lệ")
-		}
+		section, err := s.repo.GetSectionByID(ctx, req.SectionId)
+		if err != nil { return errors.New("section not found") }
+		diff, _ := s.repo.GetDifficulty(ctx, req.Difficulty)
+		qType, _ := s.repo.GetQuestionType(ctx, req.QuestionType)
 
 		question := &domain.QuestionModel{
-			TopicID:      req.TopicId,
-			CreatorID:    req.CreatorId,
-			Content:      req.Content,
-			TypeID:       qtype.Id,
-			DifficultyID: diff.Id,
-			Explanation:  req.Explanation,
+			SectionID: req.SectionId, TopicID: section.TopicID, CreatorID: req.CreatorId,
+			Content: req.Content, TypeID: qType.Id, DifficultyID: diff.Id,
+			Explanation: req.Explanation, AttachmentURL: req.AttachmentUrl,
+		}
+		createdQ, err := s.repo.CreateQuestion(ctx, tx, question)
+		if err != nil { return err }
+		qID = createdQ.Id
+
+		var choices []*domain.ChoiceModel
+		for _, c := range req.Choices {
+			choices = append(choices, &domain.ChoiceModel{QuestionID: qID, Content: c.Content, IsCorrect: c.IsCorrect})
+		}
+		return s.repo.CreateChoices(ctx, tx, choices)
+	})
+	if err != nil { return nil, err }
+	return &pb.CreateQuestionResponse{Id: qID, Content: req.Content}, nil
+}
+
+func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error) {
+	reader := bytes.NewReader(req.FileContent)
+	f, err := excelize.OpenReader(reader)
+	if err != nil {
+		return nil, errors.New("không thể đọc file excel")
+	}
+	defer f.Close()
+
+	rows, err := f.GetRows("Sheet1")
+	if err != nil {
+		return nil, errors.New("không tìm thấy Sheet1")
+	}
+
+	section, err := s.repo.GetSectionByID(ctx, req.SectionId)
+	if err != nil {
+		return nil, errors.New("section không tồn tại")
+	}
+
+	typeCache := make(map[string]int64)
+	diffCache := make(map[string]int64)
+
+	getTypeID := func(name string) int64 {
+		name = strings.TrimSpace(strings.ToLower(name))
+		if name == "multiple" || name == "multiple_choice" {
+			name = "multiple_choice"
+		} else {
+			name = "single_choice"
+		}
+		if id, ok := typeCache[name]; ok {
+			return id
+		}
+		t, _ := s.repo.GetQuestionType(ctx, name)
+		if t != nil {
+			typeCache[name] = t.Id
+			return t.Id
+		}
+		return 1
+	}
+	getDiffID := func(name string) int64 {
+		name = strings.TrimSpace(strings.ToLower(name))
+		if id, ok := diffCache[name]; ok {
+			return id
+		}
+		d, _ := s.repo.GetDifficulty(ctx, name)
+		if d != nil {
+			diffCache[name] = d.Id
+			return d.Id
+		}
+		return 1
+	}
+
+	successCount := 0
+	errorCount := 0
+
+	for i, row := range rows {
+		if i == 0 { continue }
+		if len(row) < 7 { errorCount++; continue }
+
+		content := strings.TrimSpace(row[0])
+		if content == "" { continue }
+
+		qTypeID := getTypeID(row[1])
+		diffID := getDiffID(row[2])
+		explanation := row[3]
+		imageURL := strings.TrimSpace(row[4])
+		correctStr := strings.ToUpper(strings.TrimSpace(row[5]))
+
+		correctMap := make(map[int]bool)
+		parts := strings.Split(correctStr, ",")
+		for _, p := range parts {
+			p = strings.TrimSpace(p)
+			if len(p) > 0 {
+				idx := int(p[0] - 'A')
+				if idx >= 0 { correctMap[idx] = true }
+			}
 		}
 
-		createdQuestion, err = s.repo.CreateQuestion(ctx, tx, question)
+		err := database.DB.Transaction(func(tx *gorm.DB) error {
+			q := &domain.QuestionModel{
+				SectionID: section.Id, TopicID: section.TopicID, CreatorID: req.CreatorId,
+				Content: content, TypeID: qTypeID, DifficultyID: diffID, Explanation: explanation,
+				AttachmentURL: imageURL,
+			}
+			createdQ, err := s.repo.CreateQuestion(ctx, tx, q)
+			if err != nil { return err }
+
+			var choices []*domain.ChoiceModel
+			for cIdx := 6; cIdx < len(row); cIdx++ {
+				val := strings.TrimSpace(row[cIdx])
+				if val == "" { continue }
+				isCorrect := correctMap[cIdx-6]
+				choices = append(choices, &domain.ChoiceModel{
+					QuestionID: createdQ.Id, Content: val, IsCorrect: isCorrect,
+				})
+			}
+			if len(choices) < 2 { return errors.New("cần ít nhất 2 lựa chọn") }
+			return s.repo.CreateChoices(ctx, tx, choices)
+		})
+
+		if err == nil { successCount++ } else { errorCount++ }
+	}
+
+	return &pb.ImportQuestionsResponse{SuccessCount: int32(successCount), ErrorCount: int32(errorCount)}, nil
+}
+
+func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequest) (*pb.CreateExamResponse, error) {
+	allQuestionIDs := []int64{}
+	uniqueMap := make(map[int64]bool)
+
+	for _, cfg := range req.SectionConfigs {
+		ids, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, int(cfg.Count))
+		if err != nil {
+			continue
+		}
+		for _, id := range ids {
+			if !uniqueMap[id] {
+				uniqueMap[id] = true
+				allQuestionIDs = append(allQuestionIDs, id)
+			}
+		}
+	}
+
+	if len(allQuestionIDs) == 0 {
+		return nil, errors.New("không tìm thấy câu hỏi nào phù hợp với cấu hình")
+	}
+
+	var examID int64
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		exam := &domain.ExamModel{
+			Title: req.Title, Description: req.Description,
+			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
+			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
+			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
+			TopicID: req.TopicId, CreatorID: req.CreatorId,
+		}
+		if req.Settings.StartTime != "" {
+			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
+			exam.StartTime = &t
+		}
+		if req.Settings.EndTime != "" {
+			t, _ := time.Parse(time.RFC3339, req.Settings.EndTime)
+			exam.EndTime = &t
+		}
+
+		created, err := s.repo.CreateExam(ctx, tx, exam)
 		if err != nil {
 			return err
 		}
+		examID = created.Id
 
-		var choiceModels []*domain.ChoiceModel
-		for _, c := range req.Choices {
-			choiceModels = append(choiceModels, &domain.ChoiceModel{
-				QuestionID: createdQuestion.Id,
-				Content:    c.Content,
-				IsCorrect:  c.IsCorrect,
-			})
-		}
-
-		if err = s.repo.CreateChoices(ctx, tx, choiceModels); err != nil {
-			return err
-		}
-
-		if req.ExamId > 0 {
-            err = s.repo.LinkQuestionsToExam(ctx, tx, req.ExamId, []int64{createdQuestion.Id})
-            if err != nil {
-                return err
-            }
-        }
-
-		return nil
+		return s.repo.LinkQuestionsToExam(ctx, tx, created.Id, allQuestionIDs)
 	})
 
 	if err != nil {
 		return nil, err
 	}
+	return &pb.CreateExamResponse{Id: examID, Title: req.Title}, nil
+}
 
-	return &pb.CreateQuestionResponse{
-		Id:      createdQuestion.Id,
-		Content: createdQuestion.Content,
-	}, nil
+func (s *examService) RequestExamAccess(ctx context.Context, req *pb.RequestExamAccessRequest) (*pb.RequestExamAccessResponse, error) {
+	existing, _ := s.repo.GetAccessRequest(ctx, req.ExamId, req.UserId)
+	if existing != nil {
+		return &pb.RequestExamAccessResponse{Success: true, Status: existing.Status}, nil
+	}
+	newReq := &domain.ExamAccessRequestModel{
+		ExamID: req.ExamId, UserID: req.UserId, Status: "pending", CreatedAt: time.Now().UTC(),
+	}
+	if err := s.repo.CreateAccessRequest(ctx, newReq); err != nil {
+		return nil, err
+	}
+	return &pb.RequestExamAccessResponse{Success: true, Status: "pending"}, nil
+}
+
+func (s *examService) ApproveExamAccess(ctx context.Context, req *pb.ApproveExamAccessRequest) (*pb.ApproveExamAccessResponse, error) {
+	status := "rejected"
+	if req.IsApproved {
+		status = "approved"
+	}
+	err := s.repo.UpdateAccessRequestStatus(ctx, req.ExamId, req.StudentId, status)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.ApproveExamAccessResponse{Success: true}, nil
+}
+
+func (s *examService) CheckExamAccess(ctx context.Context, req *pb.CheckExamAccessRequest) (*pb.CheckExamAccessResponse, error) {
+	exam, err := s.repo.GetExamDetails(ctx, req.ExamId)
+	if err != nil {
+		return nil, errors.New("exam not found")
+	}
+
+	if exam.RequiresApproval {
+		access, err := s.repo.GetAccessRequest(ctx, req.ExamId, req.UserId)
+		if err != nil || access == nil {
+			return &pb.CheckExamAccessResponse{CanAccess: false, Message: "none"}, nil
+		}
+		if access.Status == "pending" {
+			return &pb.CheckExamAccessResponse{CanAccess: false, Message: "pending"}, nil
+		}
+		if access.Status == "rejected" {
+			return &pb.CheckExamAccessResponse{CanAccess: false, Message: "rejected"}, nil
+		}
+	}
+
+	now := time.Now()
+	if exam.StartTime != nil && now.Before(*exam.StartTime) {
+		return &pb.CheckExamAccessResponse{CanAccess: false, Message: "not_started"}, nil
+	}
+	if exam.EndTime != nil && now.After(*exam.EndTime) {
+		return &pb.CheckExamAccessResponse{CanAccess: false, Message: "ended"}, nil
+	}
+
+	count, _ := s.repo.CountSubmissionsForExam(ctx, req.ExamId, req.UserId)
+	if exam.MaxAttempts > 0 && int(count) >= exam.MaxAttempts {
+		return &pb.CheckExamAccessResponse{CanAccess: false, Message: "max_attempts"}, nil
+	}
+
+	return &pb.CheckExamAccessResponse{CanAccess: true, Message: "ok"}, nil
 }
 
 func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest) (*pb.CreateExamResponse, error) {
 	var createdExam *domain.ExamModel
-
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		var err error
-
 		exam := &domain.ExamModel{
-			Title:           req.Title,
-			Description:     req.Description,
-			DurationMinutes: int(req.DurationMinutes),
-			TopicID:         req.TopicId,
-			CreatorID:       req.CreatorId,
+			Title: req.Title, Description: req.Description,
+			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
+			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
+			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
+			TopicID: req.TopicId, CreatorID: req.CreatorId,
+		}
+		if req.Settings.StartTime != "" {
+			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
+			exam.StartTime = &t
+		}
+		if req.Settings.EndTime != "" {
+			t, _ := time.Parse(time.RFC3339, req.Settings.EndTime)
+			exam.EndTime = &t
 		}
 
+		var err error
 		createdExam, err = s.repo.CreateExam(ctx, tx, exam)
 		if err != nil {
 			return err
 		}
-
-		if err = s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, req.QuestionIds); err != nil {
-			return err
-		}
-
-		return nil
+		return s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, req.QuestionIds)
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
-	return &pb.CreateExamResponse{
-		Id:    createdExam.Id,
-		Title: createdExam.Title,
-	}, nil
+	return &pb.CreateExamResponse{Id: createdExam.Id, Title: createdExam.Title}, nil
 }
 
 func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetailsRequest) (*pb.GetExamDetailsResponse, error) {
@@ -193,25 +420,36 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 			qType = q.Type.Type
 		}
 		pbQuestions = append(pbQuestions, &pb.QuestionDetails{
-			Id:      q.Id,
-			Content: q.Content,
-			Choices: pbChoices,
+			Id:           q.Id,
+			Content:      q.Content,
+			Choices:      pbChoices,
 			QuestionType: qType,
+			AttachmentUrl: q.AttachmentURL,
 		})
 	}
 
 	return &pb.GetExamDetailsResponse{
-		Id:              examModel.Id,
-		Title:           examModel.Title,
-		DurationMinutes: int32(examModel.DurationMinutes),
-		Questions:       pbQuestions,
-		TopicId:         examModel.TopicID,
-		IsPublished:     examModel.IsPublished,
-		Description:     examModel.Description,
+		Id:    examModel.Id,
+		Title: examModel.Title,
+		Settings: &pb.ExamSettings{
+			DurationMinutes: int32(examModel.DurationMinutes),
+			MaxAttempts:     int32(examModel.MaxAttempts),
+			StartTime:       examModel.StartTime.Format(time.RFC3339),
+			EndTime:         examModel.EndTime.Format(time.RFC3339),
+		},
+		Questions:   pbQuestions,
+		TopicId:     examModel.TopicID,
+		IsPublished: examModel.IsPublished,
+		Description: examModel.Description,
 	}, nil
 }
 
 func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
+	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
+	if !check.CanAccess {
+		return nil, fmt.Errorf("không đủ điều kiện nộp bài: %s", check.Message)
+	}
+
 	var correctCount int32 = 0
 	var totalQuestions int32 = 0
 	var finalScore float64 = 0
@@ -241,10 +479,10 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		if err := tx.WithContext(ctx).Where("status = ?", "in_progress").First(&inProgressStatus).Error; err != nil {
 			return errors.New("không tìm thấy status 'in_progress'")
 		}
-		
+
 		submission := &domain.ExamSubmissionModel{
 			ExamID:    req.ExamId,
-			UserID:    req.UserId, 
+			UserID:    req.UserId,
 			StatusID:  inProgressStatus.Id,
 			StartedAt: time.Now().UTC(),
 		}
@@ -316,8 +554,6 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		SubmissionID: submissionID,
 		ExamTitle:    examTitle,
 		Score:        finalScore,
-		Email:        req.Email,    
-		FullName:     req.FullName,
 	}
 	eventBytes, err := json.Marshal(eventPayload)
 	if err != nil {
@@ -342,20 +578,20 @@ func compareInt64Slices(a, b []int64) bool {
 	if len(a) != len(b) {
 		return false
 	}
-	
+
 	countMap := make(map[int64]int)
-	
+
 	for _, x := range a {
 		countMap[x]++
 	}
-	
+
 	for _, x := range b {
 		countMap[x]--
 		if countMap[x] < 0 {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -374,7 +610,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 	}
 
 	userSelections := make(map[int64]map[int64]bool)
-	
+
 	questionIsCorrectMap := make(map[int64]bool)
 
 	for _, ua := range submission.UserAnswers {
@@ -384,7 +620,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		if ua.ChosenChoiceID != nil {
 			userSelections[ua.QuestionID][*ua.ChosenChoiceID] = true
 		}
-		
+
 		if ua.IsCorrect != nil && *ua.IsCorrect {
 			questionIsCorrectMap[ua.QuestionID] = true
 		}
@@ -394,7 +630,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 
 	for _, q := range examFull.Questions {
 		var pbChoices []*pb.ChoiceReview
-		
+
 		for _, c := range q.Choices {
 			pbChoices = append(pbChoices, &pb.ChoiceReview{
 				Id:           c.Id,
@@ -404,8 +640,10 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			})
 		}
 
-        qType := "single_choice"
-        if q.Type.Type != "" { qType = q.Type.Type }
+		qType := "single_choice"
+		if q.Type.Type != "" {
+			qType = q.Type.Type
+		}
 
 		pbDetails = append(pbDetails, &pb.SubmissionDetail{
 			QuestionId:      q.Id,
@@ -423,10 +661,12 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			correctCount++
 		}
 	}
-    correctCount = 0
-    for _, v := range questionIsCorrectMap {
-        if v { correctCount++ }
-    }
+	correctCount = 0
+	for _, v := range questionIsCorrectMap {
+		if v {
+			correctCount++
+		}
+	}
 
 	submittedAt := ""
 	if submission.SubmittedAt != nil {
@@ -446,19 +686,27 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 }
 
 func (s *examService) GetExamCount(ctx context.Context, req *pb.GetExamCountRequest) (*pb.GetExamCountResponse, error) {
-    count, err := s.repo.CountExams(ctx)
-    if err != nil { return nil, err }
-    return &pb.GetExamCountResponse{Count: count}, nil
+	count, err := s.repo.CountExams(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetExamCountResponse{Count: count}, nil
 }
 
 func (s *examService) GetExams(ctx context.Context, req *pb.GetExamsRequest) (*pb.GetExamsResponse, error) {
 	limit := int(req.Limit)
-	if limit <= 0 { limit = 10 }
+	if limit <= 0 {
+		limit = 10
+	}
 	offset := (int(req.Page) - 1) * limit
-	if offset < 0 { offset = 0 }
+	if offset < 0 {
+		offset = 0
+	}
 
 	exams, total, err := s.repo.GetExams(ctx, limit, offset, req.CreatorId)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	var pbExams []*pb.ExamListItem
 	for _, e := range exams {
@@ -471,8 +719,8 @@ func (s *examService) GetExams(ctx context.Context, req *pb.GetExamsRequest) (*p
 			IsPublished:     e.IsPublished,
 		})
 	}
-    
-    totalPages := int32((total + int64(limit) - 1) / int64(limit))
+
+	totalPages := int32((total + int64(limit) - 1) / int64(limit))
 
 	return &pb.GetExamsResponse{
 		Exams:      pbExams,
@@ -494,94 +742,109 @@ func (s *examService) PublishExam(ctx context.Context, req *pb.PublishExamReques
 
 func (s *examService) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error) {
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		diff, _ := s.repo.GetDifficulty(ctx, req.Difficulty)
+		qType, _ := s.repo.GetQuestionType(ctx, req.QuestionType)
 		
-		var diff domain.QuestionDifficultyModel
-		if err := tx.WithContext(ctx).Where("difficulty = ?", req.Difficulty).First(&diff).Error; err != nil {
-			return errors.New("difficulty không hợp lệ: " + req.Difficulty)
-		}
-
-		var qtype domain.QuestionTypeModel
-		if err := tx.WithContext(ctx).Where("type = ?", req.QuestionType).First(&qtype).Error; err != nil {
-			return errors.New("question type không hợp lệ: " + req.QuestionType)
-		}
-
 		updates := map[string]interface{}{
-			"content":       req.Content,
-			"explanation":   req.Explanation,
-			"difficulty_id": diff.Id,
-			"type_id":       qtype.Id,
+			"content": req.Content, "explanation": req.Explanation,
+			"difficulty_id": diff.Id, "type_id": qType.Id,
 		}
-		
-		if err := s.repo.UpdateQuestion(ctx, tx, req.QuestionId, updates); err != nil {
-			return err
-		}
+		if req.AttachmentUrl != "" { updates["attachment_url"] = req.AttachmentUrl }
 
-		if err := s.repo.DeleteChoicesByQuestionID(ctx, tx, req.QuestionId); err != nil {
-			return err
-		}
+		if err := s.repo.UpdateQuestion(ctx, tx, req.QuestionId, updates); err != nil { return err }
+		if err := s.repo.DeleteChoicesByQuestionID(ctx, tx, req.QuestionId); err != nil { return err }
 		
 		if len(req.Choices) > 0 {
 			var choices []*domain.ChoiceModel
 			for _, c := range req.Choices {
-				choices = append(choices, &domain.ChoiceModel{
-					QuestionID: req.QuestionId,
-					Content:    c.Content,
-					IsCorrect:  c.IsCorrect,
-				})
+				choices = append(choices, &domain.ChoiceModel{QuestionID: req.QuestionId, Content: c.Content, IsCorrect: c.IsCorrect})
 			}
-
-			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil {
-				return err
-			}
+			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil { return err }
 		}
-
 		return nil
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
+	if err != nil { return nil, err }
 	return &pb.UpdateQuestionResponse{Success: true}, nil
 }
 
 func (s *examService) DeleteQuestion(ctx context.Context, req *pb.DeleteQuestionRequest) (*pb.DeleteQuestionResponse, error) {
-    err := database.DB.Transaction(func(tx *gorm.DB) error {
-        return s.repo.DeleteQuestion(ctx, tx, req.QuestionId)
-    })
-    if err != nil { return nil, err }
-    return &pb.DeleteQuestionResponse{Success: true}, nil
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return s.repo.DeleteQuestion(ctx, tx, req.QuestionId)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteQuestionResponse{Success: true}, nil
 }
 
 func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest) (*pb.UpdateExamResponse, error) {
-    err := database.DB.Transaction(func(tx *gorm.DB) error {
-        updates := make(map[string]interface{})
-        
-        if req.Title != "" { updates["title"] = req.Title }
-        if req.Description != "" { updates["description"] = req.Description }
-        if req.DurationMinutes > 0 { updates["duration_minutes"] = req.DurationMinutes }
-        if req.TopicId > 0 { updates["topic_id"] = req.TopicId }
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		updates := make(map[string]interface{})
 
-        return s.repo.UpdateExam(ctx, tx, req.ExamId, updates)
-    })
-    if err != nil { return nil, err }
-    return &pb.UpdateExamResponse{Success: true}, nil
+		if req.Title != "" {
+			updates["title"] = req.Title
+		}
+		if req.Description != "" {
+			updates["description"] = req.Description
+		}
+		if req.Settings.DurationMinutes > 0 {
+			updates["duration_minutes"] = req.Settings.DurationMinutes
+		}
+		if req.TopicId > 0 {
+			updates["topic_id"] = req.TopicId
+		}
+		if req.Settings != nil {
+			if req.Settings.DurationMinutes > 0 {
+				updates["duration_minutes"] = req.Settings.DurationMinutes
+			}
+			if req.Settings.MaxAttempts > 0 {
+				updates["max_attempts"] = req.Settings.MaxAttempts
+			}
+			if req.Settings.Password != "" {
+				updates["password"] = req.Settings.Password
+			}
+			updates["shuffle_questions"] = req.Settings.ShuffleQuestions
+			updates["show_result_immediately"] = req.Settings.ShowResultImmediately
+			updates["requires_approval"] = req.Settings.RequiresApproval
+
+			if req.Settings.StartTime != "" {
+				t, err := time.Parse(time.RFC3339, req.Settings.StartTime)
+				if err == nil {
+					updates["start_time"] = &t
+				}
+			}
+			if req.Settings.EndTime != "" {
+				t, err := time.Parse(time.RFC3339, req.Settings.EndTime)
+				if err == nil {
+					updates["end_time"] = &t
+				}
+			}
+		}
+
+		return s.repo.UpdateExam(ctx, tx, req.ExamId, updates)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.UpdateExamResponse{Success: true}, nil
 }
 
 func (s *examService) DeleteExam(ctx context.Context, req *pb.DeleteExamRequest) (*pb.DeleteExamResponse, error) {
-    err := database.DB.Transaction(func(tx *gorm.DB) error {
-        return s.repo.DeleteExam(ctx, tx, req.ExamId)
-    })
-    if err != nil { return nil, err }
-    return &pb.DeleteExamResponse{Success: true}, nil
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return s.repo.DeleteExam(ctx, tx, req.ExamId)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteExamResponse{Success: true}, nil
 }
 
 func (s *examService) GetUserExamStats(ctx context.Context, req *pb.GetUserExamStatsRequest) (*pb.GetUserExamStatsResponse, error) {
-    count, err := s.repo.CountSubmissionsByUserID(ctx, req.UserId)
-    if err != nil {
-        return nil, err
-    }
-    return &pb.GetUserExamStatsResponse{
-        TotalExamsTaken: count,
-    }, nil
+	count, err := s.repo.CountSubmissionsByUserID(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetUserExamStatsResponse{
+		TotalExamsTaken: count,
+	}, nil
 }

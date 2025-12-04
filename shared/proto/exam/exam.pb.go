@@ -81,6 +81,74 @@ func (x *Topic) GetDescription() string {
 	return ""
 }
 
+type Section struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	TopicId       int64                  `protobuf:"varint,4,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Section) Reset() {
+	*x = Section{}
+	mi := &file_exam_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Section) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Section) ProtoMessage() {}
+
+func (x *Section) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Section.ProtoReflect.Descriptor instead.
+func (*Section) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Section) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Section) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Section) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Section) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
+}
+
 type CreateTopicRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -91,7 +159,7 @@ type CreateTopicRequest struct {
 
 func (x *CreateTopicRequest) Reset() {
 	*x = CreateTopicRequest{}
-	mi := &file_exam_proto_msgTypes[1]
+	mi := &file_exam_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -103,7 +171,7 @@ func (x *CreateTopicRequest) String() string {
 func (*CreateTopicRequest) ProtoMessage() {}
 
 func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[1]
+	mi := &file_exam_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -116,7 +184,7 @@ func (x *CreateTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTopicRequest.ProtoReflect.Descriptor instead.
 func (*CreateTopicRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{1}
+	return file_exam_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CreateTopicRequest) GetName() string {
@@ -142,7 +210,7 @@ type CreateTopicResponse struct {
 
 func (x *CreateTopicResponse) Reset() {
 	*x = CreateTopicResponse{}
-	mi := &file_exam_proto_msgTypes[2]
+	mi := &file_exam_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -154,7 +222,7 @@ func (x *CreateTopicResponse) String() string {
 func (*CreateTopicResponse) ProtoMessage() {}
 
 func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[2]
+	mi := &file_exam_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -167,7 +235,7 @@ func (x *CreateTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTopicResponse.ProtoReflect.Descriptor instead.
 func (*CreateTopicResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{2}
+	return file_exam_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CreateTopicResponse) GetTopic() *Topic {
@@ -185,7 +253,7 @@ type GetTopicsRequest struct {
 
 func (x *GetTopicsRequest) Reset() {
 	*x = GetTopicsRequest{}
-	mi := &file_exam_proto_msgTypes[3]
+	mi := &file_exam_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -197,7 +265,7 @@ func (x *GetTopicsRequest) String() string {
 func (*GetTopicsRequest) ProtoMessage() {}
 
 func (x *GetTopicsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[3]
+	mi := &file_exam_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -210,7 +278,7 @@ func (x *GetTopicsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTopicsRequest.ProtoReflect.Descriptor instead.
 func (*GetTopicsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{3}
+	return file_exam_proto_rawDescGZIP(), []int{4}
 }
 
 type GetTopicsResponse struct {
@@ -222,7 +290,7 @@ type GetTopicsResponse struct {
 
 func (x *GetTopicsResponse) Reset() {
 	*x = GetTopicsResponse{}
-	mi := &file_exam_proto_msgTypes[4]
+	mi := &file_exam_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -234,7 +302,7 @@ func (x *GetTopicsResponse) String() string {
 func (*GetTopicsResponse) ProtoMessage() {}
 
 func (x *GetTopicsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[4]
+	mi := &file_exam_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -247,7 +315,7 @@ func (x *GetTopicsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTopicsResponse.ProtoReflect.Descriptor instead.
 func (*GetTopicsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{4}
+	return file_exam_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GetTopicsResponse) GetTopics() []*Topic {
@@ -257,7 +325,198 @@ func (x *GetTopicsResponse) GetTopics() []*Topic {
 	return nil
 }
 
-// === Question Messages ===
+type CreateSectionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	TopicId       int64                  `protobuf:"varint,3,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSectionRequest) Reset() {
+	*x = CreateSectionRequest{}
+	mi := &file_exam_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSectionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSectionRequest) ProtoMessage() {}
+
+func (x *CreateSectionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSectionRequest.ProtoReflect.Descriptor instead.
+func (*CreateSectionRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *CreateSectionRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateSectionRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateSectionRequest) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
+}
+
+type CreateSectionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Section       *Section               `protobuf:"bytes,1,opt,name=section,proto3" json:"section,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSectionResponse) Reset() {
+	*x = CreateSectionResponse{}
+	mi := &file_exam_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSectionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSectionResponse) ProtoMessage() {}
+
+func (x *CreateSectionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSectionResponse.ProtoReflect.Descriptor instead.
+func (*CreateSectionResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CreateSectionResponse) GetSection() *Section {
+	if x != nil {
+		return x.Section
+	}
+	return nil
+}
+
+type GetSectionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TopicId       int64                  `protobuf:"varint,1,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSectionsRequest) Reset() {
+	*x = GetSectionsRequest{}
+	mi := &file_exam_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSectionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSectionsRequest) ProtoMessage() {}
+
+func (x *GetSectionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSectionsRequest.ProtoReflect.Descriptor instead.
+func (*GetSectionsRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetSectionsRequest) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
+}
+
+type GetSectionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sections      []*Section             `protobuf:"bytes,1,rep,name=sections,proto3" json:"sections,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSectionsResponse) Reset() {
+	*x = GetSectionsResponse{}
+	mi := &file_exam_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSectionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSectionsResponse) ProtoMessage() {}
+
+func (x *GetSectionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSectionsResponse.ProtoReflect.Descriptor instead.
+func (*GetSectionsResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetSectionsResponse) GetSections() []*Section {
+	if x != nil {
+		return x.Sections
+	}
+	return nil
+}
+
 type ChoiceInput struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
@@ -268,7 +527,7 @@ type ChoiceInput struct {
 
 func (x *ChoiceInput) Reset() {
 	*x = ChoiceInput{}
-	mi := &file_exam_proto_msgTypes[5]
+	mi := &file_exam_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -280,7 +539,7 @@ func (x *ChoiceInput) String() string {
 func (*ChoiceInput) ProtoMessage() {}
 
 func (x *ChoiceInput) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[5]
+	mi := &file_exam_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -293,7 +552,7 @@ func (x *ChoiceInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChoiceInput.ProtoReflect.Descriptor instead.
 func (*ChoiceInput) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{5}
+	return file_exam_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ChoiceInput) GetContent() string {
@@ -312,21 +571,21 @@ func (x *ChoiceInput) GetIsCorrect() bool {
 
 type CreateQuestionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TopicId       int64                  `protobuf:"varint,1,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	SectionId     int64                  `protobuf:"varint,1,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
 	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
 	QuestionType  string                 `protobuf:"bytes,3,opt,name=question_type,json=questionType,proto3" json:"question_type,omitempty"`
 	Difficulty    string                 `protobuf:"bytes,4,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
 	Explanation   string                 `protobuf:"bytes,5,opt,name=explanation,proto3" json:"explanation,omitempty"`
 	Choices       []*ChoiceInput         `protobuf:"bytes,6,rep,name=choices,proto3" json:"choices,omitempty"`
 	CreatorId     int64                  `protobuf:"varint,7,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
-	ExamId        int64                  `protobuf:"varint,8,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	AttachmentUrl string                 `protobuf:"bytes,8,opt,name=attachment_url,json=attachmentUrl,proto3" json:"attachment_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateQuestionRequest) Reset() {
 	*x = CreateQuestionRequest{}
-	mi := &file_exam_proto_msgTypes[6]
+	mi := &file_exam_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -338,7 +597,7 @@ func (x *CreateQuestionRequest) String() string {
 func (*CreateQuestionRequest) ProtoMessage() {}
 
 func (x *CreateQuestionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[6]
+	mi := &file_exam_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -351,12 +610,12 @@ func (x *CreateQuestionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateQuestionRequest.ProtoReflect.Descriptor instead.
 func (*CreateQuestionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{6}
+	return file_exam_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *CreateQuestionRequest) GetTopicId() int64 {
+func (x *CreateQuestionRequest) GetSectionId() int64 {
 	if x != nil {
-		return x.TopicId
+		return x.SectionId
 	}
 	return 0
 }
@@ -403,11 +662,11 @@ func (x *CreateQuestionRequest) GetCreatorId() int64 {
 	return 0
 }
 
-func (x *CreateQuestionRequest) GetExamId() int64 {
+func (x *CreateQuestionRequest) GetAttachmentUrl() string {
 	if x != nil {
-		return x.ExamId
+		return x.AttachmentUrl
 	}
-	return 0
+	return ""
 }
 
 type CreateQuestionResponse struct {
@@ -420,7 +679,7 @@ type CreateQuestionResponse struct {
 
 func (x *CreateQuestionResponse) Reset() {
 	*x = CreateQuestionResponse{}
-	mi := &file_exam_proto_msgTypes[7]
+	mi := &file_exam_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -432,7 +691,7 @@ func (x *CreateQuestionResponse) String() string {
 func (*CreateQuestionResponse) ProtoMessage() {}
 
 func (x *CreateQuestionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[7]
+	mi := &file_exam_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -445,7 +704,7 @@ func (x *CreateQuestionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateQuestionResponse.ProtoReflect.Descriptor instead.
 func (*CreateQuestionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{7}
+	return file_exam_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CreateQuestionResponse) GetId() int64 {
@@ -462,21 +721,345 @@ func (x *CreateQuestionResponse) GetContent() string {
 	return ""
 }
 
+type GetUploadURLRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FileName      string                 `protobuf:"bytes,1,opt,name=file_name,json=fileName,proto3" json:"file_name,omitempty"`
+	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"`
+	Folder        string                 `protobuf:"bytes,3,opt,name=folder,proto3" json:"folder,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUploadURLRequest) Reset() {
+	*x = GetUploadURLRequest{}
+	mi := &file_exam_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUploadURLRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUploadURLRequest) ProtoMessage() {}
+
+func (x *GetUploadURLRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUploadURLRequest.ProtoReflect.Descriptor instead.
+func (*GetUploadURLRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetUploadURLRequest) GetFileName() string {
+	if x != nil {
+		return x.FileName
+	}
+	return ""
+}
+
+func (x *GetUploadURLRequest) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *GetUploadURLRequest) GetFolder() string {
+	if x != nil {
+		return x.Folder
+	}
+	return ""
+}
+
+type GetUploadURLResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UploadUrl     string                 `protobuf:"bytes,1,opt,name=upload_url,json=uploadUrl,proto3" json:"upload_url,omitempty"`
+	FinalUrl      string                 `protobuf:"bytes,2,opt,name=final_url,json=finalUrl,proto3" json:"final_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUploadURLResponse) Reset() {
+	*x = GetUploadURLResponse{}
+	mi := &file_exam_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUploadURLResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUploadURLResponse) ProtoMessage() {}
+
+func (x *GetUploadURLResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUploadURLResponse.ProtoReflect.Descriptor instead.
+func (*GetUploadURLResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetUploadURLResponse) GetUploadUrl() string {
+	if x != nil {
+		return x.UploadUrl
+	}
+	return ""
+}
+
+func (x *GetUploadURLResponse) GetFinalUrl() string {
+	if x != nil {
+		return x.FinalUrl
+	}
+	return ""
+}
+
+type ImportQuestionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SectionId     int64                  `protobuf:"varint,1,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
+	CreatorId     int64                  `protobuf:"varint,2,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	FileContent   []byte                 `protobuf:"bytes,3,opt,name=file_content,json=fileContent,proto3" json:"file_content,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportQuestionsRequest) Reset() {
+	*x = ImportQuestionsRequest{}
+	mi := &file_exam_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportQuestionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportQuestionsRequest) ProtoMessage() {}
+
+func (x *ImportQuestionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportQuestionsRequest.ProtoReflect.Descriptor instead.
+func (*ImportQuestionsRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ImportQuestionsRequest) GetSectionId() int64 {
+	if x != nil {
+		return x.SectionId
+	}
+	return 0
+}
+
+func (x *ImportQuestionsRequest) GetCreatorId() int64 {
+	if x != nil {
+		return x.CreatorId
+	}
+	return 0
+}
+
+func (x *ImportQuestionsRequest) GetFileContent() []byte {
+	if x != nil {
+		return x.FileContent
+	}
+	return nil
+}
+
+type ImportQuestionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SuccessCount  int32                  `protobuf:"varint,1,opt,name=success_count,json=successCount,proto3" json:"success_count,omitempty"`
+	ErrorCount    int32                  `protobuf:"varint,2,opt,name=error_count,json=errorCount,proto3" json:"error_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImportQuestionsResponse) Reset() {
+	*x = ImportQuestionsResponse{}
+	mi := &file_exam_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ImportQuestionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ImportQuestionsResponse) ProtoMessage() {}
+
+func (x *ImportQuestionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ImportQuestionsResponse.ProtoReflect.Descriptor instead.
+func (*ImportQuestionsResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ImportQuestionsResponse) GetSuccessCount() int32 {
+	if x != nil {
+		return x.SuccessCount
+	}
+	return 0
+}
+
+func (x *ImportQuestionsResponse) GetErrorCount() int32 {
+	if x != nil {
+		return x.ErrorCount
+	}
+	return 0
+}
+
+type ExamSettings struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	DurationMinutes       int32                  `protobuf:"varint,1,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
+	MaxAttempts           int32                  `protobuf:"varint,2,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
+	Password              string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	StartTime             string                 `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime               string                 `protobuf:"bytes,5,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	ShuffleQuestions      bool                   `protobuf:"varint,6,opt,name=shuffle_questions,json=shuffleQuestions,proto3" json:"shuffle_questions,omitempty"`
+	ShowResultImmediately bool                   `protobuf:"varint,7,opt,name=show_result_immediately,json=showResultImmediately,proto3" json:"show_result_immediately,omitempty"`
+	RequiresApproval      bool                   `protobuf:"varint,8,opt,name=requires_approval,json=requiresApproval,proto3" json:"requires_approval,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *ExamSettings) Reset() {
+	*x = ExamSettings{}
+	mi := &file_exam_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExamSettings) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExamSettings) ProtoMessage() {}
+
+func (x *ExamSettings) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExamSettings.ProtoReflect.Descriptor instead.
+func (*ExamSettings) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ExamSettings) GetDurationMinutes() int32 {
+	if x != nil {
+		return x.DurationMinutes
+	}
+	return 0
+}
+
+func (x *ExamSettings) GetMaxAttempts() int32 {
+	if x != nil {
+		return x.MaxAttempts
+	}
+	return 0
+}
+
+func (x *ExamSettings) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *ExamSettings) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *ExamSettings) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+func (x *ExamSettings) GetShuffleQuestions() bool {
+	if x != nil {
+		return x.ShuffleQuestions
+	}
+	return false
+}
+
+func (x *ExamSettings) GetShowResultImmediately() bool {
+	if x != nil {
+		return x.ShowResultImmediately
+	}
+	return false
+}
+
+func (x *ExamSettings) GetRequiresApproval() bool {
+	if x != nil {
+		return x.RequiresApproval
+	}
+	return false
+}
+
 type CreateExamRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Title           string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
-	Description     string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	TopicId         int64                  `protobuf:"varint,3,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
-	QuestionIds     []int64                `protobuf:"varint,4,rep,packed,name=question_ids,json=questionIds,proto3" json:"question_ids,omitempty"`
-	DurationMinutes int32                  `protobuf:"varint,5,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
-	CreatorId       int64                  `protobuf:"varint,6,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	TopicId       int64                  `protobuf:"varint,3,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	QuestionIds   []int64                `protobuf:"varint,4,rep,packed,name=question_ids,json=questionIds,proto3" json:"question_ids,omitempty"`
+	Settings      *ExamSettings          `protobuf:"bytes,5,opt,name=settings,proto3" json:"settings,omitempty"`
+	CreatorId     int64                  `protobuf:"varint,6,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateExamRequest) Reset() {
 	*x = CreateExamRequest{}
-	mi := &file_exam_proto_msgTypes[8]
+	mi := &file_exam_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +1071,7 @@ func (x *CreateExamRequest) String() string {
 func (*CreateExamRequest) ProtoMessage() {}
 
 func (x *CreateExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[8]
+	mi := &file_exam_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +1084,7 @@ func (x *CreateExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExamRequest.ProtoReflect.Descriptor instead.
 func (*CreateExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{8}
+	return file_exam_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CreateExamRequest) GetTitle() string {
@@ -532,11 +1115,11 @@ func (x *CreateExamRequest) GetQuestionIds() []int64 {
 	return nil
 }
 
-func (x *CreateExamRequest) GetDurationMinutes() int32 {
+func (x *CreateExamRequest) GetSettings() *ExamSettings {
 	if x != nil {
-		return x.DurationMinutes
+		return x.Settings
 	}
-	return 0
+	return nil
 }
 
 func (x *CreateExamRequest) GetCreatorId() int64 {
@@ -544,6 +1127,150 @@ func (x *CreateExamRequest) GetCreatorId() int64 {
 		return x.CreatorId
 	}
 	return 0
+}
+
+type SectionConfig struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SectionId     int64                  `protobuf:"varint,1,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
+	Count         int32                  `protobuf:"varint,2,opt,name=count,proto3" json:"count,omitempty"`
+	Difficulty    string                 `protobuf:"bytes,3,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SectionConfig) Reset() {
+	*x = SectionConfig{}
+	mi := &file_exam_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SectionConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SectionConfig) ProtoMessage() {}
+
+func (x *SectionConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SectionConfig.ProtoReflect.Descriptor instead.
+func (*SectionConfig) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *SectionConfig) GetSectionId() int64 {
+	if x != nil {
+		return x.SectionId
+	}
+	return 0
+}
+
+func (x *SectionConfig) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *SectionConfig) GetDifficulty() string {
+	if x != nil {
+		return x.Difficulty
+	}
+	return ""
+}
+
+type GenerateExamRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Title          string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
+	Description    string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	TopicId        int64                  `protobuf:"varint,3,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	Settings       *ExamSettings          `protobuf:"bytes,4,opt,name=settings,proto3" json:"settings,omitempty"`
+	CreatorId      int64                  `protobuf:"varint,5,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	SectionConfigs []*SectionConfig       `protobuf:"bytes,6,rep,name=section_configs,json=sectionConfigs,proto3" json:"section_configs,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *GenerateExamRequest) Reset() {
+	*x = GenerateExamRequest{}
+	mi := &file_exam_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateExamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateExamRequest) ProtoMessage() {}
+
+func (x *GenerateExamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateExamRequest.ProtoReflect.Descriptor instead.
+func (*GenerateExamRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GenerateExamRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *GenerateExamRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *GenerateExamRequest) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
+}
+
+func (x *GenerateExamRequest) GetSettings() *ExamSettings {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+func (x *GenerateExamRequest) GetCreatorId() int64 {
+	if x != nil {
+		return x.CreatorId
+	}
+	return 0
+}
+
+func (x *GenerateExamRequest) GetSectionConfigs() []*SectionConfig {
+	if x != nil {
+		return x.SectionConfigs
+	}
+	return nil
 }
 
 type CreateExamResponse struct {
@@ -556,7 +1283,7 @@ type CreateExamResponse struct {
 
 func (x *CreateExamResponse) Reset() {
 	*x = CreateExamResponse{}
-	mi := &file_exam_proto_msgTypes[9]
+	mi := &file_exam_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -568,7 +1295,7 @@ func (x *CreateExamResponse) String() string {
 func (*CreateExamResponse) ProtoMessage() {}
 
 func (x *CreateExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[9]
+	mi := &file_exam_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -581,7 +1308,7 @@ func (x *CreateExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExamResponse.ProtoReflect.Descriptor instead.
 func (*CreateExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{9}
+	return file_exam_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CreateExamResponse) GetId() int64 {
@@ -608,7 +1335,7 @@ type ChoiceDetails struct {
 
 func (x *ChoiceDetails) Reset() {
 	*x = ChoiceDetails{}
-	mi := &file_exam_proto_msgTypes[10]
+	mi := &file_exam_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -620,7 +1347,7 @@ func (x *ChoiceDetails) String() string {
 func (*ChoiceDetails) ProtoMessage() {}
 
 func (x *ChoiceDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[10]
+	mi := &file_exam_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -633,7 +1360,7 @@ func (x *ChoiceDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChoiceDetails.ProtoReflect.Descriptor instead.
 func (*ChoiceDetails) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{10}
+	return file_exam_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ChoiceDetails) GetId() int64 {
@@ -656,13 +1383,14 @@ type QuestionDetails struct {
 	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
 	Choices       []*ChoiceDetails       `protobuf:"bytes,3,rep,name=choices,proto3" json:"choices,omitempty"`
 	QuestionType  string                 `protobuf:"bytes,4,opt,name=question_type,json=questionType,proto3" json:"question_type,omitempty"`
+	AttachmentUrl string                 `protobuf:"bytes,5,opt,name=attachment_url,json=attachmentUrl,proto3" json:"attachment_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *QuestionDetails) Reset() {
 	*x = QuestionDetails{}
-	mi := &file_exam_proto_msgTypes[11]
+	mi := &file_exam_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -674,7 +1402,7 @@ func (x *QuestionDetails) String() string {
 func (*QuestionDetails) ProtoMessage() {}
 
 func (x *QuestionDetails) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[11]
+	mi := &file_exam_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -687,7 +1415,7 @@ func (x *QuestionDetails) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuestionDetails.ProtoReflect.Descriptor instead.
 func (*QuestionDetails) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{11}
+	return file_exam_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *QuestionDetails) GetId() int64 {
@@ -718,6 +1446,13 @@ func (x *QuestionDetails) GetQuestionType() string {
 	return ""
 }
 
+func (x *QuestionDetails) GetAttachmentUrl() string {
+	if x != nil {
+		return x.AttachmentUrl
+	}
+	return ""
+}
+
 type GetExamDetailsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
@@ -727,7 +1462,7 @@ type GetExamDetailsRequest struct {
 
 func (x *GetExamDetailsRequest) Reset() {
 	*x = GetExamDetailsRequest{}
-	mi := &file_exam_proto_msgTypes[12]
+	mi := &file_exam_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -739,7 +1474,7 @@ func (x *GetExamDetailsRequest) String() string {
 func (*GetExamDetailsRequest) ProtoMessage() {}
 
 func (x *GetExamDetailsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[12]
+	mi := &file_exam_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -752,7 +1487,7 @@ func (x *GetExamDetailsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamDetailsRequest.ProtoReflect.Descriptor instead.
 func (*GetExamDetailsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{12}
+	return file_exam_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetExamDetailsRequest) GetExamId() int64 {
@@ -763,21 +1498,21 @@ func (x *GetExamDetailsRequest) GetExamId() int64 {
 }
 
 type GetExamDetailsResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title           string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	DurationMinutes int32                  `protobuf:"varint,3,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
-	Questions       []*QuestionDetails     `protobuf:"bytes,4,rep,name=questions,proto3" json:"questions,omitempty"`
-	TopicId         int64                  `protobuf:"varint,5,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
-	IsPublished     bool                   `protobuf:"varint,6,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	Description     string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Settings      *ExamSettings          `protobuf:"bytes,4,opt,name=settings,proto3" json:"settings,omitempty"`
+	Questions     []*QuestionDetails     `protobuf:"bytes,5,rep,name=questions,proto3" json:"questions,omitempty"`
+	TopicId       int64                  `protobuf:"varint,6,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	IsPublished   bool                   `protobuf:"varint,7,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetExamDetailsResponse) Reset() {
 	*x = GetExamDetailsResponse{}
-	mi := &file_exam_proto_msgTypes[13]
+	mi := &file_exam_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -789,7 +1524,7 @@ func (x *GetExamDetailsResponse) String() string {
 func (*GetExamDetailsResponse) ProtoMessage() {}
 
 func (x *GetExamDetailsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[13]
+	mi := &file_exam_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -802,7 +1537,7 @@ func (x *GetExamDetailsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamDetailsResponse.ProtoReflect.Descriptor instead.
 func (*GetExamDetailsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{13}
+	return file_exam_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetExamDetailsResponse) GetId() int64 {
@@ -819,11 +1554,18 @@ func (x *GetExamDetailsResponse) GetTitle() string {
 	return ""
 }
 
-func (x *GetExamDetailsResponse) GetDurationMinutes() int32 {
+func (x *GetExamDetailsResponse) GetDescription() string {
 	if x != nil {
-		return x.DurationMinutes
+		return x.Description
 	}
-	return 0
+	return ""
+}
+
+func (x *GetExamDetailsResponse) GetSettings() *ExamSettings {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
 }
 
 func (x *GetExamDetailsResponse) GetQuestions() []*QuestionDetails {
@@ -847,11 +1589,1056 @@ func (x *GetExamDetailsResponse) GetIsPublished() bool {
 	return false
 }
 
-func (x *GetExamDetailsResponse) GetDescription() string {
+type RequestExamAccessRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestExamAccessRequest) Reset() {
+	*x = RequestExamAccessRequest{}
+	mi := &file_exam_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestExamAccessRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestExamAccessRequest) ProtoMessage() {}
+
+func (x *RequestExamAccessRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestExamAccessRequest.ProtoReflect.Descriptor instead.
+func (*RequestExamAccessRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *RequestExamAccessRequest) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+func (x *RequestExamAccessRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type RequestExamAccessResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequestExamAccessResponse) Reset() {
+	*x = RequestExamAccessResponse{}
+	mi := &file_exam_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequestExamAccessResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequestExamAccessResponse) ProtoMessage() {}
+
+func (x *RequestExamAccessResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequestExamAccessResponse.ProtoReflect.Descriptor instead.
+func (*RequestExamAccessResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *RequestExamAccessResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *RequestExamAccessResponse) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type ApproveExamAccessRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	StudentId     int64                  `protobuf:"varint,2,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
+	IsApproved    bool                   `protobuf:"varint,3,opt,name=is_approved,json=isApproved,proto3" json:"is_approved,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApproveExamAccessRequest) Reset() {
+	*x = ApproveExamAccessRequest{}
+	mi := &file_exam_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveExamAccessRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveExamAccessRequest) ProtoMessage() {}
+
+func (x *ApproveExamAccessRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveExamAccessRequest.ProtoReflect.Descriptor instead.
+func (*ApproveExamAccessRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ApproveExamAccessRequest) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+func (x *ApproveExamAccessRequest) GetStudentId() int64 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
+}
+
+func (x *ApproveExamAccessRequest) GetIsApproved() bool {
+	if x != nil {
+		return x.IsApproved
+	}
+	return false
+}
+
+type ApproveExamAccessResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApproveExamAccessResponse) Reset() {
+	*x = ApproveExamAccessResponse{}
+	mi := &file_exam_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApproveExamAccessResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApproveExamAccessResponse) ProtoMessage() {}
+
+func (x *ApproveExamAccessResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApproveExamAccessResponse.ProtoReflect.Descriptor instead.
+func (*ApproveExamAccessResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ApproveExamAccessResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type CheckExamAccessRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckExamAccessRequest) Reset() {
+	*x = CheckExamAccessRequest{}
+	mi := &file_exam_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckExamAccessRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckExamAccessRequest) ProtoMessage() {}
+
+func (x *CheckExamAccessRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckExamAccessRequest.ProtoReflect.Descriptor instead.
+func (*CheckExamAccessRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *CheckExamAccessRequest) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+func (x *CheckExamAccessRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type CheckExamAccessResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CanAccess     bool                   `protobuf:"varint,1,opt,name=can_access,json=canAccess,proto3" json:"can_access,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckExamAccessResponse) Reset() {
+	*x = CheckExamAccessResponse{}
+	mi := &file_exam_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckExamAccessResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckExamAccessResponse) ProtoMessage() {}
+
+func (x *CheckExamAccessResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckExamAccessResponse.ProtoReflect.Descriptor instead.
+func (*CheckExamAccessResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *CheckExamAccessResponse) GetCanAccess() bool {
+	if x != nil {
+		return x.CanAccess
+	}
+	return false
+}
+
+func (x *CheckExamAccessResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type UpdateQuestionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	QuestionId    int64                  `protobuf:"varint,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	QuestionType  string                 `protobuf:"bytes,3,opt,name=question_type,json=questionType,proto3" json:"question_type,omitempty"`
+	Difficulty    string                 `protobuf:"bytes,4,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
+	Explanation   string                 `protobuf:"bytes,5,opt,name=explanation,proto3" json:"explanation,omitempty"`
+	Choices       []*ChoiceInput         `protobuf:"bytes,6,rep,name=choices,proto3" json:"choices,omitempty"`
+	AttachmentUrl string                 `protobuf:"bytes,7,opt,name=attachment_url,json=attachmentUrl,proto3" json:"attachment_url,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateQuestionRequest) Reset() {
+	*x = UpdateQuestionRequest{}
+	mi := &file_exam_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateQuestionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateQuestionRequest) ProtoMessage() {}
+
+func (x *UpdateQuestionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateQuestionRequest.ProtoReflect.Descriptor instead.
+func (*UpdateQuestionRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *UpdateQuestionRequest) GetQuestionId() int64 {
+	if x != nil {
+		return x.QuestionId
+	}
+	return 0
+}
+
+func (x *UpdateQuestionRequest) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *UpdateQuestionRequest) GetQuestionType() string {
+	if x != nil {
+		return x.QuestionType
+	}
+	return ""
+}
+
+func (x *UpdateQuestionRequest) GetDifficulty() string {
+	if x != nil {
+		return x.Difficulty
+	}
+	return ""
+}
+
+func (x *UpdateQuestionRequest) GetExplanation() string {
+	if x != nil {
+		return x.Explanation
+	}
+	return ""
+}
+
+func (x *UpdateQuestionRequest) GetChoices() []*ChoiceInput {
+	if x != nil {
+		return x.Choices
+	}
+	return nil
+}
+
+func (x *UpdateQuestionRequest) GetAttachmentUrl() string {
+	if x != nil {
+		return x.AttachmentUrl
+	}
+	return ""
+}
+
+type UpdateQuestionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateQuestionResponse) Reset() {
+	*x = UpdateQuestionResponse{}
+	mi := &file_exam_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateQuestionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateQuestionResponse) ProtoMessage() {}
+
+func (x *UpdateQuestionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateQuestionResponse.ProtoReflect.Descriptor instead.
+func (*UpdateQuestionResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *UpdateQuestionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type DeleteQuestionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	QuestionId    int64                  `protobuf:"varint,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteQuestionRequest) Reset() {
+	*x = DeleteQuestionRequest{}
+	mi := &file_exam_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteQuestionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteQuestionRequest) ProtoMessage() {}
+
+func (x *DeleteQuestionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteQuestionRequest.ProtoReflect.Descriptor instead.
+func (*DeleteQuestionRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *DeleteQuestionRequest) GetQuestionId() int64 {
+	if x != nil {
+		return x.QuestionId
+	}
+	return 0
+}
+
+type DeleteQuestionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteQuestionResponse) Reset() {
+	*x = DeleteQuestionResponse{}
+	mi := &file_exam_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteQuestionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteQuestionResponse) ProtoMessage() {}
+
+func (x *DeleteQuestionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteQuestionResponse.ProtoReflect.Descriptor instead.
+func (*DeleteQuestionResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *DeleteQuestionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type ExamListItem struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title           string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	DurationMinutes int32                  `protobuf:"varint,3,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
+	TopicId         int64                  `protobuf:"varint,4,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	CreatorId       int64                  `protobuf:"varint,5,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	IsPublished     bool                   `protobuf:"varint,6,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ExamListItem) Reset() {
+	*x = ExamListItem{}
+	mi := &file_exam_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExamListItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExamListItem) ProtoMessage() {}
+
+func (x *ExamListItem) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExamListItem.ProtoReflect.Descriptor instead.
+func (*ExamListItem) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *ExamListItem) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ExamListItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ExamListItem) GetDurationMinutes() int32 {
+	if x != nil {
+		return x.DurationMinutes
+	}
+	return 0
+}
+
+func (x *ExamListItem) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
+}
+
+func (x *ExamListItem) GetCreatorId() int64 {
+	if x != nil {
+		return x.CreatorId
+	}
+	return 0
+}
+
+func (x *ExamListItem) GetIsPublished() bool {
+	if x != nil {
+		return x.IsPublished
+	}
+	return false
+}
+
+type GetExamsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	CreatorId     int64                  `protobuf:"varint,3,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExamsRequest) Reset() {
+	*x = GetExamsRequest{}
+	mi := &file_exam_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExamsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExamsRequest) ProtoMessage() {}
+
+func (x *GetExamsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExamsRequest.ProtoReflect.Descriptor instead.
+func (*GetExamsRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *GetExamsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetExamsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *GetExamsRequest) GetCreatorId() int64 {
+	if x != nil {
+		return x.CreatorId
+	}
+	return 0
+}
+
+type GetExamsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exams         []*ExamListItem        `protobuf:"bytes,1,rep,name=exams,proto3" json:"exams,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,4,opt,name=total_pages,json=totalPages,proto3" json:"total_pages,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExamsResponse) Reset() {
+	*x = GetExamsResponse{}
+	mi := &file_exam_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExamsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExamsResponse) ProtoMessage() {}
+
+func (x *GetExamsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExamsResponse.ProtoReflect.Descriptor instead.
+func (*GetExamsResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *GetExamsResponse) GetExams() []*ExamListItem {
+	if x != nil {
+		return x.Exams
+	}
+	return nil
+}
+
+func (x *GetExamsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetExamsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetExamsResponse) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
+type UpdateExamRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Settings      *ExamSettings          `protobuf:"bytes,4,opt,name=settings,proto3" json:"settings,omitempty"`
+	TopicId       int64                  `protobuf:"varint,5,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateExamRequest) Reset() {
+	*x = UpdateExamRequest{}
+	mi := &file_exam_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateExamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateExamRequest) ProtoMessage() {}
+
+func (x *UpdateExamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateExamRequest.ProtoReflect.Descriptor instead.
+func (*UpdateExamRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *UpdateExamRequest) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+func (x *UpdateExamRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *UpdateExamRequest) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
+}
+
+func (x *UpdateExamRequest) GetSettings() *ExamSettings {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+func (x *UpdateExamRequest) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
+}
+
+type UpdateExamResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateExamResponse) Reset() {
+	*x = UpdateExamResponse{}
+	mi := &file_exam_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateExamResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateExamResponse) ProtoMessage() {}
+
+func (x *UpdateExamResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateExamResponse.ProtoReflect.Descriptor instead.
+func (*UpdateExamResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *UpdateExamResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type DeleteExamRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExamRequest) Reset() {
+	*x = DeleteExamRequest{}
+	mi := &file_exam_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExamRequest) ProtoMessage() {}
+
+func (x *DeleteExamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExamRequest.ProtoReflect.Descriptor instead.
+func (*DeleteExamRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *DeleteExamRequest) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+type DeleteExamResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteExamResponse) Reset() {
+	*x = DeleteExamResponse{}
+	mi := &file_exam_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteExamResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteExamResponse) ProtoMessage() {}
+
+func (x *DeleteExamResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteExamResponse.ProtoReflect.Descriptor instead.
+func (*DeleteExamResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *DeleteExamResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type PublishExamRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	IsPublished   bool                   `protobuf:"varint,2,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishExamRequest) Reset() {
+	*x = PublishExamRequest{}
+	mi := &file_exam_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishExamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishExamRequest) ProtoMessage() {}
+
+func (x *PublishExamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishExamRequest.ProtoReflect.Descriptor instead.
+func (*PublishExamRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *PublishExamRequest) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+func (x *PublishExamRequest) GetIsPublished() bool {
+	if x != nil {
+		return x.IsPublished
+	}
+	return false
+}
+
+type PublishExamResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PublishExamResponse) Reset() {
+	*x = PublishExamResponse{}
+	mi := &file_exam_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PublishExamResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PublishExamResponse) ProtoMessage() {}
+
+func (x *PublishExamResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PublishExamResponse.ProtoReflect.Descriptor instead.
+func (*PublishExamResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *PublishExamResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
 }
 
 type UserAnswer struct {
@@ -864,7 +2651,7 @@ type UserAnswer struct {
 
 func (x *UserAnswer) Reset() {
 	*x = UserAnswer{}
-	mi := &file_exam_proto_msgTypes[14]
+	mi := &file_exam_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -876,7 +2663,7 @@ func (x *UserAnswer) String() string {
 func (*UserAnswer) ProtoMessage() {}
 
 func (x *UserAnswer) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[14]
+	mi := &file_exam_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -889,7 +2676,7 @@ func (x *UserAnswer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserAnswer.ProtoReflect.Descriptor instead.
 func (*UserAnswer) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{14}
+	return file_exam_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *UserAnswer) GetQuestionId() int64 {
@@ -911,15 +2698,13 @@ type SubmitExamRequest struct {
 	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
 	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Answers       []*UserAnswer          `protobuf:"bytes,3,rep,name=answers,proto3" json:"answers,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	FullName      string                 `protobuf:"bytes,5,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SubmitExamRequest) Reset() {
 	*x = SubmitExamRequest{}
-	mi := &file_exam_proto_msgTypes[15]
+	mi := &file_exam_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -931,7 +2716,7 @@ func (x *SubmitExamRequest) String() string {
 func (*SubmitExamRequest) ProtoMessage() {}
 
 func (x *SubmitExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[15]
+	mi := &file_exam_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -944,7 +2729,7 @@ func (x *SubmitExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitExamRequest.ProtoReflect.Descriptor instead.
 func (*SubmitExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{15}
+	return file_exam_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *SubmitExamRequest) GetExamId() int64 {
@@ -968,20 +2753,6 @@ func (x *SubmitExamRequest) GetAnswers() []*UserAnswer {
 	return nil
 }
 
-func (x *SubmitExamRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *SubmitExamRequest) GetFullName() string {
-	if x != nil {
-		return x.FullName
-	}
-	return ""
-}
-
 type SubmitExamResponse struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	SubmissionId   int64                  `protobuf:"varint,1,opt,name=submission_id,json=submissionId,proto3" json:"submission_id,omitempty"`
@@ -994,7 +2765,7 @@ type SubmitExamResponse struct {
 
 func (x *SubmitExamResponse) Reset() {
 	*x = SubmitExamResponse{}
-	mi := &file_exam_proto_msgTypes[16]
+	mi := &file_exam_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1006,7 +2777,7 @@ func (x *SubmitExamResponse) String() string {
 func (*SubmitExamResponse) ProtoMessage() {}
 
 func (x *SubmitExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[16]
+	mi := &file_exam_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1019,7 +2790,7 @@ func (x *SubmitExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitExamResponse.ProtoReflect.Descriptor instead.
 func (*SubmitExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{16}
+	return file_exam_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *SubmitExamResponse) GetSubmissionId() int64 {
@@ -1060,7 +2831,7 @@ type GetSubmissionRequest struct {
 
 func (x *GetSubmissionRequest) Reset() {
 	*x = GetSubmissionRequest{}
-	mi := &file_exam_proto_msgTypes[17]
+	mi := &file_exam_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1072,7 +2843,7 @@ func (x *GetSubmissionRequest) String() string {
 func (*GetSubmissionRequest) ProtoMessage() {}
 
 func (x *GetSubmissionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[17]
+	mi := &file_exam_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1085,7 +2856,7 @@ func (x *GetSubmissionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmissionRequest.ProtoReflect.Descriptor instead.
 func (*GetSubmissionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{17}
+	return file_exam_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *GetSubmissionRequest) GetSubmissionId() int64 {
@@ -1100,6 +2871,158 @@ func (x *GetSubmissionRequest) GetUserId() int64 {
 		return x.UserId
 	}
 	return 0
+}
+
+type SubmissionDetail struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	QuestionId      int64                  `protobuf:"varint,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
+	QuestionContent string                 `protobuf:"bytes,2,opt,name=question_content,json=questionContent,proto3" json:"question_content,omitempty"`
+	Explanation     string                 `protobuf:"bytes,3,opt,name=explanation,proto3" json:"explanation,omitempty"`
+	QuestionType    string                 `protobuf:"bytes,4,opt,name=question_type,json=questionType,proto3" json:"question_type,omitempty"`
+	IsCorrect       bool                   `protobuf:"varint,5,opt,name=is_correct,json=isCorrect,proto3" json:"is_correct,omitempty"`
+	Choices         []*ChoiceReview        `protobuf:"bytes,6,rep,name=choices,proto3" json:"choices,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *SubmissionDetail) Reset() {
+	*x = SubmissionDetail{}
+	mi := &file_exam_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubmissionDetail) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubmissionDetail) ProtoMessage() {}
+
+func (x *SubmissionDetail) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubmissionDetail.ProtoReflect.Descriptor instead.
+func (*SubmissionDetail) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *SubmissionDetail) GetQuestionId() int64 {
+	if x != nil {
+		return x.QuestionId
+	}
+	return 0
+}
+
+func (x *SubmissionDetail) GetQuestionContent() string {
+	if x != nil {
+		return x.QuestionContent
+	}
+	return ""
+}
+
+func (x *SubmissionDetail) GetExplanation() string {
+	if x != nil {
+		return x.Explanation
+	}
+	return ""
+}
+
+func (x *SubmissionDetail) GetQuestionType() string {
+	if x != nil {
+		return x.QuestionType
+	}
+	return ""
+}
+
+func (x *SubmissionDetail) GetIsCorrect() bool {
+	if x != nil {
+		return x.IsCorrect
+	}
+	return false
+}
+
+func (x *SubmissionDetail) GetChoices() []*ChoiceReview {
+	if x != nil {
+		return x.Choices
+	}
+	return nil
+}
+
+type ChoiceReview struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	IsCorrect     bool                   `protobuf:"varint,3,opt,name=is_correct,json=isCorrect,proto3" json:"is_correct,omitempty"`
+	UserSelected  bool                   `protobuf:"varint,4,opt,name=user_selected,json=userSelected,proto3" json:"user_selected,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChoiceReview) Reset() {
+	*x = ChoiceReview{}
+	mi := &file_exam_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChoiceReview) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChoiceReview) ProtoMessage() {}
+
+func (x *ChoiceReview) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChoiceReview.ProtoReflect.Descriptor instead.
+func (*ChoiceReview) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *ChoiceReview) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ChoiceReview) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *ChoiceReview) GetIsCorrect() bool {
+	if x != nil {
+		return x.IsCorrect
+	}
+	return false
+}
+
+func (x *ChoiceReview) GetUserSelected() bool {
+	if x != nil {
+		return x.UserSelected
+	}
+	return false
 }
 
 type GetSubmissionResponse struct {
@@ -1118,7 +3041,7 @@ type GetSubmissionResponse struct {
 
 func (x *GetSubmissionResponse) Reset() {
 	*x = GetSubmissionResponse{}
-	mi := &file_exam_proto_msgTypes[18]
+	mi := &file_exam_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1130,7 +3053,7 @@ func (x *GetSubmissionResponse) String() string {
 func (*GetSubmissionResponse) ProtoMessage() {}
 
 func (x *GetSubmissionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[18]
+	mi := &file_exam_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1143,7 +3066,7 @@ func (x *GetSubmissionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmissionResponse.ProtoReflect.Descriptor instead.
 func (*GetSubmissionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{18}
+	return file_exam_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *GetSubmissionResponse) GetId() int64 {
@@ -1202,970 +3125,6 @@ func (x *GetSubmissionResponse) GetDetails() []*SubmissionDetail {
 	return nil
 }
 
-type SubmissionDetail struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	QuestionId      int64                  `protobuf:"varint,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
-	QuestionContent string                 `protobuf:"bytes,2,opt,name=question_content,json=questionContent,proto3" json:"question_content,omitempty"`
-	Explanation     string                 `protobuf:"bytes,3,opt,name=explanation,proto3" json:"explanation,omitempty"`
-	QuestionType    string                 `protobuf:"bytes,4,opt,name=question_type,json=questionType,proto3" json:"question_type,omitempty"`
-	IsCorrect       bool                   `protobuf:"varint,5,opt,name=is_correct,json=isCorrect,proto3" json:"is_correct,omitempty"`
-	Choices         []*ChoiceReview        `protobuf:"bytes,6,rep,name=choices,proto3" json:"choices,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *SubmissionDetail) Reset() {
-	*x = SubmissionDetail{}
-	mi := &file_exam_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SubmissionDetail) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SubmissionDetail) ProtoMessage() {}
-
-func (x *SubmissionDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SubmissionDetail.ProtoReflect.Descriptor instead.
-func (*SubmissionDetail) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *SubmissionDetail) GetQuestionId() int64 {
-	if x != nil {
-		return x.QuestionId
-	}
-	return 0
-}
-
-func (x *SubmissionDetail) GetQuestionContent() string {
-	if x != nil {
-		return x.QuestionContent
-	}
-	return ""
-}
-
-func (x *SubmissionDetail) GetExplanation() string {
-	if x != nil {
-		return x.Explanation
-	}
-	return ""
-}
-
-func (x *SubmissionDetail) GetQuestionType() string {
-	if x != nil {
-		return x.QuestionType
-	}
-	return ""
-}
-
-func (x *SubmissionDetail) GetIsCorrect() bool {
-	if x != nil {
-		return x.IsCorrect
-	}
-	return false
-}
-
-func (x *SubmissionDetail) GetChoices() []*ChoiceReview {
-	if x != nil {
-		return x.Choices
-	}
-	return nil
-}
-
-type ChoiceReview struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
-	IsCorrect     bool                   `protobuf:"varint,3,opt,name=is_correct,json=isCorrect,proto3" json:"is_correct,omitempty"`
-	UserSelected  bool                   `protobuf:"varint,4,opt,name=user_selected,json=userSelected,proto3" json:"user_selected,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ChoiceReview) Reset() {
-	*x = ChoiceReview{}
-	mi := &file_exam_proto_msgTypes[20]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ChoiceReview) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ChoiceReview) ProtoMessage() {}
-
-func (x *ChoiceReview) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[20]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ChoiceReview.ProtoReflect.Descriptor instead.
-func (*ChoiceReview) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{20}
-}
-
-func (x *ChoiceReview) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ChoiceReview) GetContent() string {
-	if x != nil {
-		return x.Content
-	}
-	return ""
-}
-
-func (x *ChoiceReview) GetIsCorrect() bool {
-	if x != nil {
-		return x.IsCorrect
-	}
-	return false
-}
-
-func (x *ChoiceReview) GetUserSelected() bool {
-	if x != nil {
-		return x.UserSelected
-	}
-	return false
-}
-
-type GetExamCountRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetExamCountRequest) Reset() {
-	*x = GetExamCountRequest{}
-	mi := &file_exam_proto_msgTypes[21]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetExamCountRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetExamCountRequest) ProtoMessage() {}
-
-func (x *GetExamCountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[21]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetExamCountRequest.ProtoReflect.Descriptor instead.
-func (*GetExamCountRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{21}
-}
-
-type GetExamCountResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Count         int64                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetExamCountResponse) Reset() {
-	*x = GetExamCountResponse{}
-	mi := &file_exam_proto_msgTypes[22]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetExamCountResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetExamCountResponse) ProtoMessage() {}
-
-func (x *GetExamCountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[22]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetExamCountResponse.ProtoReflect.Descriptor instead.
-func (*GetExamCountResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{22}
-}
-
-func (x *GetExamCountResponse) GetCount() int64 {
-	if x != nil {
-		return x.Count
-	}
-	return 0
-}
-
-type ExamListItem struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Title           string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	DurationMinutes int32                  `protobuf:"varint,3,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
-	TopicId         int64                  `protobuf:"varint,4,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
-	CreatorId       int64                  `protobuf:"varint,5,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
-	IsPublished     bool                   `protobuf:"varint,6,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *ExamListItem) Reset() {
-	*x = ExamListItem{}
-	mi := &file_exam_proto_msgTypes[23]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ExamListItem) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ExamListItem) ProtoMessage() {}
-
-func (x *ExamListItem) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[23]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ExamListItem.ProtoReflect.Descriptor instead.
-func (*ExamListItem) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{23}
-}
-
-func (x *ExamListItem) GetId() int64 {
-	if x != nil {
-		return x.Id
-	}
-	return 0
-}
-
-func (x *ExamListItem) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *ExamListItem) GetDurationMinutes() int32 {
-	if x != nil {
-		return x.DurationMinutes
-	}
-	return 0
-}
-
-func (x *ExamListItem) GetTopicId() int64 {
-	if x != nil {
-		return x.TopicId
-	}
-	return 0
-}
-
-func (x *ExamListItem) GetCreatorId() int64 {
-	if x != nil {
-		return x.CreatorId
-	}
-	return 0
-}
-
-func (x *ExamListItem) GetIsPublished() bool {
-	if x != nil {
-		return x.IsPublished
-	}
-	return false
-}
-
-type GetExamsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	CreatorId     int64                  `protobuf:"varint,3,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetExamsRequest) Reset() {
-	*x = GetExamsRequest{}
-	mi := &file_exam_proto_msgTypes[24]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetExamsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetExamsRequest) ProtoMessage() {}
-
-func (x *GetExamsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[24]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetExamsRequest.ProtoReflect.Descriptor instead.
-func (*GetExamsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{24}
-}
-
-func (x *GetExamsRequest) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *GetExamsRequest) GetLimit() int32 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-func (x *GetExamsRequest) GetCreatorId() int64 {
-	if x != nil {
-		return x.CreatorId
-	}
-	return 0
-}
-
-type GetExamsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Exams         []*ExamListItem        `protobuf:"bytes,1,rep,name=exams,proto3" json:"exams,omitempty"`
-	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
-	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
-	TotalPages    int32                  `protobuf:"varint,4,opt,name=total_pages,json=totalPages,proto3" json:"total_pages,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetExamsResponse) Reset() {
-	*x = GetExamsResponse{}
-	mi := &file_exam_proto_msgTypes[25]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetExamsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetExamsResponse) ProtoMessage() {}
-
-func (x *GetExamsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[25]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetExamsResponse.ProtoReflect.Descriptor instead.
-func (*GetExamsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{25}
-}
-
-func (x *GetExamsResponse) GetExams() []*ExamListItem {
-	if x != nil {
-		return x.Exams
-	}
-	return nil
-}
-
-func (x *GetExamsResponse) GetTotal() int64 {
-	if x != nil {
-		return x.Total
-	}
-	return 0
-}
-
-func (x *GetExamsResponse) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *GetExamsResponse) GetTotalPages() int32 {
-	if x != nil {
-		return x.TotalPages
-	}
-	return 0
-}
-
-type PublishExamRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
-	IsPublished   bool                   `protobuf:"varint,2,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PublishExamRequest) Reset() {
-	*x = PublishExamRequest{}
-	mi := &file_exam_proto_msgTypes[26]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PublishExamRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishExamRequest) ProtoMessage() {}
-
-func (x *PublishExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[26]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishExamRequest.ProtoReflect.Descriptor instead.
-func (*PublishExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{26}
-}
-
-func (x *PublishExamRequest) GetExamId() int64 {
-	if x != nil {
-		return x.ExamId
-	}
-	return 0
-}
-
-func (x *PublishExamRequest) GetIsPublished() bool {
-	if x != nil {
-		return x.IsPublished
-	}
-	return false
-}
-
-type PublishExamResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *PublishExamResponse) Reset() {
-	*x = PublishExamResponse{}
-	mi := &file_exam_proto_msgTypes[27]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *PublishExamResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PublishExamResponse) ProtoMessage() {}
-
-func (x *PublishExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[27]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PublishExamResponse.ProtoReflect.Descriptor instead.
-func (*PublishExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{27}
-}
-
-func (x *PublishExamResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-type UpdateQuestionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	QuestionId    int64                  `protobuf:"varint,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
-	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
-	QuestionType  string                 `protobuf:"bytes,3,opt,name=question_type,json=questionType,proto3" json:"question_type,omitempty"`
-	Difficulty    string                 `protobuf:"bytes,4,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
-	Explanation   string                 `protobuf:"bytes,5,opt,name=explanation,proto3" json:"explanation,omitempty"`
-	Choices       []*ChoiceInput         `protobuf:"bytes,6,rep,name=choices,proto3" json:"choices,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateQuestionRequest) Reset() {
-	*x = UpdateQuestionRequest{}
-	mi := &file_exam_proto_msgTypes[28]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateQuestionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateQuestionRequest) ProtoMessage() {}
-
-func (x *UpdateQuestionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[28]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateQuestionRequest.ProtoReflect.Descriptor instead.
-func (*UpdateQuestionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{28}
-}
-
-func (x *UpdateQuestionRequest) GetQuestionId() int64 {
-	if x != nil {
-		return x.QuestionId
-	}
-	return 0
-}
-
-func (x *UpdateQuestionRequest) GetContent() string {
-	if x != nil {
-		return x.Content
-	}
-	return ""
-}
-
-func (x *UpdateQuestionRequest) GetQuestionType() string {
-	if x != nil {
-		return x.QuestionType
-	}
-	return ""
-}
-
-func (x *UpdateQuestionRequest) GetDifficulty() string {
-	if x != nil {
-		return x.Difficulty
-	}
-	return ""
-}
-
-func (x *UpdateQuestionRequest) GetExplanation() string {
-	if x != nil {
-		return x.Explanation
-	}
-	return ""
-}
-
-func (x *UpdateQuestionRequest) GetChoices() []*ChoiceInput {
-	if x != nil {
-		return x.Choices
-	}
-	return nil
-}
-
-type UpdateQuestionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateQuestionResponse) Reset() {
-	*x = UpdateQuestionResponse{}
-	mi := &file_exam_proto_msgTypes[29]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateQuestionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateQuestionResponse) ProtoMessage() {}
-
-func (x *UpdateQuestionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[29]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateQuestionResponse.ProtoReflect.Descriptor instead.
-func (*UpdateQuestionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{29}
-}
-
-func (x *UpdateQuestionResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-type DeleteQuestionRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	QuestionId    int64                  `protobuf:"varint,1,opt,name=question_id,json=questionId,proto3" json:"question_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteQuestionRequest) Reset() {
-	*x = DeleteQuestionRequest{}
-	mi := &file_exam_proto_msgTypes[30]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteQuestionRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteQuestionRequest) ProtoMessage() {}
-
-func (x *DeleteQuestionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[30]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteQuestionRequest.ProtoReflect.Descriptor instead.
-func (*DeleteQuestionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{30}
-}
-
-func (x *DeleteQuestionRequest) GetQuestionId() int64 {
-	if x != nil {
-		return x.QuestionId
-	}
-	return 0
-}
-
-type DeleteQuestionResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteQuestionResponse) Reset() {
-	*x = DeleteQuestionResponse{}
-	mi := &file_exam_proto_msgTypes[31]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteQuestionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteQuestionResponse) ProtoMessage() {}
-
-func (x *DeleteQuestionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[31]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteQuestionResponse.ProtoReflect.Descriptor instead.
-func (*DeleteQuestionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *DeleteQuestionResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-type UpdateExamRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	ExamId          int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
-	Title           string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description     string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	DurationMinutes int32                  `protobuf:"varint,4,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
-	TopicId         int64                  `protobuf:"varint,5,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
-}
-
-func (x *UpdateExamRequest) Reset() {
-	*x = UpdateExamRequest{}
-	mi := &file_exam_proto_msgTypes[32]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateExamRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateExamRequest) ProtoMessage() {}
-
-func (x *UpdateExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[32]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateExamRequest.ProtoReflect.Descriptor instead.
-func (*UpdateExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{32}
-}
-
-func (x *UpdateExamRequest) GetExamId() int64 {
-	if x != nil {
-		return x.ExamId
-	}
-	return 0
-}
-
-func (x *UpdateExamRequest) GetTitle() string {
-	if x != nil {
-		return x.Title
-	}
-	return ""
-}
-
-func (x *UpdateExamRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *UpdateExamRequest) GetDurationMinutes() int32 {
-	if x != nil {
-		return x.DurationMinutes
-	}
-	return 0
-}
-
-func (x *UpdateExamRequest) GetTopicId() int64 {
-	if x != nil {
-		return x.TopicId
-	}
-	return 0
-}
-
-type UpdateExamResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UpdateExamResponse) Reset() {
-	*x = UpdateExamResponse{}
-	mi := &file_exam_proto_msgTypes[33]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpdateExamResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateExamResponse) ProtoMessage() {}
-
-func (x *UpdateExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[33]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateExamResponse.ProtoReflect.Descriptor instead.
-func (*UpdateExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{33}
-}
-
-func (x *UpdateExamResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-type DeleteExamRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteExamRequest) Reset() {
-	*x = DeleteExamRequest{}
-	mi := &file_exam_proto_msgTypes[34]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteExamRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteExamRequest) ProtoMessage() {}
-
-func (x *DeleteExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[34]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteExamRequest.ProtoReflect.Descriptor instead.
-func (*DeleteExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{34}
-}
-
-func (x *DeleteExamRequest) GetExamId() int64 {
-	if x != nil {
-		return x.ExamId
-	}
-	return 0
-}
-
-type DeleteExamResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *DeleteExamResponse) Reset() {
-	*x = DeleteExamResponse{}
-	mi := &file_exam_proto_msgTypes[35]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteExamResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteExamResponse) ProtoMessage() {}
-
-func (x *DeleteExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[35]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteExamResponse.ProtoReflect.Descriptor instead.
-func (*DeleteExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{35}
-}
-
-func (x *DeleteExamResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
 type GetUserExamStatsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -2175,7 +3134,7 @@ type GetUserExamStatsRequest struct {
 
 func (x *GetUserExamStatsRequest) Reset() {
 	*x = GetUserExamStatsRequest{}
-	mi := &file_exam_proto_msgTypes[36]
+	mi := &file_exam_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2187,7 +3146,7 @@ func (x *GetUserExamStatsRequest) String() string {
 func (*GetUserExamStatsRequest) ProtoMessage() {}
 
 func (x *GetUserExamStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[36]
+	mi := &file_exam_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2200,7 +3159,7 @@ func (x *GetUserExamStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserExamStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserExamStatsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{36}
+	return file_exam_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *GetUserExamStatsRequest) GetUserId() int64 {
@@ -2219,7 +3178,7 @@ type GetUserExamStatsResponse struct {
 
 func (x *GetUserExamStatsResponse) Reset() {
 	*x = GetUserExamStatsResponse{}
-	mi := &file_exam_proto_msgTypes[37]
+	mi := &file_exam_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2231,7 +3190,7 @@ func (x *GetUserExamStatsResponse) String() string {
 func (*GetUserExamStatsResponse) ProtoMessage() {}
 
 func (x *GetUserExamStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[37]
+	mi := &file_exam_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2244,12 +3203,92 @@ func (x *GetUserExamStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserExamStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserExamStatsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{37}
+	return file_exam_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *GetUserExamStatsResponse) GetTotalExamsTaken() int64 {
 	if x != nil {
 		return x.TotalExamsTaken
+	}
+	return 0
+}
+
+type GetExamCountRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExamCountRequest) Reset() {
+	*x = GetExamCountRequest{}
+	mi := &file_exam_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExamCountRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExamCountRequest) ProtoMessage() {}
+
+func (x *GetExamCountRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExamCountRequest.ProtoReflect.Descriptor instead.
+func (*GetExamCountRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{54}
+}
+
+type GetExamCountResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Count         int64                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExamCountResponse) Reset() {
+	*x = GetExamCountResponse{}
+	mi := &file_exam_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExamCountResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExamCountResponse) ProtoMessage() {}
+
+func (x *GetExamCountResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExamCountResponse.ProtoReflect.Descriptor instead.
+func (*GetExamCountResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *GetExamCountResponse) GetCount() int64 {
+	if x != nil {
+		return x.Count
 	}
 	return 0
 }
@@ -2263,7 +3302,12 @@ const file_exam_proto_rawDesc = "" +
 	"\x05Topic\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"J\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"j\n" +
+	"\aSection\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x19\n" +
+	"\btopic_id\x18\x04 \x01(\x03R\atopicId\"J\n" +
 	"\x12CreateTopicRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\"8\n" +
@@ -2271,13 +3315,24 @@ const file_exam_proto_rawDesc = "" +
 	"\x05topic\x18\x01 \x01(\v2\v.exam.TopicR\x05topic\"\x12\n" +
 	"\x10GetTopicsRequest\"8\n" +
 	"\x11GetTopicsResponse\x12#\n" +
-	"\x06topics\x18\x01 \x03(\v2\v.exam.TopicR\x06topics\"F\n" +
+	"\x06topics\x18\x01 \x03(\v2\v.exam.TopicR\x06topics\"g\n" +
+	"\x14CreateSectionRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x19\n" +
+	"\btopic_id\x18\x03 \x01(\x03R\atopicId\"@\n" +
+	"\x15CreateSectionResponse\x12'\n" +
+	"\asection\x18\x01 \x01(\v2\r.exam.SectionR\asection\"/\n" +
+	"\x12GetSectionsRequest\x12\x19\n" +
+	"\btopic_id\x18\x01 \x01(\x03R\atopicId\"@\n" +
+	"\x13GetSectionsResponse\x12)\n" +
+	"\bsections\x18\x01 \x03(\v2\r.exam.SectionR\bsections\"F\n" +
 	"\vChoiceInput\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\tR\acontent\x12\x1d\n" +
 	"\n" +
-	"is_correct\x18\x02 \x01(\bR\tisCorrect\"\x98\x02\n" +
-	"\x15CreateQuestionRequest\x12\x19\n" +
-	"\btopic_id\x18\x01 \x01(\x03R\atopicId\x12\x18\n" +
+	"is_correct\x18\x02 \x01(\bR\tisCorrect\"\xaa\x02\n" +
+	"\x15CreateQuestionRequest\x12\x1d\n" +
+	"\n" +
+	"section_id\x18\x01 \x01(\x03R\tsectionId\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12#\n" +
 	"\rquestion_type\x18\x03 \x01(\tR\fquestionType\x12\x1e\n" +
 	"\n" +
@@ -2286,87 +3341,123 @@ const file_exam_proto_rawDesc = "" +
 	"\vexplanation\x18\x05 \x01(\tR\vexplanation\x12+\n" +
 	"\achoices\x18\x06 \x03(\v2\x11.exam.ChoiceInputR\achoices\x12\x1d\n" +
 	"\n" +
-	"creator_id\x18\a \x01(\x03R\tcreatorId\x12\x17\n" +
-	"\aexam_id\x18\b \x01(\x03R\x06examId\"B\n" +
+	"creator_id\x18\a \x01(\x03R\tcreatorId\x12%\n" +
+	"\x0eattachment_url\x18\b \x01(\tR\rattachmentUrl\"B\n" +
 	"\x16CreateQuestionResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\"\xd3\x01\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\"m\n" +
+	"\x13GetUploadURLRequest\x12\x1b\n" +
+	"\tfile_name\x18\x01 \x01(\tR\bfileName\x12!\n" +
+	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x16\n" +
+	"\x06folder\x18\x03 \x01(\tR\x06folder\"R\n" +
+	"\x14GetUploadURLResponse\x12\x1d\n" +
+	"\n" +
+	"upload_url\x18\x01 \x01(\tR\tuploadUrl\x12\x1b\n" +
+	"\tfinal_url\x18\x02 \x01(\tR\bfinalUrl\"y\n" +
+	"\x16ImportQuestionsRequest\x12\x1d\n" +
+	"\n" +
+	"section_id\x18\x01 \x01(\x03R\tsectionId\x12\x1d\n" +
+	"\n" +
+	"creator_id\x18\x02 \x01(\x03R\tcreatorId\x12!\n" +
+	"\ffile_content\x18\x03 \x01(\fR\vfileContent\"_\n" +
+	"\x17ImportQuestionsResponse\x12#\n" +
+	"\rsuccess_count\x18\x01 \x01(\x05R\fsuccessCount\x12\x1f\n" +
+	"\verror_count\x18\x02 \x01(\x05R\n" +
+	"errorCount\"\xc4\x02\n" +
+	"\fExamSettings\x12)\n" +
+	"\x10duration_minutes\x18\x01 \x01(\x05R\x0fdurationMinutes\x12!\n" +
+	"\fmax_attempts\x18\x02 \x01(\x05R\vmaxAttempts\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\x04 \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\x05 \x01(\tR\aendTime\x12+\n" +
+	"\x11shuffle_questions\x18\x06 \x01(\bR\x10shuffleQuestions\x126\n" +
+	"\x17show_result_immediately\x18\a \x01(\bR\x15showResultImmediately\x12+\n" +
+	"\x11requires_approval\x18\b \x01(\bR\x10requiresApproval\"\xd8\x01\n" +
 	"\x11CreateExamRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x19\n" +
 	"\btopic_id\x18\x03 \x01(\x03R\atopicId\x12!\n" +
-	"\fquestion_ids\x18\x04 \x03(\x03R\vquestionIds\x12)\n" +
-	"\x10duration_minutes\x18\x05 \x01(\x05R\x0fdurationMinutes\x12\x1d\n" +
+	"\fquestion_ids\x18\x04 \x03(\x03R\vquestionIds\x12.\n" +
+	"\bsettings\x18\x05 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x12\x1d\n" +
 	"\n" +
-	"creator_id\x18\x06 \x01(\x03R\tcreatorId\":\n" +
+	"creator_id\x18\x06 \x01(\x03R\tcreatorId\"d\n" +
+	"\rSectionConfig\x12\x1d\n" +
+	"\n" +
+	"section_id\x18\x01 \x01(\x03R\tsectionId\x12\x14\n" +
+	"\x05count\x18\x02 \x01(\x05R\x05count\x12\x1e\n" +
+	"\n" +
+	"difficulty\x18\x03 \x01(\tR\n" +
+	"difficulty\"\xf5\x01\n" +
+	"\x13GenerateExamRequest\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x19\n" +
+	"\btopic_id\x18\x03 \x01(\x03R\atopicId\x12.\n" +
+	"\bsettings\x18\x04 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x12\x1d\n" +
+	"\n" +
+	"creator_id\x18\x05 \x01(\x03R\tcreatorId\x12<\n" +
+	"\x0fsection_configs\x18\x06 \x03(\v2\x13.exam.SectionConfigR\x0esectionConfigs\":\n" +
 	"\x12CreateExamResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\"9\n" +
 	"\rChoiceDetails\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\"\x8f\x01\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\"\xb6\x01\n" +
 	"\x0fQuestionDetails\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12-\n" +
 	"\achoices\x18\x03 \x03(\v2\x13.exam.ChoiceDetailsR\achoices\x12#\n" +
-	"\rquestion_type\x18\x04 \x01(\tR\fquestionType\"0\n" +
+	"\rquestion_type\x18\x04 \x01(\tR\fquestionType\x12%\n" +
+	"\x0eattachment_url\x18\x05 \x01(\tR\rattachmentUrl\"0\n" +
 	"\x15GetExamDetailsRequest\x12\x17\n" +
-	"\aexam_id\x18\x01 \x01(\x03R\x06examId\"\xfe\x01\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\"\x83\x02\n" +
 	"\x16GetExamDetailsResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12)\n" +
-	"\x10duration_minutes\x18\x03 \x01(\x05R\x0fdurationMinutes\x123\n" +
-	"\tquestions\x18\x04 \x03(\v2\x15.exam.QuestionDetailsR\tquestions\x12\x19\n" +
-	"\btopic_id\x18\x05 \x01(\x03R\atopicId\x12!\n" +
-	"\fis_published\x18\x06 \x01(\bR\visPublished\x12 \n" +
-	"\vdescription\x18\a \x01(\tR\vdescription\"W\n" +
-	"\n" +
-	"UserAnswer\x12\x1f\n" +
-	"\vquestion_id\x18\x01 \x01(\x03R\n" +
-	"questionId\x12(\n" +
-	"\x10chosen_choice_id\x18\x02 \x01(\x03R\x0echosenChoiceId\"\xa4\x01\n" +
-	"\x11SubmitExamRequest\x12\x17\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12.\n" +
+	"\bsettings\x18\x04 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x123\n" +
+	"\tquestions\x18\x05 \x03(\v2\x15.exam.QuestionDetailsR\tquestions\x12\x19\n" +
+	"\btopic_id\x18\x06 \x01(\x03R\atopicId\x12!\n" +
+	"\fis_published\x18\a \x01(\bR\visPublished\"L\n" +
+	"\x18RequestExamAccessRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12*\n" +
-	"\aanswers\x18\x03 \x03(\v2\x10.exam.UserAnswerR\aanswers\x12\x14\n" +
-	"\x05email\x18\x04 \x01(\tR\x05email\x12\x1b\n" +
-	"\tfull_name\x18\x05 \x01(\tR\bfullName\"\x9d\x01\n" +
-	"\x12SubmitExamResponse\x12#\n" +
-	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x14\n" +
-	"\x05score\x18\x02 \x01(\x02R\x05score\x12#\n" +
-	"\rcorrect_count\x18\x03 \x01(\x05R\fcorrectCount\x12'\n" +
-	"\x0ftotal_questions\x18\x04 \x01(\x05R\x0etotalQuestions\"T\n" +
-	"\x14GetSubmissionRequest\x12#\n" +
-	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\x97\x02\n" +
-	"\x15GetSubmissionResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"M\n" +
+	"\x19RequestExamAccessResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"s\n" +
+	"\x18ApproveExamAccessRequest\x12\x17\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x1d\n" +
 	"\n" +
-	"exam_title\x18\x02 \x01(\tR\texamTitle\x12\x14\n" +
-	"\x05score\x18\x03 \x01(\x02R\x05score\x12#\n" +
-	"\rcorrect_count\x18\x04 \x01(\x05R\fcorrectCount\x12'\n" +
-	"\x0ftotal_questions\x18\x05 \x01(\x05R\x0etotalQuestions\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x12!\n" +
-	"\fsubmitted_at\x18\a \x01(\tR\vsubmittedAt\x120\n" +
-	"\adetails\x18\b \x03(\v2\x16.exam.SubmissionDetailR\adetails\"\xf2\x01\n" +
-	"\x10SubmissionDetail\x12\x1f\n" +
+	"student_id\x18\x02 \x01(\x03R\tstudentId\x12\x1f\n" +
+	"\vis_approved\x18\x03 \x01(\bR\n" +
+	"isApproved\"5\n" +
+	"\x19ApproveExamAccessResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"J\n" +
+	"\x16CheckExamAccessRequest\x12\x17\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"R\n" +
+	"\x17CheckExamAccessResponse\x12\x1d\n" +
+	"\n" +
+	"can_access\x18\x01 \x01(\bR\tcanAccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x8d\x02\n" +
+	"\x15UpdateQuestionRequest\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\x03R\n" +
-	"questionId\x12)\n" +
-	"\x10question_content\x18\x02 \x01(\tR\x0fquestionContent\x12 \n" +
-	"\vexplanation\x18\x03 \x01(\tR\vexplanation\x12#\n" +
-	"\rquestion_type\x18\x04 \x01(\tR\fquestionType\x12\x1d\n" +
+	"questionId\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\x12#\n" +
+	"\rquestion_type\x18\x03 \x01(\tR\fquestionType\x12\x1e\n" +
 	"\n" +
-	"is_correct\x18\x05 \x01(\bR\tisCorrect\x12,\n" +
-	"\achoices\x18\x06 \x03(\v2\x12.exam.ChoiceReviewR\achoices\"|\n" +
-	"\fChoiceReview\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\x12\x1d\n" +
-	"\n" +
-	"is_correct\x18\x03 \x01(\bR\tisCorrect\x12#\n" +
-	"\ruser_selected\x18\x04 \x01(\bR\fuserSelected\"\x15\n" +
-	"\x13GetExamCountRequest\",\n" +
-	"\x14GetExamCountResponse\x12\x14\n" +
-	"\x05count\x18\x01 \x01(\x03R\x05count\"\xbc\x01\n" +
+	"difficulty\x18\x04 \x01(\tR\n" +
+	"difficulty\x12 \n" +
+	"\vexplanation\x18\x05 \x01(\tR\vexplanation\x12+\n" +
+	"\achoices\x18\x06 \x03(\v2\x11.exam.ChoiceInputR\achoices\x12%\n" +
+	"\x0eattachment_url\x18\a \x01(\tR\rattachmentUrl\"2\n" +
+	"\x16UpdateQuestionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"8\n" +
+	"\x15DeleteQuestionRequest\x12\x1f\n" +
+	"\vquestion_id\x18\x01 \x01(\x03R\n" +
+	"questionId\"2\n" +
+	"\x16DeleteQuestionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xbc\x01\n" +
 	"\fExamListItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12)\n" +
@@ -2385,65 +3476,101 @@ const file_exam_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1f\n" +
 	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
-	"totalPages\"P\n" +
-	"\x12PublishExamRequest\x12\x17\n" +
-	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12!\n" +
-	"\fis_published\x18\x02 \x01(\bR\visPublished\"/\n" +
-	"\x13PublishExamResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xe6\x01\n" +
-	"\x15UpdateQuestionRequest\x12\x1f\n" +
-	"\vquestion_id\x18\x01 \x01(\x03R\n" +
-	"questionId\x12\x18\n" +
-	"\acontent\x18\x02 \x01(\tR\acontent\x12#\n" +
-	"\rquestion_type\x18\x03 \x01(\tR\fquestionType\x12\x1e\n" +
-	"\n" +
-	"difficulty\x18\x04 \x01(\tR\n" +
-	"difficulty\x12 \n" +
-	"\vexplanation\x18\x05 \x01(\tR\vexplanation\x12+\n" +
-	"\achoices\x18\x06 \x03(\v2\x11.exam.ChoiceInputR\achoices\"2\n" +
-	"\x16UpdateQuestionResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"8\n" +
-	"\x15DeleteQuestionRequest\x12\x1f\n" +
-	"\vquestion_id\x18\x01 \x01(\x03R\n" +
-	"questionId\"2\n" +
-	"\x16DeleteQuestionResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xaa\x01\n" +
+	"totalPages\"\xaf\x01\n" +
 	"\x11UpdateExamRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12)\n" +
-	"\x10duration_minutes\x18\x04 \x01(\x05R\x0fdurationMinutes\x12\x19\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12.\n" +
+	"\bsettings\x18\x04 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x12\x19\n" +
 	"\btopic_id\x18\x05 \x01(\x03R\atopicId\".\n" +
 	"\x12UpdateExamResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\",\n" +
 	"\x11DeleteExamRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\".\n" +
 	"\x12DeleteExamResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"2\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"P\n" +
+	"\x12PublishExamRequest\x12\x17\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12!\n" +
+	"\fis_published\x18\x02 \x01(\bR\visPublished\"/\n" +
+	"\x13PublishExamResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"W\n" +
+	"\n" +
+	"UserAnswer\x12\x1f\n" +
+	"\vquestion_id\x18\x01 \x01(\x03R\n" +
+	"questionId\x12(\n" +
+	"\x10chosen_choice_id\x18\x02 \x01(\x03R\x0echosenChoiceId\"q\n" +
+	"\x11SubmitExamRequest\x12\x17\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12*\n" +
+	"\aanswers\x18\x03 \x03(\v2\x10.exam.UserAnswerR\aanswers\"\x9d\x01\n" +
+	"\x12SubmitExamResponse\x12#\n" +
+	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x14\n" +
+	"\x05score\x18\x02 \x01(\x02R\x05score\x12#\n" +
+	"\rcorrect_count\x18\x03 \x01(\x05R\fcorrectCount\x12'\n" +
+	"\x0ftotal_questions\x18\x04 \x01(\x05R\x0etotalQuestions\"T\n" +
+	"\x14GetSubmissionRequest\x12#\n" +
+	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\xf2\x01\n" +
+	"\x10SubmissionDetail\x12\x1f\n" +
+	"\vquestion_id\x18\x01 \x01(\x03R\n" +
+	"questionId\x12)\n" +
+	"\x10question_content\x18\x02 \x01(\tR\x0fquestionContent\x12 \n" +
+	"\vexplanation\x18\x03 \x01(\tR\vexplanation\x12#\n" +
+	"\rquestion_type\x18\x04 \x01(\tR\fquestionType\x12\x1d\n" +
+	"\n" +
+	"is_correct\x18\x05 \x01(\bR\tisCorrect\x12,\n" +
+	"\achoices\x18\x06 \x03(\v2\x12.exam.ChoiceReviewR\achoices\"|\n" +
+	"\fChoiceReview\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\x12\x1d\n" +
+	"\n" +
+	"is_correct\x18\x03 \x01(\bR\tisCorrect\x12#\n" +
+	"\ruser_selected\x18\x04 \x01(\bR\fuserSelected\"\x97\x02\n" +
+	"\x15GetSubmissionResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\n" +
+	"exam_title\x18\x02 \x01(\tR\texamTitle\x12\x14\n" +
+	"\x05score\x18\x03 \x01(\x02R\x05score\x12#\n" +
+	"\rcorrect_count\x18\x04 \x01(\x05R\fcorrectCount\x12'\n" +
+	"\x0ftotal_questions\x18\x05 \x01(\x05R\x0etotalQuestions\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12!\n" +
+	"\fsubmitted_at\x18\a \x01(\tR\vsubmittedAt\x120\n" +
+	"\adetails\x18\b \x03(\v2\x16.exam.SubmissionDetailR\adetails\"2\n" +
 	"\x17GetUserExamStatsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\"F\n" +
 	"\x18GetUserExamStatsResponse\x12*\n" +
-	"\x11total_exams_taken\x18\x01 \x01(\x03R\x0ftotalExamsTaken2\xaa\b\n" +
+	"\x11total_exams_taken\x18\x01 \x01(\x03R\x0ftotalExamsTaken\"\x15\n" +
+	"\x13GetExamCountRequest\",\n" +
+	"\x14GetExamCountResponse\x12\x14\n" +
+	"\x05count\x18\x01 \x01(\x03R\x05count2\x90\r\n" +
 	"\vExamService\x12B\n" +
 	"\vCreateTopic\x12\x18.exam.CreateTopicRequest\x1a\x19.exam.CreateTopicResponse\x12<\n" +
-	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12K\n" +
-	"\x0eCreateQuestion\x12\x1b.exam.CreateQuestionRequest\x1a\x1c.exam.CreateQuestionResponse\x12?\n" +
-	"\n" +
-	"CreateExam\x12\x17.exam.CreateExamRequest\x1a\x18.exam.CreateExamResponse\x12K\n" +
-	"\x0eGetExamDetails\x12\x1b.exam.GetExamDetailsRequest\x1a\x1c.exam.GetExamDetailsResponse\x12?\n" +
-	"\n" +
-	"SubmitExam\x12\x17.exam.SubmitExamRequest\x1a\x18.exam.SubmitExamResponse\x12H\n" +
-	"\rGetSubmission\x12\x1a.exam.GetSubmissionRequest\x1a\x1b.exam.GetSubmissionResponse\x12E\n" +
-	"\fGetExamCount\x12\x19.exam.GetExamCountRequest\x1a\x1a.exam.GetExamCountResponse\x129\n" +
-	"\bGetExams\x12\x15.exam.GetExamsRequest\x1a\x16.exam.GetExamsResponse\x12B\n" +
-	"\vPublishExam\x12\x18.exam.PublishExamRequest\x1a\x19.exam.PublishExamResponse\x12K\n" +
+	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12H\n" +
+	"\rCreateSection\x12\x1a.exam.CreateSectionRequest\x1a\x1b.exam.CreateSectionResponse\x12B\n" +
+	"\vGetSections\x12\x18.exam.GetSectionsRequest\x1a\x19.exam.GetSectionsResponse\x12K\n" +
+	"\x0eCreateQuestion\x12\x1b.exam.CreateQuestionRequest\x1a\x1c.exam.CreateQuestionResponse\x12N\n" +
+	"\x0fImportQuestions\x12\x1c.exam.ImportQuestionsRequest\x1a\x1d.exam.ImportQuestionsResponse\x12K\n" +
 	"\x0eUpdateQuestion\x12\x1b.exam.UpdateQuestionRequest\x1a\x1c.exam.UpdateQuestionResponse\x12K\n" +
-	"\x0eDeleteQuestion\x12\x1b.exam.DeleteQuestionRequest\x1a\x1c.exam.DeleteQuestionResponse\x12?\n" +
+	"\x0eDeleteQuestion\x12\x1b.exam.DeleteQuestionRequest\x1a\x1c.exam.DeleteQuestionResponse\x12E\n" +
+	"\fGetUploadURL\x12\x19.exam.GetUploadURLRequest\x1a\x1a.exam.GetUploadURLResponse\x12?\n" +
+	"\n" +
+	"CreateExam\x12\x17.exam.CreateExamRequest\x1a\x18.exam.CreateExamResponse\x12C\n" +
+	"\fGenerateExam\x12\x19.exam.GenerateExamRequest\x1a\x18.exam.CreateExamResponse\x12K\n" +
+	"\x0eGetExamDetails\x12\x1b.exam.GetExamDetailsRequest\x1a\x1c.exam.GetExamDetailsResponse\x129\n" +
+	"\bGetExams\x12\x15.exam.GetExamsRequest\x1a\x16.exam.GetExamsResponse\x12?\n" +
 	"\n" +
 	"UpdateExam\x12\x17.exam.UpdateExamRequest\x1a\x18.exam.UpdateExamResponse\x12?\n" +
 	"\n" +
-	"DeleteExam\x12\x17.exam.DeleteExamRequest\x1a\x18.exam.DeleteExamResponse\x12Q\n" +
-	"\x10GetUserExamStats\x12\x1d.exam.GetUserExamStatsRequest\x1a\x1e.exam.GetUserExamStatsResponseB\x18Z\x16shared/proto/exam;examb\x06proto3"
+	"DeleteExam\x12\x17.exam.DeleteExamRequest\x1a\x18.exam.DeleteExamResponse\x12B\n" +
+	"\vPublishExam\x12\x18.exam.PublishExamRequest\x1a\x19.exam.PublishExamResponse\x12T\n" +
+	"\x11RequestExamAccess\x12\x1e.exam.RequestExamAccessRequest\x1a\x1f.exam.RequestExamAccessResponse\x12T\n" +
+	"\x11ApproveExamAccess\x12\x1e.exam.ApproveExamAccessRequest\x1a\x1f.exam.ApproveExamAccessResponse\x12N\n" +
+	"\x0fCheckExamAccess\x12\x1c.exam.CheckExamAccessRequest\x1a\x1d.exam.CheckExamAccessResponse\x12?\n" +
+	"\n" +
+	"SubmitExam\x12\x17.exam.SubmitExamRequest\x1a\x18.exam.SubmitExamResponse\x12H\n" +
+	"\rGetSubmission\x12\x1a.exam.GetSubmissionRequest\x1a\x1b.exam.GetSubmissionResponse\x12Q\n" +
+	"\x10GetUserExamStats\x12\x1d.exam.GetUserExamStatsRequest\x1a\x1e.exam.GetUserExamStatsResponse\x12E\n" +
+	"\fGetExamCount\x12\x19.exam.GetExamCountRequest\x1a\x1a.exam.GetExamCountResponseB\x18Z\x16shared/proto/exam;examb\x06proto3"
 
 var (
 	file_exam_proto_rawDescOnce sync.Once
@@ -2457,93 +3584,134 @@ func file_exam_proto_rawDescGZIP() []byte {
 	return file_exam_proto_rawDescData
 }
 
-var file_exam_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
+var file_exam_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
 var file_exam_proto_goTypes = []any{
-	(*Topic)(nil),                    // 0: exam.Topic
-	(*CreateTopicRequest)(nil),       // 1: exam.CreateTopicRequest
-	(*CreateTopicResponse)(nil),      // 2: exam.CreateTopicResponse
-	(*GetTopicsRequest)(nil),         // 3: exam.GetTopicsRequest
-	(*GetTopicsResponse)(nil),        // 4: exam.GetTopicsResponse
-	(*ChoiceInput)(nil),              // 5: exam.ChoiceInput
-	(*CreateQuestionRequest)(nil),    // 6: exam.CreateQuestionRequest
-	(*CreateQuestionResponse)(nil),   // 7: exam.CreateQuestionResponse
-	(*CreateExamRequest)(nil),        // 8: exam.CreateExamRequest
-	(*CreateExamResponse)(nil),       // 9: exam.CreateExamResponse
-	(*ChoiceDetails)(nil),            // 10: exam.ChoiceDetails
-	(*QuestionDetails)(nil),          // 11: exam.QuestionDetails
-	(*GetExamDetailsRequest)(nil),    // 12: exam.GetExamDetailsRequest
-	(*GetExamDetailsResponse)(nil),   // 13: exam.GetExamDetailsResponse
-	(*UserAnswer)(nil),               // 14: exam.UserAnswer
-	(*SubmitExamRequest)(nil),        // 15: exam.SubmitExamRequest
-	(*SubmitExamResponse)(nil),       // 16: exam.SubmitExamResponse
-	(*GetSubmissionRequest)(nil),     // 17: exam.GetSubmissionRequest
-	(*GetSubmissionResponse)(nil),    // 18: exam.GetSubmissionResponse
-	(*SubmissionDetail)(nil),         // 19: exam.SubmissionDetail
-	(*ChoiceReview)(nil),             // 20: exam.ChoiceReview
-	(*GetExamCountRequest)(nil),      // 21: exam.GetExamCountRequest
-	(*GetExamCountResponse)(nil),     // 22: exam.GetExamCountResponse
-	(*ExamListItem)(nil),             // 23: exam.ExamListItem
-	(*GetExamsRequest)(nil),          // 24: exam.GetExamsRequest
-	(*GetExamsResponse)(nil),         // 25: exam.GetExamsResponse
-	(*PublishExamRequest)(nil),       // 26: exam.PublishExamRequest
-	(*PublishExamResponse)(nil),      // 27: exam.PublishExamResponse
-	(*UpdateQuestionRequest)(nil),    // 28: exam.UpdateQuestionRequest
-	(*UpdateQuestionResponse)(nil),   // 29: exam.UpdateQuestionResponse
-	(*DeleteQuestionRequest)(nil),    // 30: exam.DeleteQuestionRequest
-	(*DeleteQuestionResponse)(nil),   // 31: exam.DeleteQuestionResponse
-	(*UpdateExamRequest)(nil),        // 32: exam.UpdateExamRequest
-	(*UpdateExamResponse)(nil),       // 33: exam.UpdateExamResponse
-	(*DeleteExamRequest)(nil),        // 34: exam.DeleteExamRequest
-	(*DeleteExamResponse)(nil),       // 35: exam.DeleteExamResponse
-	(*GetUserExamStatsRequest)(nil),  // 36: exam.GetUserExamStatsRequest
-	(*GetUserExamStatsResponse)(nil), // 37: exam.GetUserExamStatsResponse
+	(*Topic)(nil),                     // 0: exam.Topic
+	(*Section)(nil),                   // 1: exam.Section
+	(*CreateTopicRequest)(nil),        // 2: exam.CreateTopicRequest
+	(*CreateTopicResponse)(nil),       // 3: exam.CreateTopicResponse
+	(*GetTopicsRequest)(nil),          // 4: exam.GetTopicsRequest
+	(*GetTopicsResponse)(nil),         // 5: exam.GetTopicsResponse
+	(*CreateSectionRequest)(nil),      // 6: exam.CreateSectionRequest
+	(*CreateSectionResponse)(nil),     // 7: exam.CreateSectionResponse
+	(*GetSectionsRequest)(nil),        // 8: exam.GetSectionsRequest
+	(*GetSectionsResponse)(nil),       // 9: exam.GetSectionsResponse
+	(*ChoiceInput)(nil),               // 10: exam.ChoiceInput
+	(*CreateQuestionRequest)(nil),     // 11: exam.CreateQuestionRequest
+	(*CreateQuestionResponse)(nil),    // 12: exam.CreateQuestionResponse
+	(*GetUploadURLRequest)(nil),       // 13: exam.GetUploadURLRequest
+	(*GetUploadURLResponse)(nil),      // 14: exam.GetUploadURLResponse
+	(*ImportQuestionsRequest)(nil),    // 15: exam.ImportQuestionsRequest
+	(*ImportQuestionsResponse)(nil),   // 16: exam.ImportQuestionsResponse
+	(*ExamSettings)(nil),              // 17: exam.ExamSettings
+	(*CreateExamRequest)(nil),         // 18: exam.CreateExamRequest
+	(*SectionConfig)(nil),             // 19: exam.SectionConfig
+	(*GenerateExamRequest)(nil),       // 20: exam.GenerateExamRequest
+	(*CreateExamResponse)(nil),        // 21: exam.CreateExamResponse
+	(*ChoiceDetails)(nil),             // 22: exam.ChoiceDetails
+	(*QuestionDetails)(nil),           // 23: exam.QuestionDetails
+	(*GetExamDetailsRequest)(nil),     // 24: exam.GetExamDetailsRequest
+	(*GetExamDetailsResponse)(nil),    // 25: exam.GetExamDetailsResponse
+	(*RequestExamAccessRequest)(nil),  // 26: exam.RequestExamAccessRequest
+	(*RequestExamAccessResponse)(nil), // 27: exam.RequestExamAccessResponse
+	(*ApproveExamAccessRequest)(nil),  // 28: exam.ApproveExamAccessRequest
+	(*ApproveExamAccessResponse)(nil), // 29: exam.ApproveExamAccessResponse
+	(*CheckExamAccessRequest)(nil),    // 30: exam.CheckExamAccessRequest
+	(*CheckExamAccessResponse)(nil),   // 31: exam.CheckExamAccessResponse
+	(*UpdateQuestionRequest)(nil),     // 32: exam.UpdateQuestionRequest
+	(*UpdateQuestionResponse)(nil),    // 33: exam.UpdateQuestionResponse
+	(*DeleteQuestionRequest)(nil),     // 34: exam.DeleteQuestionRequest
+	(*DeleteQuestionResponse)(nil),    // 35: exam.DeleteQuestionResponse
+	(*ExamListItem)(nil),              // 36: exam.ExamListItem
+	(*GetExamsRequest)(nil),           // 37: exam.GetExamsRequest
+	(*GetExamsResponse)(nil),          // 38: exam.GetExamsResponse
+	(*UpdateExamRequest)(nil),         // 39: exam.UpdateExamRequest
+	(*UpdateExamResponse)(nil),        // 40: exam.UpdateExamResponse
+	(*DeleteExamRequest)(nil),         // 41: exam.DeleteExamRequest
+	(*DeleteExamResponse)(nil),        // 42: exam.DeleteExamResponse
+	(*PublishExamRequest)(nil),        // 43: exam.PublishExamRequest
+	(*PublishExamResponse)(nil),       // 44: exam.PublishExamResponse
+	(*UserAnswer)(nil),                // 45: exam.UserAnswer
+	(*SubmitExamRequest)(nil),         // 46: exam.SubmitExamRequest
+	(*SubmitExamResponse)(nil),        // 47: exam.SubmitExamResponse
+	(*GetSubmissionRequest)(nil),      // 48: exam.GetSubmissionRequest
+	(*SubmissionDetail)(nil),          // 49: exam.SubmissionDetail
+	(*ChoiceReview)(nil),              // 50: exam.ChoiceReview
+	(*GetSubmissionResponse)(nil),     // 51: exam.GetSubmissionResponse
+	(*GetUserExamStatsRequest)(nil),   // 52: exam.GetUserExamStatsRequest
+	(*GetUserExamStatsResponse)(nil),  // 53: exam.GetUserExamStatsResponse
+	(*GetExamCountRequest)(nil),       // 54: exam.GetExamCountRequest
+	(*GetExamCountResponse)(nil),      // 55: exam.GetExamCountResponse
 }
 var file_exam_proto_depIdxs = []int32{
 	0,  // 0: exam.CreateTopicResponse.topic:type_name -> exam.Topic
 	0,  // 1: exam.GetTopicsResponse.topics:type_name -> exam.Topic
-	5,  // 2: exam.CreateQuestionRequest.choices:type_name -> exam.ChoiceInput
-	10, // 3: exam.QuestionDetails.choices:type_name -> exam.ChoiceDetails
-	11, // 4: exam.GetExamDetailsResponse.questions:type_name -> exam.QuestionDetails
-	14, // 5: exam.SubmitExamRequest.answers:type_name -> exam.UserAnswer
-	19, // 6: exam.GetSubmissionResponse.details:type_name -> exam.SubmissionDetail
-	20, // 7: exam.SubmissionDetail.choices:type_name -> exam.ChoiceReview
-	23, // 8: exam.GetExamsResponse.exams:type_name -> exam.ExamListItem
-	5,  // 9: exam.UpdateQuestionRequest.choices:type_name -> exam.ChoiceInput
-	1,  // 10: exam.ExamService.CreateTopic:input_type -> exam.CreateTopicRequest
-	3,  // 11: exam.ExamService.GetTopics:input_type -> exam.GetTopicsRequest
-	6,  // 12: exam.ExamService.CreateQuestion:input_type -> exam.CreateQuestionRequest
-	8,  // 13: exam.ExamService.CreateExam:input_type -> exam.CreateExamRequest
-	12, // 14: exam.ExamService.GetExamDetails:input_type -> exam.GetExamDetailsRequest
-	15, // 15: exam.ExamService.SubmitExam:input_type -> exam.SubmitExamRequest
-	17, // 16: exam.ExamService.GetSubmission:input_type -> exam.GetSubmissionRequest
-	21, // 17: exam.ExamService.GetExamCount:input_type -> exam.GetExamCountRequest
-	24, // 18: exam.ExamService.GetExams:input_type -> exam.GetExamsRequest
-	26, // 19: exam.ExamService.PublishExam:input_type -> exam.PublishExamRequest
-	28, // 20: exam.ExamService.UpdateQuestion:input_type -> exam.UpdateQuestionRequest
-	30, // 21: exam.ExamService.DeleteQuestion:input_type -> exam.DeleteQuestionRequest
-	32, // 22: exam.ExamService.UpdateExam:input_type -> exam.UpdateExamRequest
-	34, // 23: exam.ExamService.DeleteExam:input_type -> exam.DeleteExamRequest
-	36, // 24: exam.ExamService.GetUserExamStats:input_type -> exam.GetUserExamStatsRequest
-	2,  // 25: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
-	4,  // 26: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
-	7,  // 27: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
-	9,  // 28: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
-	13, // 29: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
-	16, // 30: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
-	18, // 31: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
-	22, // 32: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
-	25, // 33: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
-	27, // 34: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
-	29, // 35: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
-	31, // 36: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
-	33, // 37: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
-	35, // 38: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
-	37, // 39: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
-	25, // [25:40] is the sub-list for method output_type
-	10, // [10:25] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	1,  // 2: exam.CreateSectionResponse.section:type_name -> exam.Section
+	1,  // 3: exam.GetSectionsResponse.sections:type_name -> exam.Section
+	10, // 4: exam.CreateQuestionRequest.choices:type_name -> exam.ChoiceInput
+	17, // 5: exam.CreateExamRequest.settings:type_name -> exam.ExamSettings
+	17, // 6: exam.GenerateExamRequest.settings:type_name -> exam.ExamSettings
+	19, // 7: exam.GenerateExamRequest.section_configs:type_name -> exam.SectionConfig
+	22, // 8: exam.QuestionDetails.choices:type_name -> exam.ChoiceDetails
+	17, // 9: exam.GetExamDetailsResponse.settings:type_name -> exam.ExamSettings
+	23, // 10: exam.GetExamDetailsResponse.questions:type_name -> exam.QuestionDetails
+	10, // 11: exam.UpdateQuestionRequest.choices:type_name -> exam.ChoiceInput
+	36, // 12: exam.GetExamsResponse.exams:type_name -> exam.ExamListItem
+	17, // 13: exam.UpdateExamRequest.settings:type_name -> exam.ExamSettings
+	45, // 14: exam.SubmitExamRequest.answers:type_name -> exam.UserAnswer
+	50, // 15: exam.SubmissionDetail.choices:type_name -> exam.ChoiceReview
+	49, // 16: exam.GetSubmissionResponse.details:type_name -> exam.SubmissionDetail
+	2,  // 17: exam.ExamService.CreateTopic:input_type -> exam.CreateTopicRequest
+	4,  // 18: exam.ExamService.GetTopics:input_type -> exam.GetTopicsRequest
+	6,  // 19: exam.ExamService.CreateSection:input_type -> exam.CreateSectionRequest
+	8,  // 20: exam.ExamService.GetSections:input_type -> exam.GetSectionsRequest
+	11, // 21: exam.ExamService.CreateQuestion:input_type -> exam.CreateQuestionRequest
+	15, // 22: exam.ExamService.ImportQuestions:input_type -> exam.ImportQuestionsRequest
+	32, // 23: exam.ExamService.UpdateQuestion:input_type -> exam.UpdateQuestionRequest
+	34, // 24: exam.ExamService.DeleteQuestion:input_type -> exam.DeleteQuestionRequest
+	13, // 25: exam.ExamService.GetUploadURL:input_type -> exam.GetUploadURLRequest
+	18, // 26: exam.ExamService.CreateExam:input_type -> exam.CreateExamRequest
+	20, // 27: exam.ExamService.GenerateExam:input_type -> exam.GenerateExamRequest
+	24, // 28: exam.ExamService.GetExamDetails:input_type -> exam.GetExamDetailsRequest
+	37, // 29: exam.ExamService.GetExams:input_type -> exam.GetExamsRequest
+	39, // 30: exam.ExamService.UpdateExam:input_type -> exam.UpdateExamRequest
+	41, // 31: exam.ExamService.DeleteExam:input_type -> exam.DeleteExamRequest
+	43, // 32: exam.ExamService.PublishExam:input_type -> exam.PublishExamRequest
+	26, // 33: exam.ExamService.RequestExamAccess:input_type -> exam.RequestExamAccessRequest
+	28, // 34: exam.ExamService.ApproveExamAccess:input_type -> exam.ApproveExamAccessRequest
+	30, // 35: exam.ExamService.CheckExamAccess:input_type -> exam.CheckExamAccessRequest
+	46, // 36: exam.ExamService.SubmitExam:input_type -> exam.SubmitExamRequest
+	48, // 37: exam.ExamService.GetSubmission:input_type -> exam.GetSubmissionRequest
+	52, // 38: exam.ExamService.GetUserExamStats:input_type -> exam.GetUserExamStatsRequest
+	54, // 39: exam.ExamService.GetExamCount:input_type -> exam.GetExamCountRequest
+	3,  // 40: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
+	5,  // 41: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
+	7,  // 42: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
+	9,  // 43: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
+	12, // 44: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
+	16, // 45: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
+	33, // 46: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
+	35, // 47: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
+	14, // 48: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
+	21, // 49: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
+	21, // 50: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
+	25, // 51: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
+	38, // 52: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
+	40, // 53: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
+	42, // 54: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
+	44, // 55: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
+	27, // 56: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
+	29, // 57: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
+	31, // 58: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
+	47, // 59: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
+	51, // 60: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
+	53, // 61: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
+	55, // 62: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
+	40, // [40:63] is the sub-list for method output_type
+	17, // [17:40] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_exam_proto_init() }
@@ -2557,7 +3725,7 @@ func file_exam_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_exam_proto_rawDesc), len(file_exam_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   38,
+			NumMessages:   56,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
