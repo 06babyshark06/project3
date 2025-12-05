@@ -33,6 +33,11 @@ service ExamService {
   rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
   rpc GetUserExamStats(GetUserExamStatsRequest) returns (GetUserExamStatsResponse);
   rpc GetExamCount(GetExamCountRequest) returns (GetExamCountResponse);
+
+  rpc SaveAnswer(SaveAnswerRequest) returns (SaveAnswerResponse);
+  rpc LogViolation(LogViolationRequest) returns (LogViolationResponse);
+  rpc GetExamStatsDetailed(GetExamStatsDetailedRequest) returns (GetExamStatsDetailedResponse);
+  rpc ExportExamResults(ExportExamResultsRequest) returns (ExportExamResultsResponse);
 }
 
 message Topic {
@@ -182,3 +187,32 @@ message GetUserExamStatsRequest { int64 user_id = 1; }
 message GetUserExamStatsResponse { int64 total_exams_taken = 1; }
 message GetExamCountRequest {}
 message GetExamCountResponse { int64 count = 1; }
+
+message SaveAnswerRequest {
+  int64 user_id = 1;
+  int64 exam_id = 2;
+  int64 question_id = 3;
+  int64 chosen_choice_id = 4;
+}
+message SaveAnswerResponse { bool success = 1; }
+
+message LogViolationRequest {
+  int64 user_id = 1;
+  int64 exam_id = 2;
+  string violation_type = 3;
+  string violation_time = 4;
+}
+message LogViolationResponse { bool success = 1; }
+
+message GetExamStatsDetailedRequest { int64 exam_id = 1; }
+message GetExamStatsDetailedResponse {
+  int64 total_students = 1;
+  int64 submitted_count = 2;
+  double average_score = 3;
+  double highest_score = 4;
+  double lowest_score = 5;
+  map<string, int32> score_distribution = 6;
+}
+
+message ExportExamResultsRequest { int64 exam_id = 1; int64 requester_id = 2; }
+message ExportExamResultsResponse { string file_url = 1; }

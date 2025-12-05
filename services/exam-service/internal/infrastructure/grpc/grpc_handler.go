@@ -52,3 +52,19 @@ func (h *gRPCHandler) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 func (h *gRPCHandler) GetSubmission(ctx context.Context, req *pb.GetSubmissionRequest) (*pb.GetSubmissionResponse, error) { return h.service.GetSubmission(ctx, req) }
 func (h *gRPCHandler) GetExamCount(ctx context.Context, req *pb.GetExamCountRequest) (*pb.GetExamCountResponse, error) { return h.service.GetExamCount(ctx, req) }
 func (h *gRPCHandler) GetUserExamStats(ctx context.Context, req *pb.GetUserExamStatsRequest) (*pb.GetUserExamStatsResponse, error) { return h.service.GetUserExamStats(ctx, req) }
+
+func (h *gRPCHandler) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest) (*pb.SaveAnswerResponse, error) {
+	return h.service.SaveAnswer(ctx, req)
+}
+
+func (h *gRPCHandler) LogViolation(ctx context.Context, req *pb.LogViolationRequest) (*pb.LogViolationResponse, error) {
+	return h.service.LogViolation(ctx, req)
+}
+
+func (h *gRPCHandler) GetExamStatsDetailed(ctx context.Context, req *pb.GetExamStatsDetailedRequest) (*pb.GetExamStatsDetailedResponse, error) {
+	return h.service.GetExamStatsDetailed(ctx, req)
+}
+
+func (h *gRPCHandler) ExportExamResults(ctx context.Context, req *pb.ExportExamResultsRequest) (*pb.ExportExamResultsResponse, error) {
+	return h.service.ExportExamResults(ctx, req)
+}

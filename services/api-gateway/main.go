@@ -54,9 +54,9 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://[::1]:3000"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders: []string{"Content-Type", "Authorization"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://[::1]:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
 
@@ -78,8 +78,8 @@ func main() {
 
 			auth.GET("/courses/:id", courseHandler.GetCourseDetails)
 			auth.GET("/exams/:id", examHandler.GetExamDetails)
-			
-			auth.GET("/exam-sections", examHandler.GetSections) 
+
+			auth.GET("/exam-sections", examHandler.GetSections)
 			auth.GET("/topics", examHandler.GetTopics)
 
 			userSelf := auth.Group("/users")
@@ -123,22 +123,24 @@ func main() {
 				instructorOnly.POST("/lessons/upload-url", courseHandler.GetUploadURL)
 
 				instructorOnly.POST("/topics", examHandler.CreateTopic)
-				instructorOnly.POST("/exam-sections", examHandler.CreateSection) 
+				instructorOnly.POST("/exam-sections", examHandler.CreateSection)
 
 				instructorOnly.POST("/questions/import", examHandler.ImportQuestions)
 				instructorOnly.POST("/questions/upload-url", examHandler.GetUploadURL)
 				instructorOnly.POST("/questions", examHandler.CreateQuestion)
 				instructorOnly.PUT("/questions/:id", examHandler.UpdateQuestion)
 				instructorOnly.DELETE("/questions/:id", examHandler.DeleteQuestion)
-				
+
 				instructorOnly.POST("/exams", examHandler.CreateExam)
 				instructorOnly.POST("/exams/generate", examHandler.GenerateExam)
 				instructorOnly.PUT("/exams/:id", examHandler.UpdateExam)
 				instructorOnly.PUT("/exams/:id/publish", examHandler.PublishExam)
 				instructorOnly.GET("/instructor/exams", examHandler.GetInstructorExams)
 				instructorOnly.DELETE("/exams/:id", examHandler.DeleteExam)
-				
+
 				instructorOnly.PUT("/exams/access/approve", examHandler.ApproveAccess)
+				instructorOnly.GET("/exams/:id/stats", examHandler.GetExamStats)
+				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
 			}
 
 			studentOnly := auth.Group("/")
@@ -147,11 +149,13 @@ func main() {
 				studentOnly.POST("/courses/enroll", courseHandler.EnrollCourse)
 				studentOnly.GET("/my-courses", courseHandler.GetMyCourses)
 				studentOnly.POST("/lessons/complete", courseHandler.MarkLessonCompleted)
-				
+
 				studentOnly.POST("/exams/submit", examHandler.SubmitExam)
 				studentOnly.GET("/submissions/:id", examHandler.GetSubmission)
 				studentOnly.POST("/exams/access/request", examHandler.RequestAccess)
 				studentOnly.GET("/exams/access/check", examHandler.CheckAccess)
+				studentOnly.POST("/exams/save-answer", examHandler.SaveAnswer)
+				studentOnly.POST("/exams/log-violation", examHandler.LogViolation)
 			}
 		}
 	}

@@ -184,3 +184,36 @@ func (r *examRepository) CountSubmissionsForExam(ctx context.Context, examID, us
 	err := database.DB.WithContext(ctx).Model(&domain.ExamSubmissionModel{}).Where("exam_id = ? AND user_id = ?", examID, userID).Count(&count).Error
 	return count, err
 }
+
+func (r *examRepository) SaveUserAnswer(ctx context.Context, tx *gorm.DB, ans *domain.UserAnswerModel) error {
+	var existing domain.UserAnswerModel
+	err := tx.WithContext(ctx).
+		Where("submission_id = ? AND question_id = ?", ans.SubmissionID, ans.QuestionID).
+		First(&existing).Error
+
+	if err == nil {
+		existing.ChosenChoiceID = ans.ChosenChoiceID
+        existing.IsCorrect = ans.IsCorrect
+		return tx.WithContext(ctx).Save(&existing).Error
+	}
+	return tx.WithContext(ctx).Create(ans).Error
+}
+
+func (r *examRepository) LogViolation(ctx context.Context, v *domain.ExamViolationModel) error {
+    return database.DB.WithContext(ctx).Create(v).Error
+}
+
+func (r *examRepository) GetExamSubmissions(ctx context.Context, examID int64) ([]*domain.ExamSubmissionModel, error) {
+    var subs []*domain.ExamSubmissionModel
+    err := database.DB.WithContext(ctx).
+        Preload("Status").
+        Where("exam_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", examID).
+        Find(&subs).Error
+    return subs, err
+}
+
+func (r *examRepository) GetViolationsByExam(ctx context.Context, examID int64) ([]*domain.ExamViolationModel, error) {
+    var vs []*domain.ExamViolationModel
+    err := database.DB.WithContext(ctx).Where("exam_id = ?", examID).Find(&vs).Error
+    return vs, err
+}

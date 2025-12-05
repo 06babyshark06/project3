@@ -19,29 +19,33 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ExamService_CreateTopic_FullMethodName       = "/exam.ExamService/CreateTopic"
-	ExamService_GetTopics_FullMethodName         = "/exam.ExamService/GetTopics"
-	ExamService_CreateSection_FullMethodName     = "/exam.ExamService/CreateSection"
-	ExamService_GetSections_FullMethodName       = "/exam.ExamService/GetSections"
-	ExamService_CreateQuestion_FullMethodName    = "/exam.ExamService/CreateQuestion"
-	ExamService_ImportQuestions_FullMethodName   = "/exam.ExamService/ImportQuestions"
-	ExamService_UpdateQuestion_FullMethodName    = "/exam.ExamService/UpdateQuestion"
-	ExamService_DeleteQuestion_FullMethodName    = "/exam.ExamService/DeleteQuestion"
-	ExamService_GetUploadURL_FullMethodName      = "/exam.ExamService/GetUploadURL"
-	ExamService_CreateExam_FullMethodName        = "/exam.ExamService/CreateExam"
-	ExamService_GenerateExam_FullMethodName      = "/exam.ExamService/GenerateExam"
-	ExamService_GetExamDetails_FullMethodName    = "/exam.ExamService/GetExamDetails"
-	ExamService_GetExams_FullMethodName          = "/exam.ExamService/GetExams"
-	ExamService_UpdateExam_FullMethodName        = "/exam.ExamService/UpdateExam"
-	ExamService_DeleteExam_FullMethodName        = "/exam.ExamService/DeleteExam"
-	ExamService_PublishExam_FullMethodName       = "/exam.ExamService/PublishExam"
-	ExamService_RequestExamAccess_FullMethodName = "/exam.ExamService/RequestExamAccess"
-	ExamService_ApproveExamAccess_FullMethodName = "/exam.ExamService/ApproveExamAccess"
-	ExamService_CheckExamAccess_FullMethodName   = "/exam.ExamService/CheckExamAccess"
-	ExamService_SubmitExam_FullMethodName        = "/exam.ExamService/SubmitExam"
-	ExamService_GetSubmission_FullMethodName     = "/exam.ExamService/GetSubmission"
-	ExamService_GetUserExamStats_FullMethodName  = "/exam.ExamService/GetUserExamStats"
-	ExamService_GetExamCount_FullMethodName      = "/exam.ExamService/GetExamCount"
+	ExamService_CreateTopic_FullMethodName          = "/exam.ExamService/CreateTopic"
+	ExamService_GetTopics_FullMethodName            = "/exam.ExamService/GetTopics"
+	ExamService_CreateSection_FullMethodName        = "/exam.ExamService/CreateSection"
+	ExamService_GetSections_FullMethodName          = "/exam.ExamService/GetSections"
+	ExamService_CreateQuestion_FullMethodName       = "/exam.ExamService/CreateQuestion"
+	ExamService_ImportQuestions_FullMethodName      = "/exam.ExamService/ImportQuestions"
+	ExamService_UpdateQuestion_FullMethodName       = "/exam.ExamService/UpdateQuestion"
+	ExamService_DeleteQuestion_FullMethodName       = "/exam.ExamService/DeleteQuestion"
+	ExamService_GetUploadURL_FullMethodName         = "/exam.ExamService/GetUploadURL"
+	ExamService_CreateExam_FullMethodName           = "/exam.ExamService/CreateExam"
+	ExamService_GenerateExam_FullMethodName         = "/exam.ExamService/GenerateExam"
+	ExamService_GetExamDetails_FullMethodName       = "/exam.ExamService/GetExamDetails"
+	ExamService_GetExams_FullMethodName             = "/exam.ExamService/GetExams"
+	ExamService_UpdateExam_FullMethodName           = "/exam.ExamService/UpdateExam"
+	ExamService_DeleteExam_FullMethodName           = "/exam.ExamService/DeleteExam"
+	ExamService_PublishExam_FullMethodName          = "/exam.ExamService/PublishExam"
+	ExamService_RequestExamAccess_FullMethodName    = "/exam.ExamService/RequestExamAccess"
+	ExamService_ApproveExamAccess_FullMethodName    = "/exam.ExamService/ApproveExamAccess"
+	ExamService_CheckExamAccess_FullMethodName      = "/exam.ExamService/CheckExamAccess"
+	ExamService_SubmitExam_FullMethodName           = "/exam.ExamService/SubmitExam"
+	ExamService_GetSubmission_FullMethodName        = "/exam.ExamService/GetSubmission"
+	ExamService_GetUserExamStats_FullMethodName     = "/exam.ExamService/GetUserExamStats"
+	ExamService_GetExamCount_FullMethodName         = "/exam.ExamService/GetExamCount"
+	ExamService_SaveAnswer_FullMethodName           = "/exam.ExamService/SaveAnswer"
+	ExamService_LogViolation_FullMethodName         = "/exam.ExamService/LogViolation"
+	ExamService_GetExamStatsDetailed_FullMethodName = "/exam.ExamService/GetExamStatsDetailed"
+	ExamService_ExportExamResults_FullMethodName    = "/exam.ExamService/ExportExamResults"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -71,6 +75,10 @@ type ExamServiceClient interface {
 	GetSubmission(ctx context.Context, in *GetSubmissionRequest, opts ...grpc.CallOption) (*GetSubmissionResponse, error)
 	GetUserExamStats(ctx context.Context, in *GetUserExamStatsRequest, opts ...grpc.CallOption) (*GetUserExamStatsResponse, error)
 	GetExamCount(ctx context.Context, in *GetExamCountRequest, opts ...grpc.CallOption) (*GetExamCountResponse, error)
+	SaveAnswer(ctx context.Context, in *SaveAnswerRequest, opts ...grpc.CallOption) (*SaveAnswerResponse, error)
+	LogViolation(ctx context.Context, in *LogViolationRequest, opts ...grpc.CallOption) (*LogViolationResponse, error)
+	GetExamStatsDetailed(ctx context.Context, in *GetExamStatsDetailedRequest, opts ...grpc.CallOption) (*GetExamStatsDetailedResponse, error)
+	ExportExamResults(ctx context.Context, in *ExportExamResultsRequest, opts ...grpc.CallOption) (*ExportExamResultsResponse, error)
 }
 
 type examServiceClient struct {
@@ -311,6 +319,46 @@ func (c *examServiceClient) GetExamCount(ctx context.Context, in *GetExamCountRe
 	return out, nil
 }
 
+func (c *examServiceClient) SaveAnswer(ctx context.Context, in *SaveAnswerRequest, opts ...grpc.CallOption) (*SaveAnswerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SaveAnswerResponse)
+	err := c.cc.Invoke(ctx, ExamService_SaveAnswer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) LogViolation(ctx context.Context, in *LogViolationRequest, opts ...grpc.CallOption) (*LogViolationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LogViolationResponse)
+	err := c.cc.Invoke(ctx, ExamService_LogViolation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) GetExamStatsDetailed(ctx context.Context, in *GetExamStatsDetailedRequest, opts ...grpc.CallOption) (*GetExamStatsDetailedResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExamStatsDetailedResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetExamStatsDetailed_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) ExportExamResults(ctx context.Context, in *ExportExamResultsRequest, opts ...grpc.CallOption) (*ExportExamResultsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExportExamResultsResponse)
+	err := c.cc.Invoke(ctx, ExamService_ExportExamResults_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -338,6 +386,10 @@ type ExamServiceServer interface {
 	GetSubmission(context.Context, *GetSubmissionRequest) (*GetSubmissionResponse, error)
 	GetUserExamStats(context.Context, *GetUserExamStatsRequest) (*GetUserExamStatsResponse, error)
 	GetExamCount(context.Context, *GetExamCountRequest) (*GetExamCountResponse, error)
+	SaveAnswer(context.Context, *SaveAnswerRequest) (*SaveAnswerResponse, error)
+	LogViolation(context.Context, *LogViolationRequest) (*LogViolationResponse, error)
+	GetExamStatsDetailed(context.Context, *GetExamStatsDetailedRequest) (*GetExamStatsDetailedResponse, error)
+	ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -416,6 +468,18 @@ func (UnimplementedExamServiceServer) GetUserExamStats(context.Context, *GetUser
 }
 func (UnimplementedExamServiceServer) GetExamCount(context.Context, *GetExamCountRequest) (*GetExamCountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetExamCount not implemented")
+}
+func (UnimplementedExamServiceServer) SaveAnswer(context.Context, *SaveAnswerRequest) (*SaveAnswerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveAnswer not implemented")
+}
+func (UnimplementedExamServiceServer) LogViolation(context.Context, *LogViolationRequest) (*LogViolationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LogViolation not implemented")
+}
+func (UnimplementedExamServiceServer) GetExamStatsDetailed(context.Context, *GetExamStatsDetailedRequest) (*GetExamStatsDetailedResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExamStatsDetailed not implemented")
+}
+func (UnimplementedExamServiceServer) ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExportExamResults not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -852,6 +916,78 @@ func _ExamService_GetExamCount_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_SaveAnswer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveAnswerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).SaveAnswer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_SaveAnswer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).SaveAnswer(ctx, req.(*SaveAnswerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_LogViolation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogViolationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).LogViolation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_LogViolation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).LogViolation(ctx, req.(*LogViolationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_GetExamStatsDetailed_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExamStatsDetailedRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetExamStatsDetailed(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetExamStatsDetailed_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetExamStatsDetailed(ctx, req.(*GetExamStatsDetailedRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_ExportExamResults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExportExamResultsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).ExportExamResults(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_ExportExamResults_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).ExportExamResults(ctx, req.(*ExportExamResultsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -950,6 +1086,22 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExamCount",
 			Handler:    _ExamService_GetExamCount_Handler,
+		},
+		{
+			MethodName: "SaveAnswer",
+			Handler:    _ExamService_SaveAnswer_Handler,
+		},
+		{
+			MethodName: "LogViolation",
+			Handler:    _ExamService_LogViolation_Handler,
+		},
+		{
+			MethodName: "GetExamStatsDetailed",
+			Handler:    _ExamService_GetExamStatsDetailed_Handler,
+		},
+		{
+			MethodName: "ExportExamResults",
+			Handler:    _ExamService_ExportExamResults_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

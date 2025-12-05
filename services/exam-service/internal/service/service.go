@@ -848,3 +848,146 @@ func (s *examService) GetUserExamStats(ctx context.Context, req *pb.GetUserExamS
 		TotalExamsTaken: count,
 	}, nil
 }
+
+func (s *examService) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest) (*pb.SaveAnswerResponse, error) {
+    var sub domain.ExamSubmissionModel
+    err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).First(&sub).Error
+    if err != nil {
+        return nil, errors.New("không tìm thấy bài làm đang diễn ra")
+    }
+
+    correctMap, _ := s.repo.GetCorrectAnswers(ctx, req.ExamId)
+    correctChoices := correctMap[req.QuestionId]
+    
+    isCorrect := false
+    for _, cID := range correctChoices {
+        if cID == req.ChosenChoiceId {
+            isCorrect = true
+            break
+        }
+    }
+
+    ans := &domain.UserAnswerModel{
+        SubmissionID:   sub.Id,
+        QuestionID:     req.QuestionId,
+        ChosenChoiceID: &req.ChosenChoiceId,
+        IsCorrect:      &isCorrect,
+    }
+    
+    err = database.DB.Transaction(func(tx *gorm.DB) error {
+        return s.repo.SaveUserAnswer(ctx, tx, ans)
+    })
+
+    return &pb.SaveAnswerResponse{Success: err == nil}, err
+}
+
+func (s *examService) LogViolation(ctx context.Context, req *pb.LogViolationRequest) (*pb.LogViolationResponse, error) {
+    v := &domain.ExamViolationModel{
+        ExamID:        req.ExamId,
+        UserID:        req.UserId,
+        ViolationType: req.ViolationType,
+        ViolationTime: time.Now().UTC(),
+    }
+    err := s.repo.LogViolation(ctx, v)
+    return &pb.LogViolationResponse{Success: err == nil}, err
+}
+
+func (s *examService) GetExamStatsDetailed(ctx context.Context, req *pb.GetExamStatsDetailedRequest) (*pb.GetExamStatsDetailedResponse, error) {
+    submissions, err := s.repo.GetExamSubmissions(ctx, req.ExamId)
+    if err != nil { return nil, err }
+
+    total := int64(len(submissions))
+    if total == 0 {
+        return &pb.GetExamStatsDetailedResponse{}, nil
+    }
+
+    var sum, highest, lowest float64
+    lowest = 10.0
+    dist := make(map[string]int32)
+    
+    ranges := []string{"0-2", "2-4", "4-6", "6-8", "8-10"}
+    for _, r := range ranges { dist[r] = 0 }
+
+    for _, sub := range submissions {
+        score := sub.Score
+        sum += score
+        if score > highest { highest = score }
+        if score < lowest { lowest = score }
+
+        if score < 2 { dist["0-2"]++ } else if score < 4 { dist["2-4"]++ } else if score < 6 { dist["4-6"]++ } else if score < 8 { dist["6-8"]++ } else { dist["8-10"]++ }
+    }
+
+    return &pb.GetExamStatsDetailedResponse{
+        TotalStudents:     total,
+        SubmittedCount:    total,
+        AverageScore:      sum / float64(total),
+        HighestScore:      highest,
+        LowestScore:       lowest,
+        ScoreDistribution: dist,
+    }, nil
+}
+
+func (s *examService) ExportExamResults(ctx context.Context, req *pb.ExportExamResultsRequest) (*pb.ExportExamResultsResponse, error) {
+    submissions, err := s.repo.GetExamSubmissions(ctx, req.ExamId)
+    if err != nil { return nil, err }
+
+    f := excelize.NewFile()
+    sheetName := "Results"
+    f.NewSheet(sheetName)
+    f.SetCellValue(sheetName, "A1", "User ID")
+    f.SetCellValue(sheetName, "B1", "Score")
+    f.SetCellValue(sheetName, "C1", "Submitted At")
+    f.SetCellValue(sheetName, "D1", "Violations Count")
+
+    violations, _ := s.repo.GetViolationsByExam(ctx, req.ExamId)
+    violationMap := make(map[int64]int)
+    for _, v := range violations { violationMap[v.UserID]++ }
+
+    for i, sub := range submissions {
+        row := i + 2
+        f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), sub.UserID)
+        f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), sub.Score)
+        f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), sub.SubmittedAt.Format(time.RFC3339))
+        f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), violationMap[sub.UserID])
+    }
+
+    buf, err := f.WriteToBuffer()
+    if err != nil { return nil, err }
+
+    fileKey := fmt.Sprintf("exports/exam_%d_%d.xlsx", req.ExamId, time.Now().Unix())
+    bucketName := env.GetString("R2_BUCKET_NAME", "")
+    
+    client, err := s.createR2ClientForUpload(ctx) 
+    if err != nil { return nil, err }
+
+    _, err = client.PutObject(ctx, &s3.PutObjectInput{
+        Bucket:      aws.String(bucketName),
+        Key:         aws.String(fileKey),
+        Body:        bytes.NewReader(buf.Bytes()),
+        ContentType: aws.String("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+    })
+    if err != nil { return nil, err }
+
+    publicDomain := env.GetString("R2_PUBLIC_DOMAIN", "")
+    finalURL := fmt.Sprintf("https://%s/%s", publicDomain, fileKey)
+
+    return &pb.ExportExamResultsResponse{FileUrl: finalURL}, nil
+}
+
+func (s *examService) createR2ClientForUpload(ctx context.Context) (*s3.Client, error) {
+    accountID := env.GetString("R2_ACCOUNT_ID", "")
+    accessKey := env.GetString("R2_ACCESS_KEY_ID", "")
+    secretKey := env.GetString("R2_SECRET_ACCESS_KEY", "")
+    endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
+
+    cfg, err := config.LoadDefaultConfig(ctx,
+        config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+        config.WithRegion("auto"),
+    )
+    if err != nil { return nil, err }
+
+    return s3.NewFromConfig(cfg, func(o *s3.Options) {
+        o.BaseEndpoint = aws.String(endpoint)
+        o.UsePathStyle = true
+    }), nil
+}

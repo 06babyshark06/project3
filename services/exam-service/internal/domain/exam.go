@@ -127,6 +127,15 @@ type UserAnswerModel struct {
 	CreatedAt      time.Time
 }
 
+type ExamViolationModel struct {
+	Id            int64     `gorm:"primaryKey;autoIncrement"`
+	ExamID        int64     `gorm:"not null;index"`
+	UserID        int64     `gorm:"not null;index"`
+	ViolationType string    `gorm:"size:50"`
+	ViolationTime time.Time
+	CreatedAt     time.Time
+}
+
 type ExamRepository interface {
 	CreateTopic(ctx context.Context, tx *gorm.DB, topic *TopicModel) (*TopicModel, error)
 	GetTopicByName(ctx context.Context, name string) (*TopicModel, error)
@@ -164,6 +173,11 @@ type ExamRepository interface {
 	GetSubmissionByID(ctx context.Context, submissionID int64) (*ExamSubmissionModel, error)
 	CountSubmissionsByUserID(ctx context.Context, userID int64) (int64, error)
 	CountSubmissionsForExam(ctx context.Context, examID, userID int64) (int64, error)
+
+	SaveUserAnswer(ctx context.Context, tx *gorm.DB, ans *UserAnswerModel) error
+    LogViolation(ctx context.Context, violation *ExamViolationModel) error
+    GetExamSubmissions(ctx context.Context, examID int64) ([]*ExamSubmissionModel, error)
+    GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
 }
 
 type EventProducer interface {
@@ -199,4 +213,9 @@ type ExamService interface {
 	SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error)
 	GetSubmission(ctx context.Context, req *pb.GetSubmissionRequest) (*pb.GetSubmissionResponse, error)
 	GetUserExamStats(ctx context.Context, req *pb.GetUserExamStatsRequest) (*pb.GetUserExamStatsResponse, error)
+
+	SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest) (*pb.SaveAnswerResponse, error)
+	LogViolation(ctx context.Context, req *pb.LogViolationRequest) (*pb.LogViolationResponse, error)
+	GetExamStatsDetailed(ctx context.Context, req *pb.GetExamStatsDetailedRequest) (*pb.GetExamStatsDetailedResponse, error)
+	ExportExamResults(ctx context.Context, req *pb.ExportExamResultsRequest) (*pb.ExportExamResultsResponse, error)
 }
