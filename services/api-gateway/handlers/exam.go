@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -54,6 +55,160 @@ func (h *ExamHandler) CreateTopic(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) CreateSection(c *gin.Context) {
+	var req pb.CreateSectionRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	resp, err := h.examClient.CreateSection(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) GetSections(c *gin.Context) {
+	topicID, _ := strconv.ParseInt(c.Query("topic_id"), 10, 64)
+	resp, err := h.examClient.GetSections(c.Request.Context(), &pb.GetSectionsRequest{TopicId: topicID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) ImportQuestions(c *gin.Context) {
+	file, _, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
+		return
+	}
+	defer file.Close()
+
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to read file"})
+		return
+	}
+
+	sectionID, _ := strconv.ParseInt(c.PostForm("section_id"), 10, 64)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.examClient.ImportQuestions(c.Request.Context(), &pb.ImportQuestionsRequest{
+		SectionId:   sectionID,
+		CreatorId:   userID,
+		FileContent: fileBytes,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) GetUploadURL(c *gin.Context) {
+	var req pb.GetUploadURLRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if req.Folder == "" {
+		req.Folder = "questions"
+	}
+
+	resp, err := h.examClient.GetUploadURL(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) GenerateExam(c *gin.Context) {
+	var req pb.GenerateExamRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	req.CreatorId = userID
+
+	resp, err := h.examClient.GenerateExam(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) RequestAccess(c *gin.Context) {
+	var req pb.RequestExamAccessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	req.UserId = userID
+
+	resp, err := h.examClient.RequestExamAccess(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) ApproveAccess(c *gin.Context) {
+	var req pb.ApproveExamAccessRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.examClient.ApproveExamAccess(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) CheckAccess(c *gin.Context) {
+	examID, _ := strconv.ParseInt(c.Query("exam_id"), 10, 64)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.examClient.CheckExamAccess(c.Request.Context(), &pb.CheckExamAccessRequest{
+		ExamId: examID,
+		UserId: userID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *ExamHandler) CreateQuestion(c *gin.Context) {
@@ -116,7 +271,6 @@ func (h *ExamHandler) GetExamDetails(c *gin.Context) {
 }
 
 func (h *ExamHandler) SubmitExam(c *gin.Context) {
-	claims := jwt.ExtractClaims(c)
 	var req pb.SubmitExamRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -129,14 +283,6 @@ func (h *ExamHandler) SubmitExam(c *gin.Context) {
 		return
 	}
 	req.UserId = userID
-	if email, ok := claims["email"].(string); ok {
-		req.Email = email
-	}
-    if fullName, ok := claims["full_name"].(string); ok {
-		req.FullName = fullName
-	} else {
-		req.FullName = "Unknown User"
-	}
 
 	resp, err := h.examClient.SubmitExam(c.Request.Context(), &req)
 	if err != nil {
@@ -309,11 +455,21 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 		return
 	}
 
+	// Cập nhật struct hứng dữ liệu JSON để bao gồm Settings
 	var req struct {
-		Title           string `json:"title"`
-		Description     string `json:"description"`
-		DurationMinutes int    `json:"duration_minutes"`
-		TopicId         int    `json:"topic_id"`
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		TopicId     int64  `json:"topic_id"`
+		Settings    struct {
+			DurationMinutes       int    `json:"duration_minutes"`
+			MaxAttempts           int    `json:"max_attempts"`
+			Password              string `json:"password"`
+			StartTime             string `json:"start_time"` // Format: RFC3339 (e.g., "2023-10-01T08:00:00Z")
+			EndTime               string `json:"end_time"`
+			ShuffleQuestions      bool   `json:"shuffle_questions"`
+			ShowResultImmediately bool   `json:"show_result_immediately"`
+			RequiresApproval      bool   `json:"requires_approval"`
+		} `json:"settings"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -322,11 +478,20 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 	}
 
 	_, err = h.examClient.UpdateExam(c.Request.Context(), &pb.UpdateExamRequest{
-		ExamId:          examID,
-		Title:           req.Title,
-		Description:     req.Description,
-		DurationMinutes: int32(req.DurationMinutes),
-		TopicId:         int64(req.TopicId),
+		ExamId:      examID,
+		Title:       req.Title,
+		Description: req.Description,
+		TopicId:     req.TopicId,
+		Settings: &pb.ExamSettings{
+			DurationMinutes:       int32(req.Settings.DurationMinutes),
+			MaxAttempts:           int32(req.Settings.MaxAttempts),
+			Password:              req.Settings.Password,
+			StartTime:             req.Settings.StartTime,
+			EndTime:               req.Settings.EndTime,
+			ShuffleQuestions:      req.Settings.ShuffleQuestions,
+			ShowResultImmediately: req.Settings.ShowResultImmediately,
+			RequiresApproval:      req.Settings.RequiresApproval,
+		},
 	})
 
 	if err != nil {

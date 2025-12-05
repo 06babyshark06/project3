@@ -69,17 +69,18 @@ func main() {
 		api.POST("/login", authHandler.Login)
 		api.POST("/register", authHandler.Register)
 		api.POST("/refresh", authHandler.Refresh)
-
 		api.GET("/courses", courseHandler.GetCourses)
-		api.GET("/topics", examHandler.GetTopics)
-		api.GET("/exams", examHandler.GetExams)
 
 		auth := api.Group("/")
 		auth.Use(jwtMiddleware.MiddlewareFunc())
 		{
 			auth.POST("/logout", authHandler.Logout)
+
 			auth.GET("/courses/:id", courseHandler.GetCourseDetails)
 			auth.GET("/exams/:id", examHandler.GetExamDetails)
+			
+			auth.GET("/exam-sections", examHandler.GetSections) 
+			auth.GET("/topics", examHandler.GetTopics)
 
 			userSelf := auth.Group("/users")
 			{
@@ -99,7 +100,7 @@ func main() {
 					adminUsers.DELETE("/:id", userHandler.DeleteUser)
 					adminUsers.PUT("/:id/role", userHandler.UpdateUserRole)
 				}
-				
+
 				adminOnly.GET("/admin/stats", statsHandler.GetAdminStats)
 				adminOnly.DELETE("/courses/:id", courseHandler.DeleteCourse)
 			}
@@ -122,24 +123,35 @@ func main() {
 				instructorOnly.POST("/lessons/upload-url", courseHandler.GetUploadURL)
 
 				instructorOnly.POST("/topics", examHandler.CreateTopic)
+				instructorOnly.POST("/exam-sections", examHandler.CreateSection) 
+
+				instructorOnly.POST("/questions/import", examHandler.ImportQuestions)
+				instructorOnly.POST("/questions/upload-url", examHandler.GetUploadURL)
 				instructorOnly.POST("/questions", examHandler.CreateQuestion)
+				instructorOnly.PUT("/questions/:id", examHandler.UpdateQuestion)
+				instructorOnly.DELETE("/questions/:id", examHandler.DeleteQuestion)
+				
 				instructorOnly.POST("/exams", examHandler.CreateExam)
+				instructorOnly.POST("/exams/generate", examHandler.GenerateExam)
 				instructorOnly.PUT("/exams/:id", examHandler.UpdateExam)
 				instructorOnly.PUT("/exams/:id/publish", examHandler.PublishExam)
 				instructorOnly.GET("/instructor/exams", examHandler.GetInstructorExams)
-				instructorOnly.PUT("/questions/:id", examHandler.UpdateQuestion)
-				instructorOnly.DELETE("/questions/:id", examHandler.DeleteQuestion)
 				instructorOnly.DELETE("/exams/:id", examHandler.DeleteExam)
+				
+				instructorOnly.PUT("/exams/access/approve", examHandler.ApproveAccess)
 			}
 
 			studentOnly := auth.Group("/")
-			studentOnly.Use(middlewares.Authorize("student", "admin"))
+			studentOnly.Use(middlewares.Authorize("student", "admin", "instructor"))
 			{
 				studentOnly.POST("/courses/enroll", courseHandler.EnrollCourse)
 				studentOnly.GET("/my-courses", courseHandler.GetMyCourses)
 				studentOnly.POST("/lessons/complete", courseHandler.MarkLessonCompleted)
+				
 				studentOnly.POST("/exams/submit", examHandler.SubmitExam)
 				studentOnly.GET("/submissions/:id", examHandler.GetSubmission)
+				studentOnly.POST("/exams/access/request", examHandler.RequestAccess)
+				studentOnly.GET("/exams/access/check", examHandler.CheckAccess)
 			}
 		}
 	}
