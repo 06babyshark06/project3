@@ -10,6 +10,7 @@ service ExamService {
   rpc CreateSection(CreateSectionRequest) returns (CreateSectionResponse);
   rpc GetSections(GetSectionsRequest) returns (GetSectionsResponse);
 
+  rpc GetQuestions(GetQuestionsRequest) returns (GetQuestionsResponse);
   rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
   rpc ImportQuestions(ImportQuestionsRequest) returns (ImportQuestionsResponse);
   rpc UpdateQuestion(UpdateQuestionRequest) returns (UpdateQuestionResponse);
@@ -216,3 +217,31 @@ message GetExamStatsDetailedResponse {
 
 message ExportExamResultsRequest { int64 exam_id = 1; int64 requester_id = 2; }
 message ExportExamResultsResponse { string file_url = 1; }
+
+message GetQuestionsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  int64 section_id = 3;
+  string difficulty = 4;
+  string search = 5;
+}
+
+message QuestionListItem {
+  int64 id = 1;
+  string content = 2;
+  string question_type = 3;
+  string difficulty = 4;
+  int64 section_id = 5;
+  string section_name = 6;
+  int64 topic_id = 7;
+  string topic_name = 8;
+  string attachment_url = 9;
+  int32 choice_count = 10;
+}
+
+message GetQuestionsResponse {
+  repeated QuestionListItem questions = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
+}

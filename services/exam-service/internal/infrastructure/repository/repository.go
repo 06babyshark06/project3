@@ -217,3 +217,43 @@ func (r *examRepository) GetViolationsByExam(ctx context.Context, examID int64) 
     err := database.DB.WithContext(ctx).Where("exam_id = ?", examID).Find(&vs).Error
     return vs, err
 }
+
+func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, difficulty, search string, page, limit int) ([]*domain.QuestionListItem, int64, error) {
+    var questions []*domain.QuestionListItem
+    var total int64
+
+    query := database.DB.WithContext(ctx).
+        Table("question_models q").
+        Select(`
+            q.id, q.content, qt.type as question_type, qd.difficulty,
+            q.section_id, s.name as section_name, 
+            s.topic_id, t.name as topic_name,
+            q.attachment_url,
+            (SELECT COUNT(*) FROM choice_models WHERE question_id = q.id) as choice_count
+        `).
+        Joins("LEFT JOIN question_type_models qt ON q.type_id = qt.id").
+        Joins("LEFT JOIN question_difficulty_models qd ON q.difficulty_id = qd.id").
+        Joins("LEFT JOIN section_models s ON q.section_id = s.id").
+        Joins("LEFT JOIN topic_models t ON s.topic_id = t.id")
+
+    if sectionID > 0 {
+        query = query.Where("q.section_id = ?", sectionID)
+    }
+
+    if difficulty != "" {
+        query = query.Where("qd.difficulty = ?", difficulty)
+    }
+
+    if search != "" {
+        query = query.Where("q.content ILIKE ?", "%"+search+"%")
+    }
+
+    if err := query.Count(&total).Error; err != nil {
+        return nil, 0, err
+    }
+
+    offset := (page - 1) * limit
+    err := query.Order("q.created_at DESC").Limit(limit).Offset(offset).Scan(&questions).Error
+
+    return questions, total, err
+}

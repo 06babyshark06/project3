@@ -60,6 +60,19 @@ type QuestionModel struct {
 	AttachmentURL string                  `gorm:"size:255" json:"attachment_url"`
 }
 
+type QuestionListItem struct {
+    ID            int64
+    Content       string
+    QuestionType  string
+    Difficulty    string
+    SectionID     int64
+    SectionName   string
+    TopicID       int64
+    TopicName     string
+    AttachmentURL string
+    ChoiceCount   int32
+}
+
 type ExamModel struct {
 	Id              int64      `gorm:"primaryKey;autoIncrement" json:"id"`
 	Title           string     `gorm:"size:255;not null" json:"title"`
@@ -178,6 +191,7 @@ type ExamRepository interface {
     LogViolation(ctx context.Context, violation *ExamViolationModel) error
     GetExamSubmissions(ctx context.Context, examID int64) ([]*ExamSubmissionModel, error)
     GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
+	GetQuestions(ctx context.Context, sectionID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
 }
 
 type EventProducer interface {
@@ -191,6 +205,7 @@ type ExamService interface {
 	CreateSection(ctx context.Context, req *pb.CreateSectionRequest) (*pb.CreateSectionResponse, error)
 	GetSections(ctx context.Context, req *pb.GetSectionsRequest) (*pb.GetSectionsResponse, error)
 
+	GetQuestions(ctx context.Context, req *pb.GetQuestionsRequest) (*pb.GetQuestionsResponse, error)
 	CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error)
 	ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error)
 	UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error)

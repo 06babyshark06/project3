@@ -991,3 +991,51 @@ func (s *examService) createR2ClientForUpload(ctx context.Context) (*s3.Client, 
         o.UsePathStyle = true
     }), nil
 }
+
+func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequest) (*pb.GetQuestionsResponse, error) {
+    page := int(req.Page)
+    if page < 1 {
+        page = 1
+    }
+    limit := int(req.Limit)
+    if limit < 1 {
+        limit = 10
+    }
+
+    questions, total, err := s.repo.GetQuestions(
+        ctx,
+        req.SectionId,
+        req.Difficulty,
+        req.Search,
+        page,
+        limit,
+    )
+    if err != nil {
+        return nil, err
+    }
+
+    var pbQuestions []*pb.QuestionListItem
+    for _, q := range questions {
+        pbQuestions = append(pbQuestions, &pb.QuestionListItem{
+            Id:            q.ID,
+            Content:       q.Content,
+            QuestionType:  q.QuestionType,
+            Difficulty:    q.Difficulty,
+            SectionId:     q.SectionID,
+            SectionName:   q.SectionName,
+            TopicId:       q.TopicID,
+            TopicName:     q.TopicName,
+            AttachmentUrl: q.AttachmentURL,
+            ChoiceCount:   q.ChoiceCount,
+        })
+    }
+
+    totalPages := int32((total + int64(limit) - 1) / int64(limit))
+
+    return &pb.GetQuestionsResponse{
+        Questions:  pbQuestions,
+        Total:      total,
+        Page:       int32(page),
+        TotalPages: totalPages,
+    }, nil
+}

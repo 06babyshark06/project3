@@ -31,6 +31,7 @@ func (h *gRPCHandler) GetTopics(ctx context.Context, req *pb.GetTopicsRequest) (
 func (h *gRPCHandler) CreateSection(ctx context.Context, req *pb.CreateSectionRequest) (*pb.CreateSectionResponse, error) { return h.service.CreateSection(ctx, req) }
 func (h *gRPCHandler) GetSections(ctx context.Context, req *pb.GetSectionsRequest) (*pb.GetSectionsResponse, error) { return h.service.GetSections(ctx, req) }
 
+func (h *gRPCHandler) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequest) (*pb.GetQuestionsResponse, error) { return h.service.GetQuestions(ctx, req) }
 func (h *gRPCHandler) CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) { return h.service.CreateQuestion(ctx, req) }
 func (h *gRPCHandler) ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error) { return h.service.ImportQuestions(ctx, req) }
 func (h *gRPCHandler) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error) { return h.service.UpdateQuestion(ctx, req) }

@@ -610,3 +610,24 @@ func (h *ExamHandler) ExportExamResults(c *gin.Context) {
     }
     c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
+
+func (h *ExamHandler) GetQuestions(c *gin.Context) {
+    page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+    limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+    sectionID, _ := strconv.ParseInt(c.Query("section_id"), 10, 64)
+    difficulty := c.Query("difficulty")
+    search := c.Query("search")
+
+    resp, err := h.examClient.GetQuestions(c.Request.Context(), &pb.GetQuestionsRequest{
+        Page:       int32(page),
+        Limit:      int32(limit),
+        SectionId:  sectionID,
+        Difficulty: difficulty,
+        Search:     search,
+    })
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}

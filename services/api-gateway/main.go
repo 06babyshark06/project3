@@ -125,6 +125,7 @@ func main() {
 				instructorOnly.POST("/topics", examHandler.CreateTopic)
 				instructorOnly.POST("/exam-sections", examHandler.CreateSection)
 
+				instructorOnly.GET("/questions", examHandler.GetQuestions)
 				instructorOnly.POST("/questions/import", examHandler.ImportQuestions)
 				instructorOnly.POST("/questions/upload-url", examHandler.GetUploadURL)
 				instructorOnly.POST("/questions", examHandler.CreateQuestion)
