@@ -131,11 +131,12 @@ type SubmissionStatusModel struct {
 	Status string
 }
 type UserAnswerModel struct {
-	Id             int64
-	SubmissionID   int64
-	QuestionID     int64
-	ChosenChoiceID *int64
-	Choice         ChoiceModel
+	Id             int64       `gorm:"primaryKey;autoIncrement"`
+	SubmissionID   int64       `gorm:"not null;index"`
+	QuestionID     int64       `gorm:"not null"`
+	ChosenChoiceID *int64      
+	Choice         ChoiceModel `gorm:"foreignKey:ChosenChoiceID"` 
+	Question       QuestionModel `gorm:"foreignKey:QuestionID"`
 	IsCorrect      *bool
 	CreatedAt      time.Time
 }
