@@ -218,7 +218,7 @@ func (r *examRepository) GetViolationsByExam(ctx context.Context, examID int64) 
     return vs, err
 }
 
-func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, difficulty, search string, page, limit int) ([]*domain.QuestionListItem, int64, error) {
+func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*domain.QuestionListItem, int64, error) {
     var questions []*domain.QuestionListItem
     var total int64
 
@@ -238,6 +238,10 @@ func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, diff
 
     if sectionID > 0 {
         query = query.Where("q.section_id = ?", sectionID)
+    }
+
+	if topicID > 0 && sectionID == 0 {
+        query = query.Where("q.topic_id = ?", topicID)
     }
 
     if difficulty != "" {

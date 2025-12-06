@@ -224,6 +224,7 @@ message GetQuestionsRequest {
   int64 section_id = 3;
   string difficulty = 4;
   string search = 5;
+  int64 topic_id = 6;
 }
 
 message QuestionListItem {

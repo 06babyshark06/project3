@@ -3748,6 +3748,7 @@ type GetQuestionsRequest struct {
 	SectionId     int64                  `protobuf:"varint,3,opt,name=section_id,json=sectionId,proto3" json:"section_id,omitempty"`
 	Difficulty    string                 `protobuf:"bytes,4,opt,name=difficulty,proto3" json:"difficulty,omitempty"`
 	Search        string                 `protobuf:"bytes,5,opt,name=search,proto3" json:"search,omitempty"`
+	TopicId       int64                  `protobuf:"varint,6,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -3815,6 +3816,13 @@ func (x *GetQuestionsRequest) GetSearch() string {
 		return x.Search
 	}
 	return ""
+}
+
+func (x *GetQuestionsRequest) GetTopicId() int64 {
+	if x != nil {
+		return x.TopicId
+	}
+	return 0
 }
 
 type QuestionListItem struct {
@@ -4282,7 +4290,7 @@ const file_exam_proto_rawDesc = "" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12!\n" +
 	"\frequester_id\x18\x02 \x01(\x03R\vrequesterId\"6\n" +
 	"\x19ExportExamResultsResponse\x12\x19\n" +
-	"\bfile_url\x18\x01 \x01(\tR\afileUrl\"\x96\x01\n" +
+	"\bfile_url\x18\x01 \x01(\tR\afileUrl\"\xb1\x01\n" +
 	"\x13GetQuestionsRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x1d\n" +
@@ -4291,7 +4299,8 @@ const file_exam_proto_rawDesc = "" +
 	"\n" +
 	"difficulty\x18\x04 \x01(\tR\n" +
 	"difficulty\x12\x16\n" +
-	"\x06search\x18\x05 \x01(\tR\x06search\"\xc7\x02\n" +
+	"\x06search\x18\x05 \x01(\tR\x06search\x12\x19\n" +
+	"\btopic_id\x18\x06 \x01(\x03R\atopicId\"\xc7\x02\n" +
 	"\x10QuestionListItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12#\n" +

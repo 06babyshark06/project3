@@ -1005,6 +1005,7 @@ func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequ
     questions, total, err := s.repo.GetQuestions(
         ctx,
         req.SectionId,
+		req.TopicId,
         req.Difficulty,
         req.Search,
         page,

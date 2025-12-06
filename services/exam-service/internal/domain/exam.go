@@ -192,7 +192,7 @@ type ExamRepository interface {
     LogViolation(ctx context.Context, violation *ExamViolationModel) error
     GetExamSubmissions(ctx context.Context, examID int64) ([]*ExamSubmissionModel, error)
     GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
-	GetQuestions(ctx context.Context, sectionID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
+	GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
 }
 
 type EventProducer interface {
