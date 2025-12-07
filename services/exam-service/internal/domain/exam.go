@@ -26,6 +26,10 @@ type SectionModel struct {
 	CreatedAt   time.Time       `json:"created_at"`
 }
 
+func (SectionModel) TableName() string {
+	return "exam_sections"
+}
+
 type QuestionDifficultyModel struct {
 	Id         int64
 	Difficulty string
@@ -39,6 +43,7 @@ type ChoiceModel struct {
 	QuestionID int64
 	Content    string
 	IsCorrect  bool
+	AttachmentURL string `gorm:"size:255" json:"attachment_url"`
 	CreatedAt  time.Time
 }
 
@@ -158,6 +163,7 @@ type ExamRepository interface {
 	GetSectionsByTopic(ctx context.Context, topicID int64) ([]*SectionModel, error)
 	GetSectionByID(ctx context.Context, id int64) (*SectionModel, error)
 
+	GetQuestionByID(ctx context.Context, id int64) (*QuestionModel, error)
 	CreateQuestion(ctx context.Context, tx *gorm.DB, question *QuestionModel) (*QuestionModel, error)
 	CreateChoices(ctx context.Context, tx *gorm.DB, choices []*ChoiceModel) error
 	GetQuestionType(ctx context.Context, typeName string) (*QuestionTypeModel, error)
@@ -207,6 +213,7 @@ type ExamService interface {
 	GetSections(ctx context.Context, req *pb.GetSectionsRequest) (*pb.GetSectionsResponse, error)
 
 	GetQuestions(ctx context.Context, req *pb.GetQuestionsRequest) (*pb.GetQuestionsResponse, error)
+	GetQuestion(ctx context.Context, req *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error)
 	CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error)
 	ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error)
 	UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error)

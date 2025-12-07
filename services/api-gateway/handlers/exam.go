@@ -615,6 +615,7 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
     page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
     limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
     sectionID, _ := strconv.ParseInt(c.Query("section_id"), 10, 64)
+	topicID, _ := strconv.ParseInt(c.Query("topic_id"), 10, 64)
     difficulty := c.Query("difficulty")
     search := c.Query("search")
 
@@ -622,6 +623,7 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
         Page:       int32(page),
         Limit:      int32(limit),
         SectionId:  sectionID,
+		TopicId:    topicID,
         Difficulty: difficulty,
         Search:     search,
     })
@@ -630,4 +632,20 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
         return
     }
     c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) GetQuestion(c *gin.Context) {
+	idStr := c.Param("id")
+	questionID, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid question ID"})
+		return
+	}
+
+	resp, err := h.examClient.GetQuestion(c.Request.Context(), &pb.GetQuestionRequest{QuestionId: questionID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp.Question})
 }

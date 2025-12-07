@@ -140,7 +140,7 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 
 		var choices []*domain.ChoiceModel
 		for _, c := range req.Choices {
-			choices = append(choices, &domain.ChoiceModel{QuestionID: qID, Content: c.Content, IsCorrect: c.IsCorrect})
+			choices = append(choices, &domain.ChoiceModel{QuestionID: qID, Content: c.Content, IsCorrect: c.IsCorrect, AttachmentURL: c.AttachmentUrl})
 		}
 		return s.repo.CreateChoices(ctx, tx, choices)
 	})
@@ -747,9 +747,8 @@ func (s *examService) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestion
 		
 		updates := map[string]interface{}{
 			"content": req.Content, "explanation": req.Explanation,
-			"difficulty_id": diff.Id, "type_id": qType.Id,
+			"difficulty_id": diff.Id, "type_id": qType.Id, "attachment_url": req.AttachmentUrl,
 		}
-		if req.AttachmentUrl != "" { updates["attachment_url"] = req.AttachmentUrl }
 
 		if err := s.repo.UpdateQuestion(ctx, tx, req.QuestionId, updates); err != nil { return err }
 		if err := s.repo.DeleteChoicesByQuestionID(ctx, tx, req.QuestionId); err != nil { return err }
@@ -757,7 +756,7 @@ func (s *examService) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestion
 		if len(req.Choices) > 0 {
 			var choices []*domain.ChoiceModel
 			for _, c := range req.Choices {
-				choices = append(choices, &domain.ChoiceModel{QuestionID: req.QuestionId, Content: c.Content, IsCorrect: c.IsCorrect})
+				choices = append(choices, &domain.ChoiceModel{QuestionID: req.QuestionId, Content: c.Content, IsCorrect: c.IsCorrect, AttachmentURL: c.AttachmentUrl})
 			}
 			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil { return err }
 		}
@@ -1039,4 +1038,49 @@ func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequ
         Page:       int32(page),
         TotalPages: totalPages,
     }, nil
+}
+
+func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
+	// 1. Gọi Repository để lấy câu hỏi kèm các quan hệ (Preload)
+	q, err := s.repo.GetQuestionByID(ctx, req.QuestionId)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Map danh sách đáp án (Choices) sang Proto
+	var pbChoices []*pb.ChoiceDetails
+	for _, c := range q.Choices {
+		pbChoices = append(pbChoices, &pb.ChoiceDetails{
+			Id:        c.Id,
+			Content:   c.Content,
+			IsCorrect: c.IsCorrect,
+			AttachmentUrl: c.AttachmentURL,
+		})
+	}
+
+	// 3. Xử lý các giá trị mặc định để tránh null/empty
+	qType := "single_choice"
+	if q.Type.Type != "" {
+		qType = q.Type.Type
+	}
+
+	difficulty := "medium"
+	if q.Difficulty.Difficulty != "" {
+		difficulty = q.Difficulty.Difficulty
+	}
+
+	// 4. Trả về response đầy đủ
+	return &pb.GetQuestionResponse{
+		Question: &pb.QuestionDetails{
+			Id:            q.Id,
+			Content:       q.Content,
+			QuestionType:  qType,
+			Difficulty:    difficulty,
+			Explanation:   q.Explanation,
+			AttachmentUrl: q.AttachmentURL,
+			SectionName:   q.Section.Name,
+			TopicName:     q.Section.Topic.Name,
+			Choices:       pbChoices,
+		},
+	}, nil
 }

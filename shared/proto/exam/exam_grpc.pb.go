@@ -25,6 +25,7 @@ const (
 	ExamService_GetSections_FullMethodName          = "/exam.ExamService/GetSections"
 	ExamService_GetQuestions_FullMethodName         = "/exam.ExamService/GetQuestions"
 	ExamService_CreateQuestion_FullMethodName       = "/exam.ExamService/CreateQuestion"
+	ExamService_GetQuestion_FullMethodName          = "/exam.ExamService/GetQuestion"
 	ExamService_ImportQuestions_FullMethodName      = "/exam.ExamService/ImportQuestions"
 	ExamService_UpdateQuestion_FullMethodName       = "/exam.ExamService/UpdateQuestion"
 	ExamService_DeleteQuestion_FullMethodName       = "/exam.ExamService/DeleteQuestion"
@@ -59,6 +60,7 @@ type ExamServiceClient interface {
 	GetSections(ctx context.Context, in *GetSectionsRequest, opts ...grpc.CallOption) (*GetSectionsResponse, error)
 	GetQuestions(ctx context.Context, in *GetQuestionsRequest, opts ...grpc.CallOption) (*GetQuestionsResponse, error)
 	CreateQuestion(ctx context.Context, in *CreateQuestionRequest, opts ...grpc.CallOption) (*CreateQuestionResponse, error)
+	GetQuestion(ctx context.Context, in *GetQuestionRequest, opts ...grpc.CallOption) (*GetQuestionResponse, error)
 	ImportQuestions(ctx context.Context, in *ImportQuestionsRequest, opts ...grpc.CallOption) (*ImportQuestionsResponse, error)
 	UpdateQuestion(ctx context.Context, in *UpdateQuestionRequest, opts ...grpc.CallOption) (*UpdateQuestionResponse, error)
 	DeleteQuestion(ctx context.Context, in *DeleteQuestionRequest, opts ...grpc.CallOption) (*DeleteQuestionResponse, error)
@@ -145,6 +147,16 @@ func (c *examServiceClient) CreateQuestion(ctx context.Context, in *CreateQuesti
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateQuestionResponse)
 	err := c.cc.Invoke(ctx, ExamService_CreateQuestion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) GetQuestion(ctx context.Context, in *GetQuestionRequest, opts ...grpc.CallOption) (*GetQuestionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetQuestionResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetQuestion_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -381,6 +393,7 @@ type ExamServiceServer interface {
 	GetSections(context.Context, *GetSectionsRequest) (*GetSectionsResponse, error)
 	GetQuestions(context.Context, *GetQuestionsRequest) (*GetQuestionsResponse, error)
 	CreateQuestion(context.Context, *CreateQuestionRequest) (*CreateQuestionResponse, error)
+	GetQuestion(context.Context, *GetQuestionRequest) (*GetQuestionResponse, error)
 	ImportQuestions(context.Context, *ImportQuestionsRequest) (*ImportQuestionsResponse, error)
 	UpdateQuestion(context.Context, *UpdateQuestionRequest) (*UpdateQuestionResponse, error)
 	DeleteQuestion(context.Context, *DeleteQuestionRequest) (*DeleteQuestionResponse, error)
@@ -430,6 +443,9 @@ func (UnimplementedExamServiceServer) GetQuestions(context.Context, *GetQuestion
 }
 func (UnimplementedExamServiceServer) CreateQuestion(context.Context, *CreateQuestionRequest) (*CreateQuestionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateQuestion not implemented")
+}
+func (UnimplementedExamServiceServer) GetQuestion(context.Context, *GetQuestionRequest) (*GetQuestionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetQuestion not implemented")
 }
 func (UnimplementedExamServiceServer) ImportQuestions(context.Context, *ImportQuestionsRequest) (*ImportQuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ImportQuestions not implemented")
@@ -622,6 +638,24 @@ func _ExamService_CreateQuestion_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExamServiceServer).CreateQuestion(ctx, req.(*CreateQuestionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_GetQuestion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetQuestionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetQuestion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetQuestion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetQuestion(ctx, req.(*GetQuestionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1052,6 +1086,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateQuestion",
 			Handler:    _ExamService_CreateQuestion_Handler,
+		},
+		{
+			MethodName: "GetQuestion",
+			Handler:    _ExamService_GetQuestion_Handler,
 		},
 		{
 			MethodName: "ImportQuestions",

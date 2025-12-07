@@ -233,7 +233,7 @@ func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topi
         `).
         Joins("LEFT JOIN question_type_models qt ON q.type_id = qt.id").
         Joins("LEFT JOIN question_difficulty_models qd ON q.difficulty_id = qd.id").
-        Joins("LEFT JOIN section_models s ON q.section_id = s.id").
+        Joins("LEFT JOIN exam_sections s ON q.section_id = s.id").
         Joins("LEFT JOIN topic_models t ON s.topic_id = t.id")
 
     if sectionID > 0 {
@@ -260,4 +260,15 @@ func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topi
     err := query.Order("q.created_at DESC").Limit(limit).Offset(offset).Scan(&questions).Error
 
     return questions, total, err
+}
+
+func (r *examRepository) GetQuestionByID(ctx context.Context, id int64) (*domain.QuestionModel, error) {
+	var q domain.QuestionModel
+	err := database.DB.WithContext(ctx).
+		Preload("Choices").
+		Preload("Type").
+		Preload("Difficulty").
+		Preload("Section").Preload("Section.Topic").
+		First(&q, id).Error
+	return &q, err
 }
