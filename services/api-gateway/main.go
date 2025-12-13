@@ -143,6 +143,7 @@ func main() {
 				instructorOnly.PUT("/exams/access/approve", examHandler.ApproveAccess)
 				instructorOnly.GET("/exams/:id/stats", examHandler.GetExamStats)
 				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
+				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
 			}
 
 			studentOnly := auth.Group("/")

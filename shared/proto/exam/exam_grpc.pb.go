@@ -48,6 +48,7 @@ const (
 	ExamService_LogViolation_FullMethodName         = "/exam.ExamService/LogViolation"
 	ExamService_GetExamStatsDetailed_FullMethodName = "/exam.ExamService/GetExamStatsDetailed"
 	ExamService_ExportExamResults_FullMethodName    = "/exam.ExamService/ExportExamResults"
+	ExamService_GetExamViolations_FullMethodName    = "/exam.ExamService/GetExamViolations"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -83,6 +84,7 @@ type ExamServiceClient interface {
 	LogViolation(ctx context.Context, in *LogViolationRequest, opts ...grpc.CallOption) (*LogViolationResponse, error)
 	GetExamStatsDetailed(ctx context.Context, in *GetExamStatsDetailedRequest, opts ...grpc.CallOption) (*GetExamStatsDetailedResponse, error)
 	ExportExamResults(ctx context.Context, in *ExportExamResultsRequest, opts ...grpc.CallOption) (*ExportExamResultsResponse, error)
+	GetExamViolations(ctx context.Context, in *GetExamViolationsRequest, opts ...grpc.CallOption) (*GetExamViolationsResponse, error)
 }
 
 type examServiceClient struct {
@@ -383,6 +385,16 @@ func (c *examServiceClient) ExportExamResults(ctx context.Context, in *ExportExa
 	return out, nil
 }
 
+func (c *examServiceClient) GetExamViolations(ctx context.Context, in *GetExamViolationsRequest, opts ...grpc.CallOption) (*GetExamViolationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExamViolationsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetExamViolations_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -416,6 +428,7 @@ type ExamServiceServer interface {
 	LogViolation(context.Context, *LogViolationRequest) (*LogViolationResponse, error)
 	GetExamStatsDetailed(context.Context, *GetExamStatsDetailedRequest) (*GetExamStatsDetailedResponse, error)
 	ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error)
+	GetExamViolations(context.Context, *GetExamViolationsRequest) (*GetExamViolationsResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -512,6 +525,9 @@ func (UnimplementedExamServiceServer) GetExamStatsDetailed(context.Context, *Get
 }
 func (UnimplementedExamServiceServer) ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExportExamResults not implemented")
+}
+func (UnimplementedExamServiceServer) GetExamViolations(context.Context, *GetExamViolationsRequest) (*GetExamViolationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExamViolations not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -1056,6 +1072,24 @@ func _ExamService_ExportExamResults_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GetExamViolations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExamViolationsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetExamViolations(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetExamViolations_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetExamViolations(ctx, req.(*GetExamViolationsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1178,6 +1212,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExportExamResults",
 			Handler:    _ExamService_ExportExamResults_Handler,
+		},
+		{
+			MethodName: "GetExamViolations",
+			Handler:    _ExamService_GetExamViolations_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

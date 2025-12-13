@@ -125,7 +125,9 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 	var qID int64
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		section, err := s.repo.GetSectionByID(ctx, req.SectionId)
-		if err != nil { return errors.New("section not found") }
+		if err != nil {
+			return errors.New("section not found")
+		}
 		diff, _ := s.repo.GetDifficulty(ctx, req.Difficulty)
 		qType, _ := s.repo.GetQuestionType(ctx, req.QuestionType)
 
@@ -135,7 +137,9 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 			Explanation: req.Explanation, AttachmentURL: req.AttachmentUrl,
 		}
 		createdQ, err := s.repo.CreateQuestion(ctx, tx, question)
-		if err != nil { return err }
+		if err != nil {
+			return err
+		}
 		qID = createdQ.Id
 
 		var choices []*domain.ChoiceModel
@@ -144,15 +148,21 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 		}
 		return s.repo.CreateChoices(ctx, tx, choices)
 	})
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &pb.CreateQuestionResponse{Id: qID, Content: req.Content}, nil
 }
 
 func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error) {
+	if len(req.FileContent) == 0 {
+		return nil, errors.New("file excel rỗng")
+	}
 	reader := bytes.NewReader(req.FileContent)
 	f, err := excelize.OpenReader(reader)
 	if err != nil {
-		return nil, errors.New("không thể đọc file excel")
+		log.Printf("Lỗi đọc excel: %v", err)
+		return nil, errors.New("không thể đọc file excel, vui lòng kiểm tra định dạng")
 	}
 	defer f.Close()
 
@@ -161,13 +171,55 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 		return nil, errors.New("không tìm thấy Sheet1")
 	}
 
-	section, err := s.repo.GetSectionByID(ctx, req.SectionId)
-	if err != nil {
-		return nil, errors.New("section không tồn tại")
-	}
-
+	topicCache := make(map[string]int64)
+	sectionCache := make(map[string]int64)
 	typeCache := make(map[string]int64)
 	diffCache := make(map[string]int64)
+
+	getOrCreateTopic := func(name string) (int64, error) {
+		name = strings.TrimSpace(name)
+		if id, ok := topicCache[name]; ok {
+			return id, nil
+		}
+
+		t, _ := s.repo.GetTopicByName(ctx, name)
+		if t != nil {
+			topicCache[name] = t.Id
+			return t.Id, nil
+		}
+
+		newTopic := &domain.TopicModel{Name: name, Description: "Auto imported"}
+		created, err := s.repo.CreateTopic(ctx, database.DB, newTopic)
+		if err != nil {
+			return 0, err
+		}
+		topicCache[name] = created.Id
+		return created.Id, nil
+	}
+
+	getOrCreateSection := func(topicID int64, name string) (int64, error) {
+		name = strings.TrimSpace(name)
+		cacheKey := fmt.Sprintf("%d_%s", topicID, name)
+		if id, ok := sectionCache[cacheKey]; ok {
+			return id, nil
+		}
+
+		sections, _ := s.repo.GetSectionsByTopic(ctx, topicID)
+		for _, sec := range sections {
+			if strings.EqualFold(sec.Name, name) {
+				sectionCache[cacheKey] = sec.Id
+				return sec.Id, nil
+			}
+		}
+
+		newSec := &domain.SectionModel{Name: name, Description: "Auto imported", TopicID: topicID}
+		created, err := s.repo.CreateSection(ctx, database.DB, newSec)
+		if err != nil {
+			return 0, err
+		}
+		sectionCache[cacheKey] = created.Id
+		return created.Id, nil
+	}
 
 	getTypeID := func(name string) int64 {
 		name = strings.TrimSpace(strings.ToLower(name))
@@ -203,17 +255,38 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 	errorCount := 0
 
 	for i, row := range rows {
-		if i == 0 { continue }
-		if len(row) < 7 { errorCount++; continue }
+		if i == 0 {
+			continue
+		}
+		if len(row) < 9 {
+			errorCount++
+			continue
+		}
 
-		content := strings.TrimSpace(row[0])
-		if content == "" { continue }
+		topicName := row[0]
+		sectionName := row[1]
+		content := strings.TrimSpace(row[2])
+		if topicName == "" || sectionName == "" || content == "" {
+			errorCount++
+			continue
+		}
 
-		qTypeID := getTypeID(row[1])
-		diffID := getDiffID(row[2])
-		explanation := row[3]
-		imageURL := strings.TrimSpace(row[4])
-		correctStr := strings.ToUpper(strings.TrimSpace(row[5]))
+		tID, err := getOrCreateTopic(topicName)
+		if err != nil {
+			errorCount++
+			continue
+		}
+
+		sID, err := getOrCreateSection(tID, sectionName)
+		if err != nil {
+			errorCount++
+			continue
+		}
+		qTypeID := getTypeID(row[3])
+		diffID := getDiffID(row[4])
+		explanation := row[5]
+		imageURL := strings.TrimSpace(row[6])
+		correctStr := strings.ToUpper(strings.TrimSpace(row[7]))
 
 		correctMap := make(map[int]bool)
 		parts := strings.Split(correctStr, ",")
@@ -221,33 +294,45 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 			p = strings.TrimSpace(p)
 			if len(p) > 0 {
 				idx := int(p[0] - 'A')
-				if idx >= 0 { correctMap[idx] = true }
+				if idx >= 0 {
+					correctMap[idx] = true
+				}
 			}
 		}
 
-		err := database.DB.Transaction(func(tx *gorm.DB) error {
+		err = database.DB.Transaction(func(tx *gorm.DB) error {
 			q := &domain.QuestionModel{
-				SectionID: section.Id, TopicID: section.TopicID, CreatorID: req.CreatorId,
+				SectionID: sID, TopicID: tID, CreatorID: req.CreatorId,
 				Content: content, TypeID: qTypeID, DifficultyID: diffID, Explanation: explanation,
 				AttachmentURL: imageURL,
 			}
 			createdQ, err := s.repo.CreateQuestion(ctx, tx, q)
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 
 			var choices []*domain.ChoiceModel
-			for cIdx := 6; cIdx < len(row); cIdx++ {
+			for cIdx := 8; cIdx < len(row); cIdx++ {
 				val := strings.TrimSpace(row[cIdx])
-				if val == "" { continue }
-				isCorrect := correctMap[cIdx-6]
+				if val == "" {
+					continue
+				}
+				isCorrect := correctMap[cIdx-8]
 				choices = append(choices, &domain.ChoiceModel{
-					QuestionID: createdQ.Id, Content: val, IsCorrect: isCorrect,
+					QuestionID: createdQ.Id, Content: val, IsCorrect: isCorrect, AttachmentURL: "",
 				})
 			}
-			if len(choices) < 2 { return errors.New("cần ít nhất 2 lựa chọn") }
+			if len(choices) < 2 {
+				return errors.New("cần ít nhất 2 lựa chọn")
+			}
 			return s.repo.CreateChoices(ctx, tx, choices)
 		})
 
-		if err == nil { successCount++ } else { errorCount++ }
+		if err == nil {
+			successCount++
+		} else {
+			errorCount++
+		}
 	}
 
 	return &pb.ImportQuestionsResponse{SuccessCount: int32(successCount), ErrorCount: int32(errorCount)}, nil
@@ -419,13 +504,46 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 		if q.Type.Type != "" {
 			qType = q.Type.Type
 		}
+		difficulty := "medium"
+		if q.Difficulty.Difficulty != "" {
+			difficulty = q.Difficulty.Difficulty
+		}
+		sectionName := ""
+		var sectionID int64 = 0
+		topicName := ""
+		var topicID int64 = 0
+
+		if q.Section != nil {
+			sectionName = q.Section.Name
+			sectionID = q.Section.Id
+			if q.Section.Topic != nil {
+				topicName = q.Section.Topic.Name
+				topicID = q.Section.Topic.Id
+			}
+		}
 		pbQuestions = append(pbQuestions, &pb.QuestionDetails{
-			Id:           q.Id,
-			Content:      q.Content,
-			Choices:      pbChoices,
-			QuestionType: qType,
+			Id:            q.Id,
+			Content:       q.Content,
+			Choices:       pbChoices,
+			QuestionType:  qType,
 			AttachmentUrl: q.AttachmentURL,
+			Difficulty:    difficulty,
+			Explanation:   q.Explanation,
+			SectionName:   sectionName,
+			TopicName:     topicName,
+			SectionId:     sectionID,
+			TopicId:       topicID,
 		})
+	}
+
+	startTime := ""
+	if examModel.StartTime != nil {
+		startTime = examModel.StartTime.Format(time.RFC3339)
+	}
+
+	endTime := ""
+	if examModel.EndTime != nil {
+		endTime = examModel.EndTime.Format(time.RFC3339)
 	}
 
 	return &pb.GetExamDetailsResponse{
@@ -434,8 +552,8 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 		Settings: &pb.ExamSettings{
 			DurationMinutes: int32(examModel.DurationMinutes),
 			MaxAttempts:     int32(examModel.MaxAttempts),
-			StartTime:       examModel.StartTime.Format(time.RFC3339),
-			EndTime:         examModel.EndTime.Format(time.RFC3339),
+			StartTime:       startTime,
+			EndTime:         endTime,
 		},
 		Questions:   pbQuestions,
 		TopicId:     examModel.TopicID,
@@ -744,25 +862,33 @@ func (s *examService) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestion
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		diff, _ := s.repo.GetDifficulty(ctx, req.Difficulty)
 		qType, _ := s.repo.GetQuestionType(ctx, req.QuestionType)
-		
+
 		updates := map[string]interface{}{
 			"content": req.Content, "explanation": req.Explanation,
 			"difficulty_id": diff.Id, "type_id": qType.Id, "attachment_url": req.AttachmentUrl,
 		}
 
-		if err := s.repo.UpdateQuestion(ctx, tx, req.QuestionId, updates); err != nil { return err }
-		if err := s.repo.DeleteChoicesByQuestionID(ctx, tx, req.QuestionId); err != nil { return err }
-		
+		if err := s.repo.UpdateQuestion(ctx, tx, req.QuestionId, updates); err != nil {
+			return err
+		}
+		if err := s.repo.DeleteChoicesByQuestionID(ctx, tx, req.QuestionId); err != nil {
+			return err
+		}
+
 		if len(req.Choices) > 0 {
 			var choices []*domain.ChoiceModel
 			for _, c := range req.Choices {
 				choices = append(choices, &domain.ChoiceModel{QuestionID: req.QuestionId, Content: c.Content, IsCorrect: c.IsCorrect, AttachmentURL: c.AttachmentUrl})
 			}
-			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil { return err }
+			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil {
+				return err
+			}
 		}
 		return nil
 	})
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return &pb.UpdateQuestionResponse{Success: true}, nil
 }
 
@@ -820,7 +946,17 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 			}
 		}
 
-		return s.repo.UpdateExam(ctx, tx, req.ExamId, updates)
+		if len(updates) > 0 {
+			if err := s.repo.UpdateExam(ctx, tx, req.ExamId, updates); err != nil {
+				return err
+			}
+		}
+
+		if err := s.repo.ReplaceExamQuestions(ctx, tx, req.ExamId, req.QuestionIds); err != nil {
+			return err
+		}
+
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -849,195 +985,236 @@ func (s *examService) GetUserExamStats(ctx context.Context, req *pb.GetUserExamS
 }
 
 func (s *examService) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest) (*pb.SaveAnswerResponse, error) {
-    var sub domain.ExamSubmissionModel
-    err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).First(&sub).Error
-    if err != nil {
-        return nil, errors.New("không tìm thấy bài làm đang diễn ra")
-    }
+	var sub domain.ExamSubmissionModel
+	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).First(&sub).Error
+	if err != nil {
+		return nil, errors.New("không tìm thấy bài làm đang diễn ra")
+	}
 
-    correctMap, _ := s.repo.GetCorrectAnswers(ctx, req.ExamId)
-    correctChoices := correctMap[req.QuestionId]
-    
-    isCorrect := false
-    for _, cID := range correctChoices {
-        if cID == req.ChosenChoiceId {
-            isCorrect = true
-            break
-        }
-    }
+	correctMap, _ := s.repo.GetCorrectAnswers(ctx, req.ExamId)
+	correctChoices := correctMap[req.QuestionId]
 
-    ans := &domain.UserAnswerModel{
-        SubmissionID:   sub.Id,
-        QuestionID:     req.QuestionId,
-        ChosenChoiceID: &req.ChosenChoiceId,
-        IsCorrect:      &isCorrect,
-    }
-    
-    err = database.DB.Transaction(func(tx *gorm.DB) error {
-        return s.repo.SaveUserAnswer(ctx, tx, ans)
-    })
+	isCorrect := false
+	for _, cID := range correctChoices {
+		if cID == req.ChosenChoiceId {
+			isCorrect = true
+			break
+		}
+	}
 
-    return &pb.SaveAnswerResponse{Success: err == nil}, err
+	ans := &domain.UserAnswerModel{
+		SubmissionID:   sub.Id,
+		QuestionID:     req.QuestionId,
+		ChosenChoiceID: &req.ChosenChoiceId,
+		IsCorrect:      &isCorrect,
+	}
+
+	err = database.DB.Transaction(func(tx *gorm.DB) error {
+		return s.repo.SaveUserAnswer(ctx, tx, ans)
+	})
+
+	return &pb.SaveAnswerResponse{Success: err == nil}, err
 }
 
 func (s *examService) LogViolation(ctx context.Context, req *pb.LogViolationRequest) (*pb.LogViolationResponse, error) {
-    v := &domain.ExamViolationModel{
-        ExamID:        req.ExamId,
-        UserID:        req.UserId,
-        ViolationType: req.ViolationType,
-        ViolationTime: time.Now().UTC(),
-    }
-    err := s.repo.LogViolation(ctx, v)
-    return &pb.LogViolationResponse{Success: err == nil}, err
+	v := &domain.ExamViolationModel{
+		ExamID:        req.ExamId,
+		UserID:        req.UserId,
+		ViolationType: req.ViolationType,
+		ViolationTime: time.Now().UTC(),
+	}
+	err := s.repo.LogViolation(ctx, v)
+	return &pb.LogViolationResponse{Success: err == nil}, err
 }
 
 func (s *examService) GetExamStatsDetailed(ctx context.Context, req *pb.GetExamStatsDetailedRequest) (*pb.GetExamStatsDetailedResponse, error) {
-    submissions, err := s.repo.GetExamSubmissions(ctx, req.ExamId)
+	submissions, err := s.repo.GetExamSubmissions(ctx, req.ExamId)
+	if err != nil {
+		return nil, err
+	}
+
+	totalParticipants, err := s.repo.CountUniqueParticipants(ctx, req.ExamId)
     if err != nil { return nil, err }
 
-    total := int64(len(submissions))
-    if total == 0 {
-        return &pb.GetExamStatsDetailedResponse{}, nil
+	submittedCount := int64(len(submissions))
+
+	if totalParticipants == 0 {
+        return &pb.GetExamStatsDetailedResponse{
+            TotalStudents:     0,
+            SubmittedCount:    0,
+            ScoreDistribution: make(map[string]int32),
+        }, nil
     }
 
-    var sum, highest, lowest float64
+	var sum, highest, lowest float64
     lowest = 10.0
     dist := make(map[string]int32)
-    
-    ranges := []string{"0-2", "2-4", "4-6", "6-8", "8-10"}
-    for _, r := range ranges { dist[r] = 0 }
 
-    for _, sub := range submissions {
-        score := sub.Score
-        sum += score
-        if score > highest { highest = score }
-        if score < lowest { lowest = score }
-
-        if score < 2 { dist["0-2"]++ } else if score < 4 { dist["2-4"]++ } else if score < 6 { dist["4-6"]++ } else if score < 8 { dist["6-8"]++ } else { dist["8-10"]++ }
+	for i := 0; i < 10; i++ {
+        key := fmt.Sprintf("%d-%d", i, i+1)
+        dist[key] = 0
     }
 
-    return &pb.GetExamStatsDetailedResponse{
-        TotalStudents:     total,
-        SubmittedCount:    total,
-        AverageScore:      sum / float64(total),
-        HighestScore:      highest,
-        LowestScore:       lowest,
-        ScoreDistribution: dist,
-    }, nil
+	for _, sub := range submissions {
+		score := sub.Score
+		sum += score
+		if score > highest { highest = score }
+		if score < lowest { lowest = score }
+
+		bucketIndex := int(score)
+		if bucketIndex >= 10 {
+			bucketIndex = 9
+		}
+		if bucketIndex < 0 {
+			bucketIndex = 0
+		}
+
+		key := fmt.Sprintf("%d-%d", bucketIndex, bucketIndex+1)
+		dist[key]++
+	}
+
+	averageScore := 0.0
+    if submittedCount > 0 {
+        averageScore = sum / float64(submittedCount)
+    } else {
+        lowest = 0
+        highest = 0
+    }
+
+	return &pb.GetExamStatsDetailedResponse{
+		TotalStudents:     totalParticipants,
+		SubmittedCount:    submittedCount,
+		AverageScore:      averageScore,
+		HighestScore:      highest,
+		LowestScore:       lowest,
+		ScoreDistribution: dist,
+	}, nil
 }
 
 func (s *examService) ExportExamResults(ctx context.Context, req *pb.ExportExamResultsRequest) (*pb.ExportExamResultsResponse, error) {
-    submissions, err := s.repo.GetExamSubmissions(ctx, req.ExamId)
-    if err != nil { return nil, err }
+	submissions, err := s.repo.GetExamSubmissions(ctx, req.ExamId)
+	if err != nil {
+		return nil, err
+	}
 
-    f := excelize.NewFile()
-    sheetName := "Results"
-    f.NewSheet(sheetName)
-    f.SetCellValue(sheetName, "A1", "User ID")
-    f.SetCellValue(sheetName, "B1", "Score")
-    f.SetCellValue(sheetName, "C1", "Submitted At")
-    f.SetCellValue(sheetName, "D1", "Violations Count")
+	f := excelize.NewFile()
+	sheetName := "Results"
+	f.NewSheet(sheetName)
+	f.SetCellValue(sheetName, "A1", "User ID")
+	f.SetCellValue(sheetName, "B1", "Score")
+	f.SetCellValue(sheetName, "C1", "Submitted At")
+	f.SetCellValue(sheetName, "D1", "Violations Count")
 
-    violations, _ := s.repo.GetViolationsByExam(ctx, req.ExamId)
-    violationMap := make(map[int64]int)
-    for _, v := range violations { violationMap[v.UserID]++ }
+	violations, _ := s.repo.GetViolationsByExam(ctx, req.ExamId)
+	violationMap := make(map[int64]int)
+	for _, v := range violations {
+		violationMap[v.UserID]++
+	}
 
-    for i, sub := range submissions {
-        row := i + 2
-        f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), sub.UserID)
-        f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), sub.Score)
-        f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), sub.SubmittedAt.Format(time.RFC3339))
-        f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), violationMap[sub.UserID])
-    }
+	for i, sub := range submissions {
+		row := i + 2
+		f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), sub.UserID)
+		f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), sub.Score)
+		f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), sub.SubmittedAt.Format(time.RFC3339))
+		f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), violationMap[sub.UserID])
+	}
 
-    buf, err := f.WriteToBuffer()
-    if err != nil { return nil, err }
+	buf, err := f.WriteToBuffer()
+	if err != nil {
+		return nil, err
+	}
 
-    fileKey := fmt.Sprintf("exports/exam_%d_%d.xlsx", req.ExamId, time.Now().Unix())
-    bucketName := env.GetString("R2_BUCKET_NAME", "")
-    
-    client, err := s.createR2ClientForUpload(ctx) 
-    if err != nil { return nil, err }
+	fileKey := fmt.Sprintf("exports/exam_%d_%d.xlsx", req.ExamId, time.Now().Unix())
+	bucketName := env.GetString("R2_BUCKET_NAME", "")
 
-    _, err = client.PutObject(ctx, &s3.PutObjectInput{
-        Bucket:      aws.String(bucketName),
-        Key:         aws.String(fileKey),
-        Body:        bytes.NewReader(buf.Bytes()),
-        ContentType: aws.String("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
-    })
-    if err != nil { return nil, err }
+	client, err := s.createR2ClientForUpload(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-    publicDomain := env.GetString("R2_PUBLIC_DOMAIN", "")
-    finalURL := fmt.Sprintf("https://%s/%s", publicDomain, fileKey)
+	_, err = client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(fileKey),
+		Body:        bytes.NewReader(buf.Bytes()),
+		ContentType: aws.String("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+	})
+	if err != nil {
+		return nil, err
+	}
 
-    return &pb.ExportExamResultsResponse{FileUrl: finalURL}, nil
+	publicDomain := env.GetString("R2_PUBLIC_DOMAIN", "")
+	finalURL := fmt.Sprintf("https://%s/%s", publicDomain, fileKey)
+
+	return &pb.ExportExamResultsResponse{FileUrl: finalURL}, nil
 }
 
 func (s *examService) createR2ClientForUpload(ctx context.Context) (*s3.Client, error) {
-    accountID := env.GetString("R2_ACCOUNT_ID", "")
-    accessKey := env.GetString("R2_ACCESS_KEY_ID", "")
-    secretKey := env.GetString("R2_SECRET_ACCESS_KEY", "")
-    endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
+	accountID := env.GetString("R2_ACCOUNT_ID", "")
+	accessKey := env.GetString("R2_ACCESS_KEY_ID", "")
+	secretKey := env.GetString("R2_SECRET_ACCESS_KEY", "")
+	endpoint := fmt.Sprintf("https://%s.r2.cloudflarestorage.com", accountID)
 
-    cfg, err := config.LoadDefaultConfig(ctx,
-        config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
-        config.WithRegion("auto"),
-    )
-    if err != nil { return nil, err }
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, "")),
+		config.WithRegion("auto"),
+	)
+	if err != nil {
+		return nil, err
+	}
 
-    return s3.NewFromConfig(cfg, func(o *s3.Options) {
-        o.BaseEndpoint = aws.String(endpoint)
-        o.UsePathStyle = true
-    }), nil
+	return s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(endpoint)
+		o.UsePathStyle = true
+	}), nil
 }
 
 func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequest) (*pb.GetQuestionsResponse, error) {
-    page := int(req.Page)
-    if page < 1 {
-        page = 1
-    }
-    limit := int(req.Limit)
-    if limit < 1 {
-        limit = 10
-    }
+	page := int(req.Page)
+	if page < 1 {
+		page = 1
+	}
+	limit := int(req.Limit)
+	if limit < 1 {
+		limit = 10
+	}
 
-    questions, total, err := s.repo.GetQuestions(
-        ctx,
-        req.SectionId,
+	questions, total, err := s.repo.GetQuestions(
+		ctx,
+		req.SectionId,
 		req.TopicId,
-        req.Difficulty,
-        req.Search,
-        page,
-        limit,
-    )
-    if err != nil {
-        return nil, err
-    }
+		req.Difficulty,
+		req.Search,
+		page,
+		limit,
+	)
+	if err != nil {
+		return nil, err
+	}
 
-    var pbQuestions []*pb.QuestionListItem
-    for _, q := range questions {
-        pbQuestions = append(pbQuestions, &pb.QuestionListItem{
-            Id:            q.ID,
-            Content:       q.Content,
-            QuestionType:  q.QuestionType,
-            Difficulty:    q.Difficulty,
-            SectionId:     q.SectionID,
-            SectionName:   q.SectionName,
-            TopicId:       q.TopicID,
-            TopicName:     q.TopicName,
-            AttachmentUrl: q.AttachmentURL,
-            ChoiceCount:   q.ChoiceCount,
-        })
-    }
+	var pbQuestions []*pb.QuestionListItem
+	for _, q := range questions {
+		pbQuestions = append(pbQuestions, &pb.QuestionListItem{
+			Id:            q.ID,
+			Content:       q.Content,
+			QuestionType:  q.QuestionType,
+			Difficulty:    q.Difficulty,
+			SectionId:     q.SectionID,
+			SectionName:   q.SectionName,
+			TopicId:       q.TopicID,
+			TopicName:     q.TopicName,
+			AttachmentUrl: q.AttachmentURL,
+			ChoiceCount:   q.ChoiceCount,
+		})
+	}
 
-    totalPages := int32((total + int64(limit) - 1) / int64(limit))
+	totalPages := int32((total + int64(limit) - 1) / int64(limit))
 
-    return &pb.GetQuestionsResponse{
-        Questions:  pbQuestions,
-        Total:      total,
-        Page:       int32(page),
-        TotalPages: totalPages,
-    }, nil
+	return &pb.GetQuestionsResponse{
+		Questions:  pbQuestions,
+		Total:      total,
+		Page:       int32(page),
+		TotalPages: totalPages,
+	}, nil
 }
 
 func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
@@ -1051,9 +1228,9 @@ func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionReques
 	var pbChoices []*pb.ChoiceDetails
 	for _, c := range q.Choices {
 		pbChoices = append(pbChoices, &pb.ChoiceDetails{
-			Id:        c.Id,
-			Content:   c.Content,
-			IsCorrect: c.IsCorrect,
+			Id:            c.Id,
+			Content:       c.Content,
+			IsCorrect:     c.IsCorrect,
 			AttachmentUrl: c.AttachmentURL,
 		})
 	}
@@ -1080,7 +1257,28 @@ func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionReques
 			AttachmentUrl: q.AttachmentURL,
 			SectionName:   q.Section.Name,
 			TopicName:     q.Section.Topic.Name,
+			SectionId:     q.SectionID,
+			TopicId:       q.Section.TopicID,
 			Choices:       pbChoices,
 		},
 	}, nil
+}
+
+func (s *examService) GetExamViolations(ctx context.Context, req *pb.GetExamViolationsRequest) (*pb.GetExamViolationsResponse, error) {
+	violations, err := s.repo.GetViolationsByExam(ctx, req.ExamId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pbViolations []*pb.ExamViolation
+	for _, v := range violations {
+		pbViolations = append(pbViolations, &pb.ExamViolation{
+			Id:            v.Id,
+			UserId:        v.UserID,
+			ViolationType: v.ViolationType,
+			ViolationTime: v.ViolationTime.Format(time.RFC3339),
+		})
+	}
+
+	return &pb.GetExamViolationsResponse{Violations: pbViolations}, nil
 }

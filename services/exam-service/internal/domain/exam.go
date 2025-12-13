@@ -21,7 +21,7 @@ type SectionModel struct {
 	Name        string          `gorm:"size:255;not null" json:"name"`
 	Description string          `gorm:"type:text" json:"description"`
 	TopicID     int64           `gorm:"not null;index" json:"topic_id"`
-	Topic       TopicModel      `gorm:"foreignKey:TopicID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
+	Topic       *TopicModel     `gorm:"foreignKey:TopicID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Questions   []QuestionModel `gorm:"foreignKey:SectionID" json:"questions"`
 	CreatedAt   time.Time       `json:"created_at"`
 }
@@ -39,18 +39,18 @@ type QuestionTypeModel struct {
 	Type string
 }
 type ChoiceModel struct {
-	Id         int64
-	QuestionID int64
-	Content    string
-	IsCorrect  bool
+	Id            int64
+	QuestionID    int64
+	Content       string
+	IsCorrect     bool
 	AttachmentURL string `gorm:"size:255" json:"attachment_url"`
-	CreatedAt  time.Time
+	CreatedAt     time.Time
 }
 
 type QuestionModel struct {
 	Id            int64                   `gorm:"primaryKey;autoIncrement" json:"id"`
 	SectionID     int64                   `gorm:"not null;index" json:"section_id"`
-	Section       SectionModel            `gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"section"`
+	Section       *SectionModel            `gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"section"`
 	TopicID       int64                   `gorm:"not null;index" json:"topic_id"`
 	CreatorID     int64                   `gorm:"not null" json:"creator_id"`
 	Content       string                  `gorm:"type:text;not null" json:"content"`
@@ -66,16 +66,16 @@ type QuestionModel struct {
 }
 
 type QuestionListItem struct {
-    ID            int64
-    Content       string
-    QuestionType  string
-    Difficulty    string
-    SectionID     int64
-    SectionName   string
-    TopicID       int64
-    TopicName     string
-    AttachmentURL string
-    ChoiceCount   int32
+	ID            int64
+	Content       string
+	QuestionType  string
+	Difficulty    string
+	SectionID     int64
+	SectionName   string
+	TopicID       int64
+	TopicName     string
+	AttachmentURL string
+	ChoiceCount   int32
 }
 
 type ExamModel struct {
@@ -93,16 +93,18 @@ type ExamModel struct {
 	RequiresApproval      bool `gorm:"default:false" json:"requires_approval"`
 
 	TopicID     int64            `gorm:"not null;index" json:"topic_id"`
+	Topic       *TopicModel       `gorm:"foreignKey:TopicID" json:"topic"`
 	CreatorID   int64            `gorm:"not null" json:"creator_id"`
 	IsPublished bool             `gorm:"not null;default:false" json:"is_published"`
 	CreatedAt   time.Time        `json:"created_at"`
 	UpdatedAt   time.Time        `json:"updated_at"`
-	Questions   []*QuestionModel `gorm:"many2many:exam_questions;" json:"questions"`
+	Questions   []*QuestionModel `gorm:"many2many:exam_questions;joinForeignKey:exam_id;joinReferences:question_id" json:"questions"`
 }
 
 type ExamQuestionModel struct {
 	ExamID     int64 `gorm:"primaryKey"`
 	QuestionID int64 `gorm:"primaryKey"`
+	Sequence   int   `gorm:"default:0"`
 }
 
 func (ExamQuestionModel) TableName() string {
@@ -136,21 +138,21 @@ type SubmissionStatusModel struct {
 	Status string
 }
 type UserAnswerModel struct {
-	Id             int64       `gorm:"primaryKey;autoIncrement"`
-	SubmissionID   int64       `gorm:"not null;index"`
-	QuestionID     int64       `gorm:"not null"`
-	ChosenChoiceID *int64      
-	Choice         ChoiceModel `gorm:"foreignKey:ChosenChoiceID"` 
+	Id             int64 `gorm:"primaryKey;autoIncrement"`
+	SubmissionID   int64 `gorm:"not null;index"`
+	QuestionID     int64 `gorm:"not null"`
+	ChosenChoiceID *int64
+	Choice         ChoiceModel   `gorm:"foreignKey:ChosenChoiceID"`
 	Question       QuestionModel `gorm:"foreignKey:QuestionID"`
 	IsCorrect      *bool
 	CreatedAt      time.Time
 }
 
 type ExamViolationModel struct {
-	Id            int64     `gorm:"primaryKey;autoIncrement"`
-	ExamID        int64     `gorm:"not null;index"`
-	UserID        int64     `gorm:"not null;index"`
-	ViolationType string    `gorm:"size:50"`
+	Id            int64  `gorm:"primaryKey;autoIncrement"`
+	ExamID        int64  `gorm:"not null;index"`
+	UserID        int64  `gorm:"not null;index"`
+	ViolationType string `gorm:"size:50"`
 	ViolationTime time.Time
 	CreatedAt     time.Time
 }
@@ -181,6 +183,7 @@ type ExamRepository interface {
 	UpdateExamStatus(ctx context.Context, tx *gorm.DB, examID int64, isPublished bool) error
 	GetExams(ctx context.Context, limit, offset int, creatorID int64) ([]*ExamModel, int64, error)
 	CountExams(ctx context.Context) (int64, error)
+	ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error
 
 	CreateAccessRequest(ctx context.Context, req *ExamAccessRequestModel) error
 	GetAccessRequest(ctx context.Context, examID, userID int64) (*ExamAccessRequestModel, error)
@@ -195,9 +198,10 @@ type ExamRepository interface {
 	CountSubmissionsForExam(ctx context.Context, examID, userID int64) (int64, error)
 
 	SaveUserAnswer(ctx context.Context, tx *gorm.DB, ans *UserAnswerModel) error
-    LogViolation(ctx context.Context, violation *ExamViolationModel) error
-    GetExamSubmissions(ctx context.Context, examID int64) ([]*ExamSubmissionModel, error)
-    GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
+	LogViolation(ctx context.Context, violation *ExamViolationModel) error
+	GetExamSubmissions(ctx context.Context, examID int64) ([]*ExamSubmissionModel, error)
+	GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
+	CountUniqueParticipants(ctx context.Context, examID int64) (int64, error)
 	GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
 }
 
@@ -241,4 +245,5 @@ type ExamService interface {
 	LogViolation(ctx context.Context, req *pb.LogViolationRequest) (*pb.LogViolationResponse, error)
 	GetExamStatsDetailed(ctx context.Context, req *pb.GetExamStatsDetailedRequest) (*pb.GetExamStatsDetailedResponse, error)
 	ExportExamResults(ctx context.Context, req *pb.ExportExamResultsRequest) (*pb.ExportExamResultsResponse, error)
+	GetExamViolations(ctx context.Context, req *pb.GetExamViolationsRequest) (*pb.GetExamViolationsResponse, error)
 }

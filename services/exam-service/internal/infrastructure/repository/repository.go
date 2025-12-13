@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
@@ -92,16 +93,41 @@ func (r *examRepository) CreateExam(ctx context.Context, tx *gorm.DB, exam *doma
 func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
 	if len(questionIDs) == 0 { return nil }
 	var examQuestions []*domain.ExamQuestionModel
-	for _, qid := range questionIDs {
-		examQuestions = append(examQuestions, &domain.ExamQuestionModel{ExamID: examID, QuestionID: qid})
+	for i, qid := range questionIDs {
+		examQuestions = append(examQuestions, &domain.ExamQuestionModel{ExamID: examID, QuestionID: qid, Sequence: i})
 	}
 	return tx.WithContext(ctx).Create(&examQuestions).Error
 }
 func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*domain.ExamModel, error) {
 	var exam domain.ExamModel
 	err := database.DB.WithContext(ctx).
-		Preload("Questions").Preload("Questions.Choices").Preload("Questions.Type").Preload("Topic").
+		Preload("Questions").Preload("Questions.Choices").Preload("Questions.Type").Preload("Questions.Difficulty").
+		Preload("Questions.Section").
+		Preload("Questions.Section.Topic").Preload("Topic").
 		First(&exam, examID).Error
+	
+	if err != nil { return nil, err }
+	type ExamQuestionOrder struct {
+		QuestionID int64
+		Sequence   int
+	}
+	var orders []ExamQuestionOrder
+	database.DB.WithContext(ctx).
+        Table("exam_questions").
+		Select("question_id, sequence").
+		Where("exam_id = ?", examID).
+		Scan(&orders)
+
+	if len(orders) > 0 {
+		orderMap := make(map[int64]int)
+		for _, o := range orders {
+			orderMap[o.QuestionID] = o.Sequence
+		}
+
+		sort.Slice(exam.Questions, func(i, j int) bool {
+			return orderMap[exam.Questions[i].Id] < orderMap[exam.Questions[j].Id]
+		})
+	}
 	return &exam, err
 }
 func (r *examRepository) UpdateExam(ctx context.Context, tx *gorm.DB, examID int64, updates map[string]interface{}) error {
@@ -271,4 +297,26 @@ func (r *examRepository) GetQuestionByID(ctx context.Context, id int64) (*domain
 		Preload("Section").Preload("Section.Topic").
 		First(&q, id).Error
 	return &q, err
+}
+
+func (r *examRepository) CountUniqueParticipants(ctx context.Context, examID int64) (int64, error) {
+    var count int64
+    err := database.DB.WithContext(ctx).
+        Model(&domain.ExamSubmissionModel{}).
+        Where("exam_id = ?", examID).
+        Distinct("user_id").
+        Count(&count).Error
+    return count, err
+}
+
+func (r *examRepository) ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
+	if err := tx.WithContext(ctx).Where("exam_id = ?", examID).Delete(&domain.ExamQuestionModel{}).Error; err != nil {
+		return err
+	}
+
+	if len(questionIDs) > 0 {
+		return r.LinkQuestionsToExam(ctx, tx, examID, questionIDs)
+	}
+	
+	return nil
 }
