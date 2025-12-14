@@ -160,6 +160,7 @@ func main() {
 				studentOnly.GET("/exams/access/check", examHandler.CheckAccess)
 				studentOnly.POST("/exams/save-answer", examHandler.SaveAnswer)
 				studentOnly.POST("/exams/log-violation", examHandler.LogViolation)
+				studentOnly.POST("/exams/:id/start", examHandler.StartExam)
 			}
 		}
 	}

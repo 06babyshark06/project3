@@ -696,3 +696,29 @@ func (h *ExamHandler) ExportQuestions(c *gin.Context) {
 
     c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
+
+func (h *ExamHandler) StartExam(c *gin.Context) {
+	examID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid exam id"})
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	resp, err := h.examClient.StartExam(c.Request.Context(), &pb.StartExamRequest{
+		ExamId: examID,
+		UserId: userID,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}

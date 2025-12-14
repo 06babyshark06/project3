@@ -42,6 +42,7 @@ service ExamService {
   rpc ExportExamResults(ExportExamResultsRequest) returns (ExportExamResultsResponse);
   rpc GetExamViolations(GetExamViolationsRequest) returns (GetExamViolationsResponse);
   rpc ExportQuestions(ExportQuestionsRequest) returns (ExportQuestionsResponse);
+  rpc StartExam(StartExamRequest) returns (StartExamResponse);
 }
 
 message Topic {
@@ -282,4 +283,19 @@ message ExportQuestionsRequest {
 
 message ExportQuestionsResponse {
   string file_url = 1;
+}
+
+message StartExamRequest {
+  int64 exam_id = 1;
+  int64 user_id = 2;
+}
+
+message StartExamResponse {
+  int64 submission_id = 1;
+  int32 remaining_seconds = 2;
+  map<int64, Int64List> current_answers = 3;
+}
+
+message Int64List {
+  repeated int64 values = 1;
 }

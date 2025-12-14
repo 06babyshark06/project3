@@ -50,6 +50,7 @@ const (
 	ExamService_ExportExamResults_FullMethodName    = "/exam.ExamService/ExportExamResults"
 	ExamService_GetExamViolations_FullMethodName    = "/exam.ExamService/GetExamViolations"
 	ExamService_ExportQuestions_FullMethodName      = "/exam.ExamService/ExportQuestions"
+	ExamService_StartExam_FullMethodName            = "/exam.ExamService/StartExam"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -87,6 +88,7 @@ type ExamServiceClient interface {
 	ExportExamResults(ctx context.Context, in *ExportExamResultsRequest, opts ...grpc.CallOption) (*ExportExamResultsResponse, error)
 	GetExamViolations(ctx context.Context, in *GetExamViolationsRequest, opts ...grpc.CallOption) (*GetExamViolationsResponse, error)
 	ExportQuestions(ctx context.Context, in *ExportQuestionsRequest, opts ...grpc.CallOption) (*ExportQuestionsResponse, error)
+	StartExam(ctx context.Context, in *StartExamRequest, opts ...grpc.CallOption) (*StartExamResponse, error)
 }
 
 type examServiceClient struct {
@@ -407,6 +409,16 @@ func (c *examServiceClient) ExportQuestions(ctx context.Context, in *ExportQuest
 	return out, nil
 }
 
+func (c *examServiceClient) StartExam(ctx context.Context, in *StartExamRequest, opts ...grpc.CallOption) (*StartExamResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StartExamResponse)
+	err := c.cc.Invoke(ctx, ExamService_StartExam_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -442,6 +454,7 @@ type ExamServiceServer interface {
 	ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error)
 	GetExamViolations(context.Context, *GetExamViolationsRequest) (*GetExamViolationsResponse, error)
 	ExportQuestions(context.Context, *ExportQuestionsRequest) (*ExportQuestionsResponse, error)
+	StartExam(context.Context, *StartExamRequest) (*StartExamResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -544,6 +557,9 @@ func (UnimplementedExamServiceServer) GetExamViolations(context.Context, *GetExa
 }
 func (UnimplementedExamServiceServer) ExportQuestions(context.Context, *ExportQuestionsRequest) (*ExportQuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExportQuestions not implemented")
+}
+func (UnimplementedExamServiceServer) StartExam(context.Context, *StartExamRequest) (*StartExamResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartExam not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -1124,6 +1140,24 @@ func _ExamService_ExportQuestions_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_StartExam_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartExamRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).StartExam(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_StartExam_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).StartExam(ctx, req.(*StartExamRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1254,6 +1288,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ExportQuestions",
 			Handler:    _ExamService_ExportQuestions_Handler,
+		},
+		{
+			MethodName: "StartExam",
+			Handler:    _ExamService_StartExam_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

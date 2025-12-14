@@ -1370,3 +1370,68 @@ func (s *examService) ExportQuestions(ctx context.Context, req *pb.ExportQuestio
 
 	return &pb.ExportQuestionsResponse{FileUrl: finalURL}, nil
 }
+
+func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (*pb.StartExamResponse, error) {
+	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
+
+	var submission domain.ExamSubmissionModel
+	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
+        Preload("UserAnswers").
+        First(&submission).Error
+
+	var submissionID int64
+	var startTime time.Time
+    var currentAnswers = make(map[int64]*pb.Int64List)
+
+	if err == nil {
+		submissionID = submission.Id
+		startTime = submission.StartedAt
+        
+        for _, ans := range submission.UserAnswers {
+            if ans.ChosenChoiceID != nil {
+                if _, exists := currentAnswers[ans.QuestionID]; !exists {
+                    currentAnswers[ans.QuestionID] = &pb.Int64List{Values: []int64{}}
+                }
+                currentAnswers[ans.QuestionID].Values = append(currentAnswers[ans.QuestionID].Values, *ans.ChosenChoiceID)
+            }
+        }
+
+	} else {
+        if !check.CanAccess {
+            return nil, fmt.Errorf("bạn không thể bắt đầu bài thi: %s", check.Message)
+        }
+
+		_, err := s.repo.GetExamDetails(ctx, req.ExamId)
+		if err != nil { return nil, err }
+
+		var inProgressStatus domain.SubmissionStatusModel
+		database.DB.Where("status = ?", "in_progress").First(&inProgressStatus)
+
+		newSub := &domain.ExamSubmissionModel{
+			ExamID:    req.ExamId,
+			UserID:    req.UserId,
+			StatusID:  inProgressStatus.Id,
+			StartedAt: time.Now().UTC(),
+			Score:     0,
+		}
+		created, err := s.repo.CreateSubmission(ctx, database.DB, newSub)
+		if err != nil { return nil, err }
+		
+		submissionID = created.Id
+		startTime = created.StartedAt
+	}
+
+	examDetails, _ := s.repo.GetExamDetails(ctx, req.ExamId)
+	durationSeconds := examDetails.DurationMinutes * 60
+	
+	elapsed := time.Since(startTime).Seconds()
+	remaining := int32(float64(durationSeconds) - elapsed)
+
+	if remaining < 0 { remaining = 0 }
+
+	return &pb.StartExamResponse{
+		SubmissionId:     submissionID,
+		RemainingSeconds: remaining,
+        CurrentAnswers:   currentAnswers,
+	}, nil
+}
