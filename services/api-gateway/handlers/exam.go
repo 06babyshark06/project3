@@ -668,3 +668,31 @@ func (h *ExamHandler) GetExamViolations(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp.Violations})
 }
+
+func (h *ExamHandler) ExportQuestions(c *gin.Context) {
+    userID, err := getUserIDFromContext(c)
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+        return
+    }
+
+    sectionID, _ := strconv.ParseInt(c.Query("section_id"), 10, 64)
+    topicID, _ := strconv.ParseInt(c.Query("topic_id"), 10, 64)
+    difficulty := c.Query("difficulty")
+    search := c.Query("search")
+
+    resp, err := h.examClient.ExportQuestions(c.Request.Context(), &pb.ExportQuestionsRequest{
+        CreatorId:  userID,
+        SectionId:  sectionID,
+        TopicId:    topicID,
+        Difficulty: difficulty,
+        Search:     search,
+    })
+
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}

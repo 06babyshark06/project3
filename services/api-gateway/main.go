@@ -132,6 +132,7 @@ func main() {
 				instructorOnly.POST("/questions", examHandler.CreateQuestion)
 				instructorOnly.PUT("/questions/:id", examHandler.UpdateQuestion)
 				instructorOnly.DELETE("/questions/:id", examHandler.DeleteQuestion)
+				instructorOnly.GET("/questions/export", examHandler.ExportQuestions)
 
 				instructorOnly.POST("/exams", examHandler.CreateExam)
 				instructorOnly.POST("/exams/generate", examHandler.GenerateExam)

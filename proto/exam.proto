@@ -41,6 +41,7 @@ service ExamService {
   rpc GetExamStatsDetailed(GetExamStatsDetailedRequest) returns (GetExamStatsDetailedResponse);
   rpc ExportExamResults(ExportExamResultsRequest) returns (ExportExamResultsResponse);
   rpc GetExamViolations(GetExamViolationsRequest) returns (GetExamViolationsResponse);
+  rpc ExportQuestions(ExportQuestionsRequest) returns (ExportQuestionsResponse);
 }
 
 message Topic {
@@ -269,4 +270,16 @@ message GetExamViolationsRequest {
 
 message GetExamViolationsResponse {
   repeated ExamViolation violations = 1;
+}
+
+message ExportQuestionsRequest {
+  int64 section_id = 1;
+  int64 topic_id = 2;
+  string difficulty = 3;
+  string search = 4;
+  int64 creator_id = 5;
+}
+
+message ExportQuestionsResponse {
+  string file_url = 1;
 }

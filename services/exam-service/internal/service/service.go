@@ -1282,3 +1282,91 @@ func (s *examService) GetExamViolations(ctx context.Context, req *pb.GetExamViol
 
 	return &pb.GetExamViolationsResponse{Violations: pbViolations}, nil
 }
+
+func (s *examService) ExportQuestions(ctx context.Context, req *pb.ExportQuestionsRequest) (*pb.ExportQuestionsResponse, error) {
+	var questions []*domain.QuestionModel
+	
+	db := database.DB.Model(&domain.QuestionModel{}).
+		Preload("Section").Preload("Section.Topic").Preload("Choices").
+		Preload("Type").Preload("Difficulty").
+		Where("creator_id = ?", req.CreatorId)
+
+	if req.TopicId > 0 { db = db.Where("topic_id = ?", req.TopicId) }
+	if req.SectionId > 0 { db = db.Where("section_id = ?", req.SectionId) }
+	if req.Difficulty != "" && req.Difficulty != "all" {
+		db = db.Joins("JOIN question_difficulty_models ON question_models.difficulty_id = question_difficulty_models.id").
+			Where("question_difficulty_models.difficulty = ?", req.Difficulty)
+	}
+	if req.Search != "" { db = db.Where("content ILIKE ?", "%"+req.Search+"%") }
+
+	if err := db.Find(&questions).Error; err != nil { return nil, err }
+
+	f := excelize.NewFile()
+	sheetName := "Sheet1"
+	f.SetSheetName("Sheet1", sheetName)
+
+	headers := []string{
+		"Topic Name", "Section Name", "Content", "Type", "Difficulty", 
+		"Explanation", "Image URL", "Correct Answer", 
+		"Option A", "Option B", "Option C", "Option D", "Option E", "Option F",
+	}
+	for i, h := range headers {
+		cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+		f.SetCellValue(sheetName, cell, h)
+	}
+	style, _ := f.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+	f.SetRowStyle(sheetName, 1, 1, style)
+
+	for i, q := range questions {
+		row := i + 2
+		
+		f.SetCellValue(sheetName, fmt.Sprintf("A%d", row), q.Section.Topic.Name)
+		f.SetCellValue(sheetName, fmt.Sprintf("B%d", row), q.Section.Name)
+		f.SetCellValue(sheetName, fmt.Sprintf("C%d", row), q.Content)
+		
+		f.SetCellValue(sheetName, fmt.Sprintf("D%d", row), q.Type.Type)
+		f.SetCellValue(sheetName, fmt.Sprintf("E%d", row), q.Difficulty.Difficulty)
+		
+		f.SetCellValue(sheetName, fmt.Sprintf("F%d", row), q.Explanation)
+		f.SetCellValue(sheetName, fmt.Sprintf("G%d", row), q.AttachmentURL)
+		
+		correctAnswers := []string{}
+		
+		optionStartCol := 9 
+		
+		for j, c := range q.Choices {
+			cell, _ := excelize.CoordinatesToCellName(optionStartCol+j, row)
+			f.SetCellValue(sheetName, cell, c.Content)
+
+			if c.IsCorrect {
+				char := string(rune('A' + j))
+				correctAnswers = append(correctAnswers, char)
+			}
+		}
+		
+		correctStr := strings.Join(correctAnswers, ",")
+		f.SetCellValue(sheetName, fmt.Sprintf("H%d", row), correctStr)
+	}
+
+	buf, err := f.WriteToBuffer()
+	if err != nil { return nil, err }
+
+	fileKey := fmt.Sprintf("exports/backup_%d_%d.xlsx", req.CreatorId, time.Now().Unix())
+	bucketName := env.GetString("R2_BUCKET_NAME", "")
+	
+	client, err := s.createR2ClientForUpload(ctx)
+	if err != nil { return nil, err }
+
+	_, err = client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(fileKey),
+		Body:        bytes.NewReader(buf.Bytes()),
+		ContentType: aws.String("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"),
+	})
+	if err != nil { return nil, err }
+
+	publicDomain := env.GetString("R2_PUBLIC_DOMAIN", "")
+	finalURL := fmt.Sprintf("https://%s/%s", publicDomain, fileKey)
+
+	return &pb.ExportQuestionsResponse{FileUrl: finalURL}, nil
+}

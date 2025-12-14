@@ -121,3 +121,7 @@ func (h *gRPCHandler) ExportExamResults(ctx context.Context, req *pb.ExportExamR
 func (h *gRPCHandler) GetExamViolations(ctx context.Context, req *pb.GetExamViolationsRequest) (*pb.GetExamViolationsResponse, error) {
 	return h.service.GetExamViolations(ctx, req)
 }
+
+func (h *gRPCHandler) ExportQuestions(ctx context.Context, req *pb.ExportQuestionsRequest) (*pb.ExportQuestionsResponse, error) {
+	return h.service.ExportQuestions(ctx, req)
+}
