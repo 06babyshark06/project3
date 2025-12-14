@@ -78,6 +78,7 @@ func main() {
 
 			auth.GET("/courses/:id", courseHandler.GetCourseDetails)
 			auth.GET("/exams/:id", examHandler.GetExamDetails)
+			auth.GET("/exams", examHandler.GetExams)
 
 			auth.GET("/exam-sections", examHandler.GetSections)
 			auth.GET("/topics", examHandler.GetTopics)
