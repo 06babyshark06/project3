@@ -224,3 +224,112 @@ func (s *userService) UpdatePassword(ctx context.Context, req *pb.UpdatePassword
 
 	return &pb.UpdatePasswordResponse{Success: true}, nil
 }
+
+func (s *userService) CreateClass(ctx context.Context, req *pb.CreateClassRequest) (*pb.CreateClassResponse, error) {
+	class := &domain.ClassModel{
+		Name: req.Name, Code: req.Code, Description: req.Description,
+		TeacherID: req.TeacherId, CreatedAt: time.Now().UTC(),
+	}
+	if err := s.repo.CreateClass(ctx, class); err != nil { return nil, err }
+	
+    return &pb.CreateClassResponse{Class: mapClassToProto(class)}, nil
+}
+
+func (s *userService) UpdateClass(ctx context.Context, req *pb.UpdateClassRequest) (*pb.UpdateClassResponse, error) {
+    class, err := s.repo.GetClassByID(ctx, req.Id)
+    if err != nil { return nil, errors.New("class not found") }
+    if class.TeacherID != req.TeacherId { return nil, errors.New("unauthorized") }
+
+	updates := map[string]interface{}{}
+	if req.Name != "" { updates["name"] = req.Name }
+	if req.Description != "" { updates["description"] = req.Description }
+	
+	err = s.repo.UpdateClass(ctx, req.Id, updates)
+	return &pb.UpdateClassResponse{Success: err == nil}, err
+}
+
+func (s *userService) DeleteClass(ctx context.Context, req *pb.DeleteClassRequest) (*pb.DeleteClassResponse, error) {
+    class, err := s.repo.GetClassByID(ctx, req.Id)
+    if err != nil { return nil, errors.New("class not found") }
+    if class.TeacherID != req.TeacherId { return nil, errors.New("unauthorized") }
+
+	err = s.repo.DeleteClass(ctx, req.Id)
+	return &pb.DeleteClassResponse{Success: err == nil}, err
+}
+
+func (s *userService) GetClasses(ctx context.Context, req *pb.GetClassesRequest) (*pb.GetClassesResponse, error) {
+	classes, total, err := s.repo.GetClasses(ctx, req.TeacherId, req.StudentId, int(req.Limit), int(req.Page-1)*int(req.Limit))
+	if err != nil { return nil, err }
+
+	var pbClasses []*pb.Class
+	for _, c := range classes {
+		pbClasses = append(pbClasses, mapClassToProto(c))
+	}
+	return &pb.GetClassesResponse{Classes: pbClasses, Total: total}, nil
+}
+
+func (s *userService) GetClassDetails(ctx context.Context, req *pb.GetClassDetailsRequest) (*pb.GetClassDetailsResponse, error) {
+	class, err := s.repo.GetClassByID(ctx, req.ClassId)
+	if err != nil { return nil, err }
+
+	var members []*pb.ClassMember
+	for _, m := range class.Members {
+        if m.User != nil {
+            members = append(members, &pb.ClassMember{
+                UserId: m.UserID, FullName: m.User.FullName, Email: m.User.Email,
+                Role: m.Role, JoinedAt: m.JoinedAt.Format(time.RFC3339),
+            })
+        }
+	}
+	return &pb.GetClassDetailsResponse{Class: mapClassToProto(class), Members: members}, nil
+}
+
+func (s *userService) AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error) {
+    class, err := s.repo.GetClassByID(ctx, req.ClassId)
+    if err != nil || class.TeacherID != req.TeacherId { return nil, errors.New("unauthorized or class not found") }
+
+    success := 0
+    failed := []string{}
+
+    for _, email := range req.Emails {
+        user, err := s.repo.GetUserByEmail(ctx, email)
+        if err != nil {
+            failed = append(failed, email)
+            continue
+        }
+        err = s.repo.AddClassMember(ctx, &domain.ClassMemberModel{
+            ClassID: req.ClassId, UserID: user.Id, Role: "student", JoinedAt: time.Now().UTC(),
+        })
+        if err == nil { success++ } else { failed = append(failed, email) }
+    }
+    return &pb.AddMembersResponse{SuccessCount: int32(success), FailedEmails: failed}, nil
+}
+
+func (s *userService) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {
+    class, err := s.repo.GetClassByID(ctx, req.ClassId)
+    if err != nil || class.TeacherID != req.TeacherId { return nil, errors.New("unauthorized") }
+
+    err = s.repo.RemoveClassMember(ctx, req.ClassId, req.UserId)
+    return &pb.RemoveMemberResponse{Success: err == nil}, err
+}
+
+func (s *userService) CheckUserInClass(ctx context.Context, req *pb.CheckUserInClassRequest) (*pb.CheckUserInClassResponse, error) {
+    isMember := false
+    for _, cid := range req.ClassIds {
+        m, _ := s.repo.GetClassMember(ctx, cid, req.UserId)
+        if m != nil {
+            isMember = true; break
+        }
+    }
+    return &pb.CheckUserInClassResponse{IsMember: isMember}, nil
+}
+
+func mapClassToProto(c *domain.ClassModel) *pb.Class {
+    tName := ""
+    if c.Teacher != nil { tName = c.Teacher.FullName }
+    return &pb.Class{
+        Id: c.Id, Name: c.Name, Code: c.Code, Description: c.Description,
+        TeacherId: c.TeacherID, TeacherName: tName,
+        StudentCount: int32(len(c.Members)), CreatedAt: c.CreatedAt.Format(time.RFC3339),
+    }
+}

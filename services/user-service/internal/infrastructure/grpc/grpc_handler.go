@@ -72,3 +72,31 @@ func (h *gRPCHandler) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 func (h *gRPCHandler) UpdatePassword(ctx context.Context, req *pb.UpdatePasswordRequest) (*pb.UpdatePasswordResponse, error) {
 	return h.service.UpdatePassword(ctx, req)
 }
+
+func (h *gRPCHandler) CreateClass(ctx context.Context, req *pb.CreateClassRequest) (*pb.CreateClassResponse, error) {
+	return h.service.CreateClass(ctx, req)
+}
+
+func (h *gRPCHandler) UpdateClass(ctx context.Context, req *pb.UpdateClassRequest) (*pb.UpdateClassResponse, error) {
+	return h.service.UpdateClass(ctx, req)
+}
+
+func (h *gRPCHandler) DeleteClass(ctx context.Context, req *pb.DeleteClassRequest) (*pb.DeleteClassResponse, error) {
+	return h.service.DeleteClass(ctx, req)
+}
+
+func (h *gRPCHandler) GetClasses(ctx context.Context, req *pb.GetClassesRequest) (*pb.GetClassesResponse, error) {
+	return h.service.GetClasses(ctx, req)
+}
+func (h *gRPCHandler) GetClassDetails(ctx context.Context, req *pb.GetClassDetailsRequest) (*pb.GetClassDetailsResponse, error) {
+	return h.service.GetClassDetails(ctx, req)
+}
+func (h *gRPCHandler) AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error) {
+	return h.service.AddMembers(ctx, req)
+}
+func (h *gRPCHandler) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {
+	return h.service.RemoveMember(ctx, req)
+}
+func (h *gRPCHandler) CheckUserInClass(ctx context.Context, req *pb.CheckUserInClassRequest) (*pb.CheckUserInClassResponse, error) {
+	return h.service.CheckUserInClass(ctx, req)
+}

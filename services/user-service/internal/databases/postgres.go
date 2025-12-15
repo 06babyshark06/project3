@@ -33,7 +33,12 @@ func Connect() {
 		log.Fatalf("❌ Failed to connect to DB: %v", err)
 	}
 
-	if err := db.AutoMigrate(&domain.Role{}, &domain.UserModel{}); err != nil {
+	if err := db.AutoMigrate(
+		&domain.Role{},
+		&domain.UserModel{},
+		&domain.ClassModel{},
+		&domain.ClassMemberModel{},
+	); err != nil {
 		log.Fatalf("❌ Migration failed: %v", err)
 	}
 

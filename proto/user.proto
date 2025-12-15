@@ -92,6 +92,84 @@ message GetUserCountRequest {}
 
 message GetUserCountResponse { int64 count = 1; }
 
+message Class {
+  int64 id = 1;
+  string name = 2;
+  string code = 3;
+  string description = 4;
+  int64 teacher_id = 5;
+  string teacher_name = 6;
+  int32 student_count = 7;
+  string created_at = 8;
+}
+
+message CreateClassRequest {
+  string name = 1;
+  string code = 2;
+  string description = 3;
+  int64 teacher_id = 4;
+}
+message CreateClassResponse { Class class = 1; }
+
+message UpdateClassRequest {
+  int64 id = 1;
+  string name = 2;
+  string description = 3;
+  int64 teacher_id = 4;
+}
+message UpdateClassResponse { bool success = 1; }
+
+message DeleteClassRequest { int64 id = 1; int64 teacher_id = 2; }
+message DeleteClassResponse { bool success = 1; }
+
+message GetClassesRequest {
+  int64 teacher_id = 1; // Nếu > 0: Lấy lớp tôi dạy
+  int64 student_id = 2; // Nếu > 0: Lấy lớp tôi học
+  int32 page = 3;
+  int32 limit = 4;
+}
+message GetClassesResponse {
+  repeated Class classes = 1;
+  int64 total = 2;
+}
+
+message GetClassDetailsRequest { int64 class_id = 1; }
+message GetClassDetailsResponse {
+  Class class = 1;
+  repeated ClassMember members = 2;
+}
+
+message ClassMember {
+  int64 user_id = 1;
+  string full_name = 2;
+  string email = 3;
+  string role = 4; // "student"
+  string joined_at = 5;
+}
+
+message AddMembersRequest {
+  int64 class_id = 1;
+  repeated string emails = 2;
+  int64 teacher_id = 3;
+}
+message AddMembersResponse {
+  int32 success_count = 1;
+  repeated string failed_emails = 2;
+}
+
+message RemoveMemberRequest {
+  int64 class_id = 1;
+  int64 user_id = 2;
+  int64 teacher_id = 3;
+}
+message RemoveMemberResponse { bool success = 1; }
+
+message CheckUserInClassRequest {
+  int64 user_id = 1;
+  repeated int64 class_ids = 2;
+}
+message CheckUserInClassResponse { bool is_member = 1; }
+
 service UserService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
@@ -104,5 +182,13 @@ service UserService {
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
   rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse);
   rpc GetUserCount(GetUserCountRequest) returns (GetUserCountResponse);
-}
 
+  rpc CreateClass(CreateClassRequest) returns (CreateClassResponse);
+  rpc UpdateClass(UpdateClassRequest) returns (UpdateClassResponse);
+  rpc DeleteClass(DeleteClassRequest) returns (DeleteClassResponse);
+  rpc GetClasses(GetClassesRequest) returns (GetClassesResponse);
+  rpc GetClassDetails(GetClassDetailsRequest) returns (GetClassDetailsResponse);
+  rpc AddMembers(AddMembersRequest) returns (AddMembersResponse);
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
+  rpc CheckUserInClass(CheckUserInClassRequest) returns (CheckUserInClassResponse);
+}

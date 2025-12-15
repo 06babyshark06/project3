@@ -39,6 +39,16 @@ type UserRepository interface {
 	GetUsersWithPagination(ctx context.Context, limit, offset int) ([]*UserModel, int64, error)
 	CountUsers(ctx context.Context) (int64, error)
 	GetRoleByName(ctx context.Context, name string) (*Role, error)
+
+	CreateClass(ctx context.Context, class *ClassModel) error
+    UpdateClass(ctx context.Context, id int64, updates map[string]interface{}) error
+    DeleteClass(ctx context.Context, id int64) error
+    GetClassByID(ctx context.Context, id int64) (*ClassModel, error)
+    GetClasses(ctx context.Context, teacherID, studentID int64, limit, offset int) ([]*ClassModel, int64, error)
+    
+    AddClassMember(ctx context.Context, member *ClassMemberModel) error
+    RemoveClassMember(ctx context.Context, classID, userID int64) error
+    GetClassMember(ctx context.Context, classID, userID int64) (*ClassMemberModel, error)
 }
 
 type EventProducer interface {
@@ -56,4 +66,13 @@ type UserService interface {
 	UpdateUserRole(ctx context.Context, req *pb.UpdateUserRoleRequest) (*pb.UpdateUserRoleResponse, error)
 	UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UpdateUserResponse, error)
 	UpdatePassword(ctx context.Context, req *pb.UpdatePasswordRequest) (*pb.UpdatePasswordResponse, error)
+
+	CreateClass(ctx context.Context, req *pb.CreateClassRequest) (*pb.CreateClassResponse, error)
+	UpdateClass(ctx context.Context, req *pb.UpdateClassRequest) (*pb.UpdateClassResponse, error)
+	DeleteClass(ctx context.Context, req *pb.DeleteClassRequest) (*pb.DeleteClassResponse, error)
+	GetClasses(ctx context.Context, req *pb.GetClassesRequest) (*pb.GetClassesResponse, error)
+	GetClassDetails(ctx context.Context, req *pb.GetClassDetailsRequest) (*pb.GetClassDetailsResponse, error)
+	AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error)
+	RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error)
+	CheckUserInClass(ctx context.Context, req *pb.CheckUserInClassRequest) (*pb.CheckUserInClassResponse, error)
 }

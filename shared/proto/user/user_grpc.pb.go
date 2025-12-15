@@ -19,15 +19,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Register_FullMethodName       = "/user.UserService/Register"
-	UserService_Login_FullMethodName          = "/user.UserService/Login"
-	UserService_GetProfile_FullMethodName     = "/user.UserService/GetProfile"
-	UserService_GetAllUsers_FullMethodName    = "/user.UserService/GetAllUsers"
-	UserService_DeleteUser_FullMethodName     = "/user.UserService/DeleteUser"
-	UserService_UpdateUserRole_FullMethodName = "/user.UserService/UpdateUserRole"
-	UserService_UpdateUser_FullMethodName     = "/user.UserService/UpdateUser"
-	UserService_UpdatePassword_FullMethodName = "/user.UserService/UpdatePassword"
-	UserService_GetUserCount_FullMethodName   = "/user.UserService/GetUserCount"
+	UserService_Register_FullMethodName         = "/user.UserService/Register"
+	UserService_Login_FullMethodName            = "/user.UserService/Login"
+	UserService_GetProfile_FullMethodName       = "/user.UserService/GetProfile"
+	UserService_GetAllUsers_FullMethodName      = "/user.UserService/GetAllUsers"
+	UserService_DeleteUser_FullMethodName       = "/user.UserService/DeleteUser"
+	UserService_UpdateUserRole_FullMethodName   = "/user.UserService/UpdateUserRole"
+	UserService_UpdateUser_FullMethodName       = "/user.UserService/UpdateUser"
+	UserService_UpdatePassword_FullMethodName   = "/user.UserService/UpdatePassword"
+	UserService_GetUserCount_FullMethodName     = "/user.UserService/GetUserCount"
+	UserService_CreateClass_FullMethodName      = "/user.UserService/CreateClass"
+	UserService_UpdateClass_FullMethodName      = "/user.UserService/UpdateClass"
+	UserService_DeleteClass_FullMethodName      = "/user.UserService/DeleteClass"
+	UserService_GetClasses_FullMethodName       = "/user.UserService/GetClasses"
+	UserService_GetClassDetails_FullMethodName  = "/user.UserService/GetClassDetails"
+	UserService_AddMembers_FullMethodName       = "/user.UserService/AddMembers"
+	UserService_RemoveMember_FullMethodName     = "/user.UserService/RemoveMember"
+	UserService_CheckUserInClass_FullMethodName = "/user.UserService/CheckUserInClass"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -43,6 +51,14 @@ type UserServiceClient interface {
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
 	UpdatePassword(ctx context.Context, in *UpdatePasswordRequest, opts ...grpc.CallOption) (*UpdatePasswordResponse, error)
 	GetUserCount(ctx context.Context, in *GetUserCountRequest, opts ...grpc.CallOption) (*GetUserCountResponse, error)
+	CreateClass(ctx context.Context, in *CreateClassRequest, opts ...grpc.CallOption) (*CreateClassResponse, error)
+	UpdateClass(ctx context.Context, in *UpdateClassRequest, opts ...grpc.CallOption) (*UpdateClassResponse, error)
+	DeleteClass(ctx context.Context, in *DeleteClassRequest, opts ...grpc.CallOption) (*DeleteClassResponse, error)
+	GetClasses(ctx context.Context, in *GetClassesRequest, opts ...grpc.CallOption) (*GetClassesResponse, error)
+	GetClassDetails(ctx context.Context, in *GetClassDetailsRequest, opts ...grpc.CallOption) (*GetClassDetailsResponse, error)
+	AddMembers(ctx context.Context, in *AddMembersRequest, opts ...grpc.CallOption) (*AddMembersResponse, error)
+	RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error)
+	CheckUserInClass(ctx context.Context, in *CheckUserInClassRequest, opts ...grpc.CallOption) (*CheckUserInClassResponse, error)
 }
 
 type userServiceClient struct {
@@ -143,6 +159,86 @@ func (c *userServiceClient) GetUserCount(ctx context.Context, in *GetUserCountRe
 	return out, nil
 }
 
+func (c *userServiceClient) CreateClass(ctx context.Context, in *CreateClassRequest, opts ...grpc.CallOption) (*CreateClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateClassResponse)
+	err := c.cc.Invoke(ctx, UserService_CreateClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateClass(ctx context.Context, in *UpdateClassRequest, opts ...grpc.CallOption) (*UpdateClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateClassResponse)
+	err := c.cc.Invoke(ctx, UserService_UpdateClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) DeleteClass(ctx context.Context, in *DeleteClassRequest, opts ...grpc.CallOption) (*DeleteClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteClassResponse)
+	err := c.cc.Invoke(ctx, UserService_DeleteClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetClasses(ctx context.Context, in *GetClassesRequest, opts ...grpc.CallOption) (*GetClassesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetClassesResponse)
+	err := c.cc.Invoke(ctx, UserService_GetClasses_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetClassDetails(ctx context.Context, in *GetClassDetailsRequest, opts ...grpc.CallOption) (*GetClassDetailsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetClassDetailsResponse)
+	err := c.cc.Invoke(ctx, UserService_GetClassDetails_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) AddMembers(ctx context.Context, in *AddMembersRequest, opts ...grpc.CallOption) (*AddMembersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddMembersResponse)
+	err := c.cc.Invoke(ctx, UserService_AddMembers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveMemberResponse)
+	err := c.cc.Invoke(ctx, UserService_RemoveMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) CheckUserInClass(ctx context.Context, in *CheckUserInClassRequest, opts ...grpc.CallOption) (*CheckUserInClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckUserInClassResponse)
+	err := c.cc.Invoke(ctx, UserService_CheckUserInClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -156,6 +252,14 @@ type UserServiceServer interface {
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
 	UpdatePassword(context.Context, *UpdatePasswordRequest) (*UpdatePasswordResponse, error)
 	GetUserCount(context.Context, *GetUserCountRequest) (*GetUserCountResponse, error)
+	CreateClass(context.Context, *CreateClassRequest) (*CreateClassResponse, error)
+	UpdateClass(context.Context, *UpdateClassRequest) (*UpdateClassResponse, error)
+	DeleteClass(context.Context, *DeleteClassRequest) (*DeleteClassResponse, error)
+	GetClasses(context.Context, *GetClassesRequest) (*GetClassesResponse, error)
+	GetClassDetails(context.Context, *GetClassDetailsRequest) (*GetClassDetailsResponse, error)
+	AddMembers(context.Context, *AddMembersRequest) (*AddMembersResponse, error)
+	RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error)
+	CheckUserInClass(context.Context, *CheckUserInClassRequest) (*CheckUserInClassResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -192,6 +296,30 @@ func (UnimplementedUserServiceServer) UpdatePassword(context.Context, *UpdatePas
 }
 func (UnimplementedUserServiceServer) GetUserCount(context.Context, *GetUserCountRequest) (*GetUserCountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserCount not implemented")
+}
+func (UnimplementedUserServiceServer) CreateClass(context.Context, *CreateClassRequest) (*CreateClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateClass not implemented")
+}
+func (UnimplementedUserServiceServer) UpdateClass(context.Context, *UpdateClassRequest) (*UpdateClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateClass not implemented")
+}
+func (UnimplementedUserServiceServer) DeleteClass(context.Context, *DeleteClassRequest) (*DeleteClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteClass not implemented")
+}
+func (UnimplementedUserServiceServer) GetClasses(context.Context, *GetClassesRequest) (*GetClassesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClasses not implemented")
+}
+func (UnimplementedUserServiceServer) GetClassDetails(context.Context, *GetClassDetailsRequest) (*GetClassDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClassDetails not implemented")
+}
+func (UnimplementedUserServiceServer) AddMembers(context.Context, *AddMembersRequest) (*AddMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddMembers not implemented")
+}
+func (UnimplementedUserServiceServer) RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveMember not implemented")
+}
+func (UnimplementedUserServiceServer) CheckUserInClass(context.Context, *CheckUserInClassRequest) (*CheckUserInClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckUserInClass not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -376,6 +504,150 @@ func _UserService_GetUserCount_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_CreateClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CreateClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_CreateClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CreateClass(ctx, req.(*CreateClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UpdateClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_UpdateClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateClass(ctx, req.(*UpdateClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_DeleteClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).DeleteClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_DeleteClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).DeleteClass(ctx, req.(*DeleteClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetClasses_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClassesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetClasses(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetClasses_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetClasses(ctx, req.(*GetClassesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetClassDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClassDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetClassDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetClassDetails_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetClassDetails(ctx, req.(*GetClassDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_AddMembers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AddMembers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_AddMembers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AddMembers(ctx, req.(*AddMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_RemoveMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).RemoveMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_RemoveMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).RemoveMember(ctx, req.(*RemoveMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_CheckUserInClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckUserInClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).CheckUserInClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_CheckUserInClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).CheckUserInClass(ctx, req.(*CheckUserInClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -418,6 +690,38 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserCount",
 			Handler:    _UserService_GetUserCount_Handler,
+		},
+		{
+			MethodName: "CreateClass",
+			Handler:    _UserService_CreateClass_Handler,
+		},
+		{
+			MethodName: "UpdateClass",
+			Handler:    _UserService_UpdateClass_Handler,
+		},
+		{
+			MethodName: "DeleteClass",
+			Handler:    _UserService_DeleteClass_Handler,
+		},
+		{
+			MethodName: "GetClasses",
+			Handler:    _UserService_GetClasses_Handler,
+		},
+		{
+			MethodName: "GetClassDetails",
+			Handler:    _UserService_GetClassDetails_Handler,
+		},
+		{
+			MethodName: "AddMembers",
+			Handler:    _UserService_AddMembers_Handler,
+		},
+		{
+			MethodName: "RemoveMember",
+			Handler:    _UserService_RemoveMember_Handler,
+		},
+		{
+			MethodName: "CheckUserInClass",
+			Handler:    _UserService_CheckUserInClass_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

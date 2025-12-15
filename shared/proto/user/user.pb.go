@@ -997,6 +997,1030 @@ func (x *GetUserCountResponse) GetCount() int64 {
 	return 0
 }
 
+type Class struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Code          string                 `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	TeacherId     int64                  `protobuf:"varint,5,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	TeacherName   string                 `protobuf:"bytes,6,opt,name=teacher_name,json=teacherName,proto3" json:"teacher_name,omitempty"`
+	StudentCount  int32                  `protobuf:"varint,7,opt,name=student_count,json=studentCount,proto3" json:"student_count,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Class) Reset() {
+	*x = Class{}
+	mi := &file_user_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Class) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Class) ProtoMessage() {}
+
+func (x *Class) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Class.ProtoReflect.Descriptor instead.
+func (*Class) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *Class) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Class) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Class) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *Class) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Class) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+func (x *Class) GetTeacherName() string {
+	if x != nil {
+		return x.TeacherName
+	}
+	return ""
+}
+
+func (x *Class) GetStudentCount() int32 {
+	if x != nil {
+		return x.StudentCount
+	}
+	return 0
+}
+
+func (x *Class) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+type CreateClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	TeacherId     int64                  `protobuf:"varint,4,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateClassRequest) Reset() {
+	*x = CreateClassRequest{}
+	mi := &file_user_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClassRequest) ProtoMessage() {}
+
+func (x *CreateClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateClassRequest.ProtoReflect.Descriptor instead.
+func (*CreateClassRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *CreateClassRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateClassRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *CreateClassRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateClassRequest) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+type CreateClassResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Class         *Class                 `protobuf:"bytes,1,opt,name=class,proto3" json:"class,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateClassResponse) Reset() {
+	*x = CreateClassResponse{}
+	mi := &file_user_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateClassResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateClassResponse) ProtoMessage() {}
+
+func (x *CreateClassResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateClassResponse.ProtoReflect.Descriptor instead.
+func (*CreateClassResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *CreateClassResponse) GetClass() *Class {
+	if x != nil {
+		return x.Class
+	}
+	return nil
+}
+
+type UpdateClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	TeacherId     int64                  `protobuf:"varint,4,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateClassRequest) Reset() {
+	*x = UpdateClassRequest{}
+	mi := &file_user_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateClassRequest) ProtoMessage() {}
+
+func (x *UpdateClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateClassRequest.ProtoReflect.Descriptor instead.
+func (*UpdateClassRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *UpdateClassRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateClassRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateClassRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateClassRequest) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+type UpdateClassResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateClassResponse) Reset() {
+	*x = UpdateClassResponse{}
+	mi := &file_user_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateClassResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateClassResponse) ProtoMessage() {}
+
+func (x *UpdateClassResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateClassResponse.ProtoReflect.Descriptor instead.
+func (*UpdateClassResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UpdateClassResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type DeleteClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	TeacherId     int64                  `protobuf:"varint,2,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteClassRequest) Reset() {
+	*x = DeleteClassRequest{}
+	mi := &file_user_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteClassRequest) ProtoMessage() {}
+
+func (x *DeleteClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteClassRequest.ProtoReflect.Descriptor instead.
+func (*DeleteClassRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeleteClassRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *DeleteClassRequest) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+type DeleteClassResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteClassResponse) Reset() {
+	*x = DeleteClassResponse{}
+	mi := &file_user_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteClassResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteClassResponse) ProtoMessage() {}
+
+func (x *DeleteClassResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteClassResponse.ProtoReflect.Descriptor instead.
+func (*DeleteClassResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *DeleteClassResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type GetClassesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TeacherId     int64                  `protobuf:"varint,1,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"` // Nếu > 0: Lấy lớp tôi dạy
+	StudentId     int64                  `protobuf:"varint,2,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"` // Nếu > 0: Lấy lớp tôi học
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,4,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClassesRequest) Reset() {
+	*x = GetClassesRequest{}
+	mi := &file_user_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClassesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClassesRequest) ProtoMessage() {}
+
+func (x *GetClassesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClassesRequest.ProtoReflect.Descriptor instead.
+func (*GetClassesRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GetClassesRequest) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+func (x *GetClassesRequest) GetStudentId() int64 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
+}
+
+func (x *GetClassesRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetClassesRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetClassesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Classes       []*Class               `protobuf:"bytes,1,rep,name=classes,proto3" json:"classes,omitempty"`
+	Total         int64                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClassesResponse) Reset() {
+	*x = GetClassesResponse{}
+	mi := &file_user_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClassesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClassesResponse) ProtoMessage() {}
+
+func (x *GetClassesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClassesResponse.ProtoReflect.Descriptor instead.
+func (*GetClassesResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *GetClassesResponse) GetClasses() []*Class {
+	if x != nil {
+		return x.Classes
+	}
+	return nil
+}
+
+func (x *GetClassesResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+type GetClassDetailsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClassId       int64                  `protobuf:"varint,1,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClassDetailsRequest) Reset() {
+	*x = GetClassDetailsRequest{}
+	mi := &file_user_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClassDetailsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClassDetailsRequest) ProtoMessage() {}
+
+func (x *GetClassDetailsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClassDetailsRequest.ProtoReflect.Descriptor instead.
+func (*GetClassDetailsRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetClassDetailsRequest) GetClassId() int64 {
+	if x != nil {
+		return x.ClassId
+	}
+	return 0
+}
+
+type GetClassDetailsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Class         *Class                 `protobuf:"bytes,1,opt,name=class,proto3" json:"class,omitempty"`
+	Members       []*ClassMember         `protobuf:"bytes,2,rep,name=members,proto3" json:"members,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClassDetailsResponse) Reset() {
+	*x = GetClassDetailsResponse{}
+	mi := &file_user_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClassDetailsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClassDetailsResponse) ProtoMessage() {}
+
+func (x *GetClassDetailsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClassDetailsResponse.ProtoReflect.Descriptor instead.
+func (*GetClassDetailsResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *GetClassDetailsResponse) GetClass() *Class {
+	if x != nil {
+		return x.Class
+	}
+	return nil
+}
+
+func (x *GetClassDetailsResponse) GetMembers() []*ClassMember {
+	if x != nil {
+		return x.Members
+	}
+	return nil
+}
+
+type ClassMember struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	FullName      string                 `protobuf:"bytes,2,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
+	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"` // "student"
+	JoinedAt      string                 `protobuf:"bytes,5,opt,name=joined_at,json=joinedAt,proto3" json:"joined_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClassMember) Reset() {
+	*x = ClassMember{}
+	mi := &file_user_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClassMember) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClassMember) ProtoMessage() {}
+
+func (x *ClassMember) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClassMember.ProtoReflect.Descriptor instead.
+func (*ClassMember) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ClassMember) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *ClassMember) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
+func (x *ClassMember) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *ClassMember) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *ClassMember) GetJoinedAt() string {
+	if x != nil {
+		return x.JoinedAt
+	}
+	return ""
+}
+
+type AddMembersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClassId       int64                  `protobuf:"varint,1,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
+	Emails        []string               `protobuf:"bytes,2,rep,name=emails,proto3" json:"emails,omitempty"`
+	TeacherId     int64                  `protobuf:"varint,3,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddMembersRequest) Reset() {
+	*x = AddMembersRequest{}
+	mi := &file_user_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddMembersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddMembersRequest) ProtoMessage() {}
+
+func (x *AddMembersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddMembersRequest.ProtoReflect.Descriptor instead.
+func (*AddMembersRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *AddMembersRequest) GetClassId() int64 {
+	if x != nil {
+		return x.ClassId
+	}
+	return 0
+}
+
+func (x *AddMembersRequest) GetEmails() []string {
+	if x != nil {
+		return x.Emails
+	}
+	return nil
+}
+
+func (x *AddMembersRequest) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+type AddMembersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SuccessCount  int32                  `protobuf:"varint,1,opt,name=success_count,json=successCount,proto3" json:"success_count,omitempty"`
+	FailedEmails  []string               `protobuf:"bytes,2,rep,name=failed_emails,json=failedEmails,proto3" json:"failed_emails,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddMembersResponse) Reset() {
+	*x = AddMembersResponse{}
+	mi := &file_user_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddMembersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddMembersResponse) ProtoMessage() {}
+
+func (x *AddMembersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddMembersResponse.ProtoReflect.Descriptor instead.
+func (*AddMembersResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *AddMembersResponse) GetSuccessCount() int32 {
+	if x != nil {
+		return x.SuccessCount
+	}
+	return 0
+}
+
+func (x *AddMembersResponse) GetFailedEmails() []string {
+	if x != nil {
+		return x.FailedEmails
+	}
+	return nil
+}
+
+type RemoveMemberRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClassId       int64                  `protobuf:"varint,1,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
+	UserId        int64                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	TeacherId     int64                  `protobuf:"varint,3,opt,name=teacher_id,json=teacherId,proto3" json:"teacher_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveMemberRequest) Reset() {
+	*x = RemoveMemberRequest{}
+	mi := &file_user_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveMemberRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveMemberRequest) ProtoMessage() {}
+
+func (x *RemoveMemberRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveMemberRequest.ProtoReflect.Descriptor instead.
+func (*RemoveMemberRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *RemoveMemberRequest) GetClassId() int64 {
+	if x != nil {
+		return x.ClassId
+	}
+	return 0
+}
+
+func (x *RemoveMemberRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *RemoveMemberRequest) GetTeacherId() int64 {
+	if x != nil {
+		return x.TeacherId
+	}
+	return 0
+}
+
+type RemoveMemberResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RemoveMemberResponse) Reset() {
+	*x = RemoveMemberResponse{}
+	mi := &file_user_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RemoveMemberResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RemoveMemberResponse) ProtoMessage() {}
+
+func (x *RemoveMemberResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RemoveMemberResponse.ProtoReflect.Descriptor instead.
+func (*RemoveMemberResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *RemoveMemberResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+type CheckUserInClassRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ClassIds      []int64                `protobuf:"varint,2,rep,packed,name=class_ids,json=classIds,proto3" json:"class_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckUserInClassRequest) Reset() {
+	*x = CheckUserInClassRequest{}
+	mi := &file_user_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckUserInClassRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckUserInClassRequest) ProtoMessage() {}
+
+func (x *CheckUserInClassRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckUserInClassRequest.ProtoReflect.Descriptor instead.
+func (*CheckUserInClassRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *CheckUserInClassRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *CheckUserInClassRequest) GetClassIds() []int64 {
+	if x != nil {
+		return x.ClassIds
+	}
+	return nil
+}
+
+type CheckUserInClassResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	IsMember      bool                   `protobuf:"varint,1,opt,name=is_member,json=isMember,proto3" json:"is_member,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckUserInClassResponse) Reset() {
+	*x = CheckUserInClassResponse{}
+	mi := &file_user_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckUserInClassResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckUserInClassResponse) ProtoMessage() {}
+
+func (x *CheckUserInClassResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckUserInClassResponse.ProtoReflect.Descriptor instead.
+func (*CheckUserInClassResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *CheckUserInClassResponse) GetIsMember() bool {
+	if x != nil {
+		return x.IsMember
+	}
+	return false
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
@@ -1062,7 +2086,81 @@ const file_user_proto_rawDesc = "" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x15\n" +
 	"\x13GetUserCountRequest\",\n" +
 	"\x14GetUserCountResponse\x12\x14\n" +
-	"\x05count\x18\x01 \x01(\x03R\x05count2\xe2\x04\n" +
+	"\x05count\x18\x01 \x01(\x03R\x05count\"\xe7\x01\n" +
+	"\x05Class\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\tR\x04code\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x05 \x01(\x03R\tteacherId\x12!\n" +
+	"\fteacher_name\x18\x06 \x01(\tR\vteacherName\x12#\n" +
+	"\rstudent_count\x18\a \x01(\x05R\fstudentCount\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\b \x01(\tR\tcreatedAt\"}\n" +
+	"\x12CreateClassRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x04 \x01(\x03R\tteacherId\"8\n" +
+	"\x13CreateClassResponse\x12!\n" +
+	"\x05class\x18\x01 \x01(\v2\v.user.ClassR\x05class\"y\n" +
+	"\x12UpdateClassRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x04 \x01(\x03R\tteacherId\"/\n" +
+	"\x13UpdateClassResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"C\n" +
+	"\x12DeleteClassRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x02 \x01(\x03R\tteacherId\"/\n" +
+	"\x13DeleteClassResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"{\n" +
+	"\x11GetClassesRequest\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x01 \x01(\x03R\tteacherId\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x02 \x01(\x03R\tstudentId\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x04 \x01(\x05R\x05limit\"Q\n" +
+	"\x12GetClassesResponse\x12%\n" +
+	"\aclasses\x18\x01 \x03(\v2\v.user.ClassR\aclasses\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x03R\x05total\"3\n" +
+	"\x16GetClassDetailsRequest\x12\x19\n" +
+	"\bclass_id\x18\x01 \x01(\x03R\aclassId\"i\n" +
+	"\x17GetClassDetailsResponse\x12!\n" +
+	"\x05class\x18\x01 \x01(\v2\v.user.ClassR\x05class\x12+\n" +
+	"\amembers\x18\x02 \x03(\v2\x11.user.ClassMemberR\amembers\"\x8a\x01\n" +
+	"\vClassMember\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tfull_name\x18\x02 \x01(\tR\bfullName\x12\x14\n" +
+	"\x05email\x18\x03 \x01(\tR\x05email\x12\x12\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12\x1b\n" +
+	"\tjoined_at\x18\x05 \x01(\tR\bjoinedAt\"e\n" +
+	"\x11AddMembersRequest\x12\x19\n" +
+	"\bclass_id\x18\x01 \x01(\x03R\aclassId\x12\x16\n" +
+	"\x06emails\x18\x02 \x03(\tR\x06emails\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x03 \x01(\x03R\tteacherId\"^\n" +
+	"\x12AddMembersResponse\x12#\n" +
+	"\rsuccess_count\x18\x01 \x01(\x05R\fsuccessCount\x12#\n" +
+	"\rfailed_emails\x18\x02 \x03(\tR\ffailedEmails\"h\n" +
+	"\x13RemoveMemberRequest\x12\x19\n" +
+	"\bclass_id\x18\x01 \x01(\x03R\aclassId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x1d\n" +
+	"\n" +
+	"teacher_id\x18\x03 \x01(\x03R\tteacherId\"0\n" +
+	"\x14RemoveMemberResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"O\n" +
+	"\x17CheckUserInClassRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tclass_ids\x18\x02 \x03(\x03R\bclassIds\"7\n" +
+	"\x18CheckUserInClassResponse\x12\x1b\n" +
+	"\tis_member\x18\x01 \x01(\bR\bisMember2\x9a\t\n" +
 	"\vUserService\x129\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x16.user.RegisterResponse\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x12?\n" +
@@ -1075,7 +2173,17 @@ const file_user_proto_rawDesc = "" +
 	"\n" +
 	"UpdateUser\x12\x17.user.UpdateUserRequest\x1a\x18.user.UpdateUserResponse\x12K\n" +
 	"\x0eUpdatePassword\x12\x1b.user.UpdatePasswordRequest\x1a\x1c.user.UpdatePasswordResponse\x12E\n" +
-	"\fGetUserCount\x12\x19.user.GetUserCountRequest\x1a\x1a.user.GetUserCountResponseB\x18Z\x16shared/proto/user;userb\x06proto3"
+	"\fGetUserCount\x12\x19.user.GetUserCountRequest\x1a\x1a.user.GetUserCountResponse\x12B\n" +
+	"\vCreateClass\x12\x18.user.CreateClassRequest\x1a\x19.user.CreateClassResponse\x12B\n" +
+	"\vUpdateClass\x12\x18.user.UpdateClassRequest\x1a\x19.user.UpdateClassResponse\x12B\n" +
+	"\vDeleteClass\x12\x18.user.DeleteClassRequest\x1a\x19.user.DeleteClassResponse\x12?\n" +
+	"\n" +
+	"GetClasses\x12\x17.user.GetClassesRequest\x1a\x18.user.GetClassesResponse\x12N\n" +
+	"\x0fGetClassDetails\x12\x1c.user.GetClassDetailsRequest\x1a\x1d.user.GetClassDetailsResponse\x12?\n" +
+	"\n" +
+	"AddMembers\x12\x17.user.AddMembersRequest\x1a\x18.user.AddMembersResponse\x12E\n" +
+	"\fRemoveMember\x12\x19.user.RemoveMemberRequest\x1a\x1a.user.RemoveMemberResponse\x12Q\n" +
+	"\x10CheckUserInClass\x12\x1d.user.CheckUserInClassRequest\x1a\x1e.user.CheckUserInClassResponseB\x18Z\x16shared/proto/user;userb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once
@@ -1089,52 +2197,90 @@ func file_user_proto_rawDescGZIP() []byte {
 	return file_user_proto_rawDescData
 }
 
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
 var file_user_proto_goTypes = []any{
-	(*RegisterRequest)(nil),        // 0: user.RegisterRequest
-	(*RegisterResponse)(nil),       // 1: user.RegisterResponse
-	(*LoginRequest)(nil),           // 2: user.LoginRequest
-	(*LoginResponse)(nil),          // 3: user.LoginResponse
-	(*GetProfileRequest)(nil),      // 4: user.GetProfileRequest
-	(*GetProfileResponse)(nil),     // 5: user.GetProfileResponse
-	(*GetAllUsersRequest)(nil),     // 6: user.GetAllUsersRequest
-	(*GetAllUsersResponse)(nil),    // 7: user.GetAllUsersResponse
-	(*DeleteUserRequest)(nil),      // 8: user.DeleteUserRequest
-	(*DeleteUserResponse)(nil),     // 9: user.DeleteUserResponse
-	(*UpdateUserRoleRequest)(nil),  // 10: user.UpdateUserRoleRequest
-	(*UpdateUserRoleResponse)(nil), // 11: user.UpdateUserRoleResponse
-	(*UpdateUserRequest)(nil),      // 12: user.UpdateUserRequest
-	(*UpdateUserResponse)(nil),     // 13: user.UpdateUserResponse
-	(*UpdatePasswordRequest)(nil),  // 14: user.UpdatePasswordRequest
-	(*UpdatePasswordResponse)(nil), // 15: user.UpdatePasswordResponse
-	(*GetUserCountRequest)(nil),    // 16: user.GetUserCountRequest
-	(*GetUserCountResponse)(nil),   // 17: user.GetUserCountResponse
+	(*RegisterRequest)(nil),          // 0: user.RegisterRequest
+	(*RegisterResponse)(nil),         // 1: user.RegisterResponse
+	(*LoginRequest)(nil),             // 2: user.LoginRequest
+	(*LoginResponse)(nil),            // 3: user.LoginResponse
+	(*GetProfileRequest)(nil),        // 4: user.GetProfileRequest
+	(*GetProfileResponse)(nil),       // 5: user.GetProfileResponse
+	(*GetAllUsersRequest)(nil),       // 6: user.GetAllUsersRequest
+	(*GetAllUsersResponse)(nil),      // 7: user.GetAllUsersResponse
+	(*DeleteUserRequest)(nil),        // 8: user.DeleteUserRequest
+	(*DeleteUserResponse)(nil),       // 9: user.DeleteUserResponse
+	(*UpdateUserRoleRequest)(nil),    // 10: user.UpdateUserRoleRequest
+	(*UpdateUserRoleResponse)(nil),   // 11: user.UpdateUserRoleResponse
+	(*UpdateUserRequest)(nil),        // 12: user.UpdateUserRequest
+	(*UpdateUserResponse)(nil),       // 13: user.UpdateUserResponse
+	(*UpdatePasswordRequest)(nil),    // 14: user.UpdatePasswordRequest
+	(*UpdatePasswordResponse)(nil),   // 15: user.UpdatePasswordResponse
+	(*GetUserCountRequest)(nil),      // 16: user.GetUserCountRequest
+	(*GetUserCountResponse)(nil),     // 17: user.GetUserCountResponse
+	(*Class)(nil),                    // 18: user.Class
+	(*CreateClassRequest)(nil),       // 19: user.CreateClassRequest
+	(*CreateClassResponse)(nil),      // 20: user.CreateClassResponse
+	(*UpdateClassRequest)(nil),       // 21: user.UpdateClassRequest
+	(*UpdateClassResponse)(nil),      // 22: user.UpdateClassResponse
+	(*DeleteClassRequest)(nil),       // 23: user.DeleteClassRequest
+	(*DeleteClassResponse)(nil),      // 24: user.DeleteClassResponse
+	(*GetClassesRequest)(nil),        // 25: user.GetClassesRequest
+	(*GetClassesResponse)(nil),       // 26: user.GetClassesResponse
+	(*GetClassDetailsRequest)(nil),   // 27: user.GetClassDetailsRequest
+	(*GetClassDetailsResponse)(nil),  // 28: user.GetClassDetailsResponse
+	(*ClassMember)(nil),              // 29: user.ClassMember
+	(*AddMembersRequest)(nil),        // 30: user.AddMembersRequest
+	(*AddMembersResponse)(nil),       // 31: user.AddMembersResponse
+	(*RemoveMemberRequest)(nil),      // 32: user.RemoveMemberRequest
+	(*RemoveMemberResponse)(nil),     // 33: user.RemoveMemberResponse
+	(*CheckUserInClassRequest)(nil),  // 34: user.CheckUserInClassRequest
+	(*CheckUserInClassResponse)(nil), // 35: user.CheckUserInClassResponse
 }
 var file_user_proto_depIdxs = []int32{
 	5,  // 0: user.GetAllUsersResponse.users:type_name -> user.GetProfileResponse
-	0,  // 1: user.UserService.Register:input_type -> user.RegisterRequest
-	2,  // 2: user.UserService.Login:input_type -> user.LoginRequest
-	4,  // 3: user.UserService.GetProfile:input_type -> user.GetProfileRequest
-	6,  // 4: user.UserService.GetAllUsers:input_type -> user.GetAllUsersRequest
-	8,  // 5: user.UserService.DeleteUser:input_type -> user.DeleteUserRequest
-	10, // 6: user.UserService.UpdateUserRole:input_type -> user.UpdateUserRoleRequest
-	12, // 7: user.UserService.UpdateUser:input_type -> user.UpdateUserRequest
-	14, // 8: user.UserService.UpdatePassword:input_type -> user.UpdatePasswordRequest
-	16, // 9: user.UserService.GetUserCount:input_type -> user.GetUserCountRequest
-	1,  // 10: user.UserService.Register:output_type -> user.RegisterResponse
-	3,  // 11: user.UserService.Login:output_type -> user.LoginResponse
-	5,  // 12: user.UserService.GetProfile:output_type -> user.GetProfileResponse
-	7,  // 13: user.UserService.GetAllUsers:output_type -> user.GetAllUsersResponse
-	9,  // 14: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse
-	11, // 15: user.UserService.UpdateUserRole:output_type -> user.UpdateUserRoleResponse
-	13, // 16: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
-	15, // 17: user.UserService.UpdatePassword:output_type -> user.UpdatePasswordResponse
-	17, // 18: user.UserService.GetUserCount:output_type -> user.GetUserCountResponse
-	10, // [10:19] is the sub-list for method output_type
-	1,  // [1:10] is the sub-list for method input_type
-	1,  // [1:1] is the sub-list for extension type_name
-	1,  // [1:1] is the sub-list for extension extendee
-	0,  // [0:1] is the sub-list for field type_name
+	18, // 1: user.CreateClassResponse.class:type_name -> user.Class
+	18, // 2: user.GetClassesResponse.classes:type_name -> user.Class
+	18, // 3: user.GetClassDetailsResponse.class:type_name -> user.Class
+	29, // 4: user.GetClassDetailsResponse.members:type_name -> user.ClassMember
+	0,  // 5: user.UserService.Register:input_type -> user.RegisterRequest
+	2,  // 6: user.UserService.Login:input_type -> user.LoginRequest
+	4,  // 7: user.UserService.GetProfile:input_type -> user.GetProfileRequest
+	6,  // 8: user.UserService.GetAllUsers:input_type -> user.GetAllUsersRequest
+	8,  // 9: user.UserService.DeleteUser:input_type -> user.DeleteUserRequest
+	10, // 10: user.UserService.UpdateUserRole:input_type -> user.UpdateUserRoleRequest
+	12, // 11: user.UserService.UpdateUser:input_type -> user.UpdateUserRequest
+	14, // 12: user.UserService.UpdatePassword:input_type -> user.UpdatePasswordRequest
+	16, // 13: user.UserService.GetUserCount:input_type -> user.GetUserCountRequest
+	19, // 14: user.UserService.CreateClass:input_type -> user.CreateClassRequest
+	21, // 15: user.UserService.UpdateClass:input_type -> user.UpdateClassRequest
+	23, // 16: user.UserService.DeleteClass:input_type -> user.DeleteClassRequest
+	25, // 17: user.UserService.GetClasses:input_type -> user.GetClassesRequest
+	27, // 18: user.UserService.GetClassDetails:input_type -> user.GetClassDetailsRequest
+	30, // 19: user.UserService.AddMembers:input_type -> user.AddMembersRequest
+	32, // 20: user.UserService.RemoveMember:input_type -> user.RemoveMemberRequest
+	34, // 21: user.UserService.CheckUserInClass:input_type -> user.CheckUserInClassRequest
+	1,  // 22: user.UserService.Register:output_type -> user.RegisterResponse
+	3,  // 23: user.UserService.Login:output_type -> user.LoginResponse
+	5,  // 24: user.UserService.GetProfile:output_type -> user.GetProfileResponse
+	7,  // 25: user.UserService.GetAllUsers:output_type -> user.GetAllUsersResponse
+	9,  // 26: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse
+	11, // 27: user.UserService.UpdateUserRole:output_type -> user.UpdateUserRoleResponse
+	13, // 28: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
+	15, // 29: user.UserService.UpdatePassword:output_type -> user.UpdatePasswordResponse
+	17, // 30: user.UserService.GetUserCount:output_type -> user.GetUserCountResponse
+	20, // 31: user.UserService.CreateClass:output_type -> user.CreateClassResponse
+	22, // 32: user.UserService.UpdateClass:output_type -> user.UpdateClassResponse
+	24, // 33: user.UserService.DeleteClass:output_type -> user.DeleteClassResponse
+	26, // 34: user.UserService.GetClasses:output_type -> user.GetClassesResponse
+	28, // 35: user.UserService.GetClassDetails:output_type -> user.GetClassDetailsResponse
+	31, // 36: user.UserService.AddMembers:output_type -> user.AddMembersResponse
+	33, // 37: user.UserService.RemoveMember:output_type -> user.RemoveMemberResponse
+	35, // 38: user.UserService.CheckUserInClass:output_type -> user.CheckUserInClassResponse
+	22, // [22:39] is the sub-list for method output_type
+	5,  // [5:22] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_user_proto_init() }
@@ -1148,7 +2294,7 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   36,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

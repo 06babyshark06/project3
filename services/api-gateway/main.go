@@ -49,6 +49,7 @@ func main() {
 	examHandler := handlers.NewExamHandler(examClient)
 	courseHandler := handlers.NewCourseHandler(courseClient)
 	statsHandler := handlers.NewStatsHandler(userClient, courseClient, examClient)
+	classHandler := handlers.NewClassHandler(userClient)
 
 	// Tạo router
 	r := gin.Default()
@@ -151,6 +152,14 @@ func main() {
 				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
 				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
 				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)
+
+				instructorOnly.POST("/classes", classHandler.CreateClass)
+				instructorOnly.PUT("/classes/:id", classHandler.UpdateClass)
+				instructorOnly.DELETE("/classes/:id", classHandler.DeleteClass)
+				instructorOnly.GET("/classes", classHandler.GetClasses)
+				instructorOnly.GET("/classes/:id", classHandler.GetClassDetails)
+				instructorOnly.POST("/classes/members", classHandler.AddMembers)
+				instructorOnly.DELETE("/classes/members", classHandler.RemoveMember)
 			}
 
 			studentOnly := auth.Group("/")
