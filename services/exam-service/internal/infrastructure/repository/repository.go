@@ -163,7 +163,10 @@ func (r *examRepository) CreateAccessRequest(ctx context.Context, req *domain.Ex
 func (r *examRepository) GetAccessRequest(ctx context.Context, examID, userID int64) (*domain.ExamAccessRequestModel, error) {
 	var req domain.ExamAccessRequestModel
 	err := database.DB.WithContext(ctx).Where("exam_id = ? AND user_id = ?", examID, userID).First(&req).Error
-	return &req, err
+	if err != nil {
+		return nil, err
+	}
+	return &req, nil
 }
 func (r *examRepository) UpdateAccessRequestStatus(ctx context.Context, examID, userID int64, status string) error {
 	return database.DB.WithContext(ctx).Model(&domain.ExamAccessRequestModel{}).
@@ -319,4 +322,55 @@ func (r *examRepository) ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, 
 	}
 	
 	return nil
+}
+
+func (r *examRepository) GetAccessRequestsByExam(ctx context.Context, examID int64) ([]*domain.ExamAccessRequestModel, error) {
+	var reqs []*domain.ExamAccessRequestModel
+	err := database.DB.WithContext(ctx).
+        Where("exam_id = ?", examID).
+        Order("created_at DESC").
+        Find(&reqs).Error
+	return reqs, err
+}
+
+func (r *examRepository) UpdateTopic(ctx context.Context, id int64, updates map[string]interface{}) error {
+	return database.DB.WithContext(ctx).Model(&domain.TopicModel{}).Where("id = ?", id).Updates(updates).Error
+}
+
+func (r *examRepository) DeleteTopic(ctx context.Context, tx *gorm.DB, topicID int64) error {
+	var sectionIDs []int64
+	if err := tx.WithContext(ctx).Model(&domain.SectionModel{}).Where("topic_id = ?", topicID).Pluck("id", &sectionIDs).Error; err != nil {
+		return err
+	}
+
+	for _, sid := range sectionIDs {
+		if err := r.DeleteSection(ctx, tx, sid); err != nil {
+			return err
+		}
+	}
+
+	return tx.WithContext(ctx).Delete(&domain.TopicModel{}, topicID).Error
+}
+
+func (r *examRepository) UpdateSection(ctx context.Context, id int64, updates map[string]interface{}) error {
+	return database.DB.WithContext(ctx).Model(&domain.SectionModel{}).Where("id = ?", id).Updates(updates).Error
+}
+
+func (r *examRepository) DeleteSection(ctx context.Context, tx *gorm.DB, sectionID int64) error {
+	var questionIDs []int64
+	if err := tx.WithContext(ctx).Model(&domain.QuestionModel{}).Where("section_id = ?", sectionID).Pluck("id", &questionIDs).Error; err != nil {
+		return err
+	}
+
+	if len(questionIDs) > 0 {
+		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ChoiceModel{}).Error; err != nil { return err }
+		
+		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ExamQuestionModel{}).Error; err != nil { return err }
+		
+		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.UserAnswerModel{}).Error; err != nil { return err }
+
+		if err := tx.WithContext(ctx).Where("id IN ?", questionIDs).Delete(&domain.QuestionModel{}).Error; err != nil { return err }
+	}
+
+	return tx.WithContext(ctx).Delete(&domain.SectionModel{}, sectionID).Error
 }

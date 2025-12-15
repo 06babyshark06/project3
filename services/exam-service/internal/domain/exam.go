@@ -50,7 +50,7 @@ type ChoiceModel struct {
 type QuestionModel struct {
 	Id            int64                   `gorm:"primaryKey;autoIncrement" json:"id"`
 	SectionID     int64                   `gorm:"not null;index" json:"section_id"`
-	Section       *SectionModel            `gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"section"`
+	Section       *SectionModel           `gorm:"foreignKey:SectionID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"section"`
 	TopicID       int64                   `gorm:"not null;index" json:"topic_id"`
 	CreatorID     int64                   `gorm:"not null" json:"creator_id"`
 	Content       string                  `gorm:"type:text;not null" json:"content"`
@@ -88,12 +88,12 @@ type ExamModel struct {
 	MaxAttempts     int        `gorm:"default:1" json:"max_attempts"`
 	Password        string     `gorm:"size:50" json:"password"`
 
-	ShuffleQuestions      bool `gorm:"default:false" json:"shuffle_questions"`
-	ShowResultImmediately bool `gorm:"default:true" json:"show_result_immediately"`
-	RequiresApproval      bool `gorm:"default:false" json:"requires_approval"`
+	ShuffleQuestions      bool `json:"shuffle_questions"`
+	ShowResultImmediately bool `json:"show_result_immediately"`
+	RequiresApproval      bool `json:"requires_approval"`
 
 	TopicID     int64            `gorm:"not null;index" json:"topic_id"`
-	Topic       *TopicModel       `gorm:"foreignKey:TopicID" json:"topic"`
+	Topic       *TopicModel      `gorm:"foreignKey:TopicID" json:"topic"`
 	CreatorID   int64            `gorm:"not null" json:"creator_id"`
 	IsPublished bool             `gorm:"not null;default:false" json:"is_published"`
 	CreatedAt   time.Time        `json:"created_at"`
@@ -112,12 +112,13 @@ func (ExamQuestionModel) TableName() string {
 }
 
 type ExamAccessRequestModel struct {
-	Id        int64     `gorm:"primaryKey;autoIncrement"`
-	ExamID    int64     `gorm:"not null;index"`
-	UserID    int64     `gorm:"not null;index"`
-	Status    string    `gorm:"size:20;default:'pending'"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id          int64     `gorm:"primaryKey;autoIncrement"`
+	ExamID      int64     `gorm:"not null;index"`
+	UserID      int64     `gorm:"not null;index"`
+	StudentName string    `gorm:"size:255" json:"student_name"`
+	Status      string    `gorm:"size:20;default:'pending'"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type ExamSubmissionModel struct {
@@ -164,6 +165,10 @@ type ExamRepository interface {
 	CreateSection(ctx context.Context, tx *gorm.DB, section *SectionModel) (*SectionModel, error)
 	GetSectionsByTopic(ctx context.Context, topicID int64) ([]*SectionModel, error)
 	GetSectionByID(ctx context.Context, id int64) (*SectionModel, error)
+	UpdateTopic(ctx context.Context, id int64, updates map[string]interface{}) error
+	DeleteTopic(ctx context.Context, tx *gorm.DB, id int64) error
+	UpdateSection(ctx context.Context, id int64, updates map[string]interface{}) error
+	DeleteSection(ctx context.Context, tx *gorm.DB, id int64) error
 
 	GetQuestionByID(ctx context.Context, id int64) (*QuestionModel, error)
 	CreateQuestion(ctx context.Context, tx *gorm.DB, question *QuestionModel) (*QuestionModel, error)
@@ -188,6 +193,7 @@ type ExamRepository interface {
 	CreateAccessRequest(ctx context.Context, req *ExamAccessRequestModel) error
 	GetAccessRequest(ctx context.Context, examID, userID int64) (*ExamAccessRequestModel, error)
 	UpdateAccessRequestStatus(ctx context.Context, examID, userID int64, status string) error
+	GetAccessRequestsByExam(ctx context.Context, examID int64) ([]*ExamAccessRequestModel, error)
 
 	GetCorrectAnswers(ctx context.Context, examID int64) (map[int64][]int64, error)
 	CreateSubmission(ctx context.Context, tx *gorm.DB, submission *ExamSubmissionModel) (*ExamSubmissionModel, error)
@@ -215,6 +221,10 @@ type ExamService interface {
 	GetTopics(ctx context.Context, req *pb.GetTopicsRequest) (*pb.GetTopicsResponse, error)
 	CreateSection(ctx context.Context, req *pb.CreateSectionRequest) (*pb.CreateSectionResponse, error)
 	GetSections(ctx context.Context, req *pb.GetSectionsRequest) (*pb.GetSectionsResponse, error)
+	UpdateTopic(ctx context.Context, req *pb.UpdateTopicRequest) (*pb.UpdateTopicResponse, error)
+	DeleteTopic(ctx context.Context, req *pb.DeleteTopicRequest) (*pb.DeleteTopicResponse, error)
+	UpdateSection(ctx context.Context, req *pb.UpdateSectionRequest) (*pb.UpdateSectionResponse, error)
+	DeleteSection(ctx context.Context, req *pb.DeleteSectionRequest) (*pb.DeleteSectionResponse, error)
 
 	GetQuestions(ctx context.Context, req *pb.GetQuestionsRequest) (*pb.GetQuestionsResponse, error)
 	GetQuestion(ctx context.Context, req *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error)
@@ -236,6 +246,7 @@ type ExamService interface {
 	RequestExamAccess(ctx context.Context, req *pb.RequestExamAccessRequest) (*pb.RequestExamAccessResponse, error)
 	ApproveExamAccess(ctx context.Context, req *pb.ApproveExamAccessRequest) (*pb.ApproveExamAccessResponse, error)
 	CheckExamAccess(ctx context.Context, req *pb.CheckExamAccessRequest) (*pb.CheckExamAccessResponse, error)
+	GetAccessRequests(ctx context.Context, req *pb.GetAccessRequestsRequest) (*pb.GetAccessRequestsResponse, error)
 
 	SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error)
 	GetSubmission(ctx context.Context, req *pb.GetSubmissionRequest) (*pb.GetSubmissionResponse, error)

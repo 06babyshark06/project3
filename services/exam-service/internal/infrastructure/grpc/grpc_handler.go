@@ -129,3 +129,23 @@ func (h *gRPCHandler) ExportQuestions(ctx context.Context, req *pb.ExportQuestio
 func (h *gRPCHandler) StartExam(ctx context.Context, req *pb.StartExamRequest) (*pb.StartExamResponse, error) {
 	return h.service.StartExam(ctx, req)
 }
+
+func (h *gRPCHandler) GetAccessRequests(ctx context.Context, req *pb.GetAccessRequestsRequest) (*pb.GetAccessRequestsResponse, error) {
+	return h.service.GetAccessRequests(ctx, req)
+}
+
+func (h *gRPCHandler) UpdateTopic(ctx context.Context, req *pb.UpdateTopicRequest) (*pb.UpdateTopicResponse, error) {
+	return h.service.UpdateTopic(ctx, req)
+}
+
+func (h *gRPCHandler) DeleteTopic(ctx context.Context, req *pb.DeleteTopicRequest) (*pb.DeleteTopicResponse, error) {
+	return h.service.DeleteTopic(ctx, req)
+}
+
+func (h *gRPCHandler) UpdateSection(ctx context.Context, req *pb.UpdateSectionRequest) (*pb.UpdateSectionResponse, error) {
+	return h.service.UpdateSection(ctx, req)
+}
+
+func (h *gRPCHandler) DeleteSection(ctx context.Context, req *pb.DeleteSectionRequest) (*pb.DeleteSectionResponse, error) {
+	return h.service.DeleteSection(ctx, req)
+}

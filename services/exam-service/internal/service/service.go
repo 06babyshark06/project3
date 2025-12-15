@@ -398,7 +398,7 @@ func (s *examService) RequestExamAccess(ctx context.Context, req *pb.RequestExam
 		return &pb.RequestExamAccessResponse{Success: true, Status: existing.Status}, nil
 	}
 	newReq := &domain.ExamAccessRequestModel{
-		ExamID: req.ExamId, UserID: req.UserId, Status: "pending", CreatedAt: time.Now().UTC(),
+		ExamID: req.ExamId, UserID: req.UserId, StudentName: req.StudentName, Status: "pending", CreatedAt: time.Now().UTC(),
 	}
 	if err := s.repo.CreateAccessRequest(ctx, newReq); err != nil {
 		return nil, err
@@ -498,6 +498,7 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 			pbChoices = append(pbChoices, &pb.ChoiceDetails{
 				Id:      c.Id,
 				Content: c.Content,
+				AttachmentUrl: c.AttachmentURL,
 			})
 		}
 		qType := "single_choice"
@@ -554,6 +555,10 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 			MaxAttempts:     int32(examModel.MaxAttempts),
 			StartTime:       startTime,
 			EndTime:         endTime,
+			ShuffleQuestions:      examModel.ShuffleQuestions,
+			ShowResultImmediately: examModel.ShowResultImmediately,
+			RequiresApproval:      examModel.RequiresApproval,
+			Password:              examModel.Password,
 		},
 		Questions:   pbQuestions,
 		TopicId:     examModel.TopicID,
@@ -563,21 +568,22 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 }
 
 func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
-	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
-	if !check.CanAccess {
-		return nil, fmt.Errorf("không đủ điều kiện nộp bài: %s", check.Message)
+	var submission domain.ExamSubmissionModel
+	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
+		First(&submission).Error
+
+	if err != nil {
+		return nil, errors.New("không tìm thấy bài làm đang diễn ra (hoặc đã nộp rồi)")
 	}
 
 	var correctCount int32 = 0
-	var totalQuestions int32 = 0
 	var finalScore float64 = 0
-	var submissionID int64 = 0
-	var examTitle string
-
+	
 	correctMap, err := s.repo.GetCorrectAnswers(ctx, req.ExamId)
 	if err != nil {
-		return nil, errors.New("lỗi khi lấy đáp án: " + err.Error())
+		return nil, errors.New("lỗi lấy đáp án: " + err.Error())
 	}
+	totalQuestions := int32(len(correctMap))
 
 	userAnswerMap := make(map[int64][]int64)
 	for _, ans := range req.Answers {
@@ -585,37 +591,13 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 			userAnswerMap[ans.QuestionId] = append(userAnswerMap[ans.QuestionId], ans.ChosenChoiceId)
 		}
 	}
-	totalQuestions = int32(len(correctMap))
 
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
-		var exam domain.ExamModel
-		if err := tx.WithContext(ctx).Select("title").First(&exam, req.ExamId).Error; err != nil {
-			return errors.New("không tìm thấy bài thi")
-		}
-		examTitle = exam.Title
-		var inProgressStatus domain.SubmissionStatusModel
-		if err := tx.WithContext(ctx).Where("status = ?", "in_progress").First(&inProgressStatus).Error; err != nil {
-			return errors.New("không tìm thấy status 'in_progress'")
-		}
-
-		submission := &domain.ExamSubmissionModel{
-			ExamID:    req.ExamId,
-			UserID:    req.UserId,
-			StatusID:  inProgressStatus.Id,
-			StartedAt: time.Now().UTC(),
-		}
-		createdSubmission, err := s.repo.CreateSubmission(ctx, tx, submission)
-		if err != nil {
-			return err
-		}
-		submissionID = createdSubmission.Id
-
+		
 		var userAnswerModels []*domain.UserAnswerModel
-		totalQuestions = int32(len(correctMap))
 
 		for qID, correctChoices := range correctMap {
 			userChoices := userAnswerMap[qID]
-
 			isCorrect := compareInt64Slices(userChoices, correctChoices)
 
 			if isCorrect {
@@ -627,7 +609,7 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 				correctVal := isCorrect
 
 				userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
-					SubmissionID:   createdSubmission.Id,
+					SubmissionID:   submission.Id,
 					QuestionID:     qID,
 					ChosenChoiceID: &choiceIDVal,
 					IsCorrect:      &correctVal,
@@ -635,6 +617,9 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 			}
 		}
 
+		tx.Where("submission_id = ?", submission.Id).Delete(&domain.UserAnswerModel{})
+
+		// Lưu đáp án mới
 		if len(userAnswerModels) > 0 {
 			if err := s.repo.CreateUserAnswers(ctx, tx, userAnswerModels); err != nil {
 				return err
@@ -647,15 +632,15 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 
 		var completedStatus domain.SubmissionStatusModel
 		if err := tx.WithContext(ctx).Where("status = ?", "completed").First(&completedStatus).Error; err != nil {
-			return errors.New("không tìm thấy status 'completed'")
+			return errors.New("không tìm thấy status 'completed' trong DB")
 		}
 
+		submission.StatusID = completedStatus.Id
+		submission.Score = finalScore
 		now := time.Now().UTC()
-		createdSubmission.StatusID = completedStatus.Id
-		createdSubmission.Score = finalScore
-		createdSubmission.SubmittedAt = &now
+		submission.SubmittedAt = &now
 
-		if _, err := s.repo.UpdateSubmission(ctx, tx, createdSubmission); err != nil {
+		if _, err := s.repo.UpdateSubmission(ctx, tx, &submission); err != nil {
 			return err
 		}
 
@@ -666,26 +651,21 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		return nil, err
 	}
 
+	var examTitle string 
+	
 	eventPayload := contracts.ExamSubmittedEvent{
 		UserID:       req.UserId,
 		ExamID:       req.ExamId,
-		SubmissionID: submissionID,
+		SubmissionID: submission.Id,
 		ExamTitle:    examTitle,
 		Score:        finalScore,
 	}
-	eventBytes, err := json.Marshal(eventPayload)
-	if err != nil {
-		log.Printf("LỖI: Không thể marshal sự kiện exam_submitted: %v", err)
-	} else {
-		key := []byte(strconv.FormatInt(submissionID, 10))
-		err = s.producer.Produce("exam_events", key, eventBytes)
-		if err != nil {
-			log.Printf("LỖI: Không thể gửi sự kiện exam_submitted: %v", err)
-		}
-	}
+	eventBytes, _ := json.Marshal(eventPayload)
+	key := []byte(strconv.FormatInt(submission.Id, 10))
+	s.producer.Produce("exam_events", key, eventBytes)
 
 	return &pb.SubmitExamResponse{
-		SubmissionId:   submissionID,
+		SubmissionId:   submission.Id,
 		Score:          float32(finalScore),
 		CorrectCount:   correctCount,
 		TotalQuestions: totalQuestions,
@@ -726,6 +706,21 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 	if err != nil {
 		return nil, errors.New("không thể tải nội dung đề thi gốc")
 	}
+	submittedAt := ""
+	if submission.SubmittedAt != nil { submittedAt = submission.SubmittedAt.Format(time.RFC3339) }
+
+	if !examFull.ShowResultImmediately {
+		return &pb.GetSubmissionResponse{
+			Id:             submission.Id,
+			ExamTitle:      submission.Exam.Title,
+			Status:         submission.Status.Status,
+			SubmittedAt:    submittedAt,
+			Score:          0,
+			CorrectCount:   0,
+			TotalQuestions: 0,
+			Details:        nil,
+		}, nil
+	}
 
 	userSelections := make(map[int64]map[int64]bool)
 
@@ -755,6 +750,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 				Content:      c.Content,
 				IsCorrect:    c.IsCorrect,
 				UserSelected: userSelections[q.Id][c.Id],
+				AttachmentUrl: c.AttachmentURL,
 			})
 		}
 
@@ -770,25 +766,15 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			QuestionType:    qType,
 			IsCorrect:       questionIsCorrectMap[q.Id],
 			Choices:         pbChoices,
+			AttachmentUrl:   q.AttachmentURL,
 		})
 	}
 
 	correctCount := 0
-	for _, ans := range submission.UserAnswers {
-		if ans.IsCorrect != nil && *ans.IsCorrect {
-			correctCount++
-		}
-	}
-	correctCount = 0
 	for _, v := range questionIsCorrectMap {
 		if v {
 			correctCount++
 		}
-	}
-
-	submittedAt := ""
-	if submission.SubmittedAt != nil {
-		submittedAt = submission.SubmittedAt.Format(time.RFC3339)
 	}
 
 	return &pb.GetSubmissionResponse{
@@ -1372,20 +1358,25 @@ func (s *examService) ExportQuestions(ctx context.Context, req *pb.ExportQuestio
 }
 
 func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (*pb.StartExamResponse, error) {
-	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
+    examDetails, err := s.repo.GetExamDetails(ctx, req.ExamId)
+    if err != nil {
+        return nil, fmt.Errorf("không tìm thấy bài thi: %v", err)
+    }
 
-	var submission domain.ExamSubmissionModel
-	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
+    check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
+
+    var submission domain.ExamSubmissionModel
+    err = database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
         Preload("UserAnswers").
         First(&submission).Error
 
-	var submissionID int64
-	var startTime time.Time
+    var submissionID int64
+    var startTime time.Time
     var currentAnswers = make(map[int64]*pb.Int64List)
 
-	if err == nil {
-		submissionID = submission.Id
-		startTime = submission.StartedAt
+    if err == nil {
+        submissionID = submission.Id
+        startTime = submission.StartedAt
         
         for _, ans := range submission.UserAnswers {
             if ans.ChosenChoiceID != nil {
@@ -1395,43 +1386,103 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
                 currentAnswers[ans.QuestionID].Values = append(currentAnswers[ans.QuestionID].Values, *ans.ChosenChoiceID)
             }
         }
-
-	} else {
+    } else {
         if !check.CanAccess {
             return nil, fmt.Errorf("bạn không thể bắt đầu bài thi: %s", check.Message)
         }
 
-		_, err := s.repo.GetExamDetails(ctx, req.ExamId)
-		if err != nil { return nil, err }
+        var inProgressStatus domain.SubmissionStatusModel
+        if err := database.DB.Where("status = ?", "in_progress").First(&inProgressStatus).Error; err != nil {
+             return nil, errors.New("lỗi hệ thống: chưa cấu hình status in_progress")
+        }
 
-		var inProgressStatus domain.SubmissionStatusModel
-		database.DB.Where("status = ?", "in_progress").First(&inProgressStatus)
+        newSub := &domain.ExamSubmissionModel{
+            ExamID:    req.ExamId,
+            UserID:    req.UserId,
+            StatusID:  inProgressStatus.Id,
+            StartedAt: time.Now().UTC(),
+            Score:     0,
+        }
+        created, err := s.repo.CreateSubmission(ctx, database.DB, newSub)
+        if err != nil { return nil, err }
+        
+        submissionID = created.Id
+        startTime = created.StartedAt
+    }
 
-		newSub := &domain.ExamSubmissionModel{
-			ExamID:    req.ExamId,
-			UserID:    req.UserId,
-			StatusID:  inProgressStatus.Id,
-			StartedAt: time.Now().UTC(),
-			Score:     0,
-		}
-		created, err := s.repo.CreateSubmission(ctx, database.DB, newSub)
-		if err != nil { return nil, err }
-		
-		submissionID = created.Id
-		startTime = created.StartedAt
-	}
+    durationSeconds := float64(examDetails.DurationMinutes * 60)
+    now := time.Now().UTC()
+    elapsed := now.Sub(startTime).Seconds()
+    remaining := int32(durationSeconds - elapsed)
 
-	examDetails, _ := s.repo.GetExamDetails(ctx, req.ExamId)
-	durationSeconds := examDetails.DurationMinutes * 60
-	
-	elapsed := time.Since(startTime).Seconds()
-	remaining := int32(float64(durationSeconds) - elapsed)
+    if examDetails.EndTime != nil {
+        timeUntilClose := examDetails.EndTime.Sub(now).Seconds()
+        if timeUntilClose < float64(remaining) {
+            remaining = int32(timeUntilClose)
+        }
+    }
 
-	if remaining < 0 { remaining = 0 }
+    if remaining < 0 { remaining = 0 }
 
-	return &pb.StartExamResponse{
-		SubmissionId:     submissionID,
-		RemainingSeconds: remaining,
+    return &pb.StartExamResponse{
+        SubmissionId:     submissionID,
+        RemainingSeconds: remaining,
         CurrentAnswers:   currentAnswers,
-	}, nil
+    }, nil
+}
+
+func (s *examService) GetAccessRequests(ctx context.Context, req *pb.GetAccessRequestsRequest) (*pb.GetAccessRequestsResponse, error) {
+    exam, err := s.repo.GetExamDetails(ctx, req.ExamId)
+    if err != nil { return nil, err }
+    if exam.CreatorID != req.CreatorId { 
+        return nil, errors.New("không có quyền xem yêu cầu của bài thi này") 
+    }
+
+    requests, err := s.repo.GetAccessRequestsByExam(ctx, req.ExamId)
+    if err != nil { return nil, err }
+
+    var pbRequests []*pb.AccessRequestItem
+    for _, r := range requests {
+        pbRequests = append(pbRequests, &pb.AccessRequestItem{
+            Id:        r.Id,
+            UserId:    r.UserID,
+            Status:    r.Status,
+            CreatedAt: r.CreatedAt.Format(time.RFC3339),
+			FullName:  r.StudentName,
+        })
+    }
+
+    return &pb.GetAccessRequestsResponse{Requests: pbRequests}, nil
+}
+
+func (s *examService) UpdateTopic(ctx context.Context, req *pb.UpdateTopicRequest) (*pb.UpdateTopicResponse, error) {
+	updates := make(map[string]interface{})
+	if req.Name != "" { updates["name"] = req.Name }
+	if req.Description != "" { updates["description"] = req.Description }
+	
+	err := s.repo.UpdateTopic(ctx, req.Id, updates)
+	return &pb.UpdateTopicResponse{Success: err == nil}, err
+}
+
+func (s *examService) DeleteTopic(ctx context.Context, req *pb.DeleteTopicRequest) (*pb.DeleteTopicResponse, error) {
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return s.repo.DeleteTopic(ctx, tx, req.Id)
+	})
+	return &pb.DeleteTopicResponse{Success: err == nil}, err
+}
+
+func (s *examService) UpdateSection(ctx context.Context, req *pb.UpdateSectionRequest) (*pb.UpdateSectionResponse, error) {
+	updates := make(map[string]interface{})
+	if req.Name != "" { updates["name"] = req.Name }
+	if req.Description != "" { updates["description"] = req.Description }
+
+	err := s.repo.UpdateSection(ctx, req.Id, updates)
+	return &pb.UpdateSectionResponse{Success: err == nil}, err
+}
+
+func (s *examService) DeleteSection(ctx context.Context, req *pb.DeleteSectionRequest) (*pb.DeleteSectionResponse, error) {
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return s.repo.DeleteSection(ctx, tx, req.Id)
+	})
+	return &pb.DeleteSectionResponse{Success: err == nil}, err
 }

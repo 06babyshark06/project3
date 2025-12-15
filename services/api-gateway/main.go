@@ -54,7 +54,7 @@ func main() {
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://[::1]:3000"},
+		AllowOrigins:     []string{"http://localhost:4001", "http://127.0.0.1:3000", "http://[::1]:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
@@ -125,6 +125,10 @@ func main() {
 
 				instructorOnly.POST("/topics", examHandler.CreateTopic)
 				instructorOnly.POST("/exam-sections", examHandler.CreateSection)
+				instructorOnly.PUT("/topics/:id", examHandler.UpdateTopic)
+				instructorOnly.DELETE("/topics/:id", examHandler.DeleteTopic)
+				instructorOnly.PUT("/exam-sections/:id", examHandler.UpdateSection)
+				instructorOnly.DELETE("/exam-sections/:id", examHandler.DeleteSection)
 
 				instructorOnly.GET("/questions", examHandler.GetQuestions)
 				instructorOnly.GET("/questions/:id", examHandler.GetQuestion)
@@ -146,6 +150,7 @@ func main() {
 				instructorOnly.GET("/exams/:id/stats", examHandler.GetExamStats)
 				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
 				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
+				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)
 			}
 
 			studentOnly := auth.Group("/")

@@ -23,6 +23,10 @@ const (
 	ExamService_GetTopics_FullMethodName            = "/exam.ExamService/GetTopics"
 	ExamService_CreateSection_FullMethodName        = "/exam.ExamService/CreateSection"
 	ExamService_GetSections_FullMethodName          = "/exam.ExamService/GetSections"
+	ExamService_UpdateTopic_FullMethodName          = "/exam.ExamService/UpdateTopic"
+	ExamService_DeleteTopic_FullMethodName          = "/exam.ExamService/DeleteTopic"
+	ExamService_UpdateSection_FullMethodName        = "/exam.ExamService/UpdateSection"
+	ExamService_DeleteSection_FullMethodName        = "/exam.ExamService/DeleteSection"
 	ExamService_GetQuestions_FullMethodName         = "/exam.ExamService/GetQuestions"
 	ExamService_CreateQuestion_FullMethodName       = "/exam.ExamService/CreateQuestion"
 	ExamService_GetQuestion_FullMethodName          = "/exam.ExamService/GetQuestion"
@@ -40,6 +44,7 @@ const (
 	ExamService_RequestExamAccess_FullMethodName    = "/exam.ExamService/RequestExamAccess"
 	ExamService_ApproveExamAccess_FullMethodName    = "/exam.ExamService/ApproveExamAccess"
 	ExamService_CheckExamAccess_FullMethodName      = "/exam.ExamService/CheckExamAccess"
+	ExamService_GetAccessRequests_FullMethodName    = "/exam.ExamService/GetAccessRequests"
 	ExamService_SubmitExam_FullMethodName           = "/exam.ExamService/SubmitExam"
 	ExamService_GetSubmission_FullMethodName        = "/exam.ExamService/GetSubmission"
 	ExamService_GetUserExamStats_FullMethodName     = "/exam.ExamService/GetUserExamStats"
@@ -61,6 +66,10 @@ type ExamServiceClient interface {
 	GetTopics(ctx context.Context, in *GetTopicsRequest, opts ...grpc.CallOption) (*GetTopicsResponse, error)
 	CreateSection(ctx context.Context, in *CreateSectionRequest, opts ...grpc.CallOption) (*CreateSectionResponse, error)
 	GetSections(ctx context.Context, in *GetSectionsRequest, opts ...grpc.CallOption) (*GetSectionsResponse, error)
+	UpdateTopic(ctx context.Context, in *UpdateTopicRequest, opts ...grpc.CallOption) (*UpdateTopicResponse, error)
+	DeleteTopic(ctx context.Context, in *DeleteTopicRequest, opts ...grpc.CallOption) (*DeleteTopicResponse, error)
+	UpdateSection(ctx context.Context, in *UpdateSectionRequest, opts ...grpc.CallOption) (*UpdateSectionResponse, error)
+	DeleteSection(ctx context.Context, in *DeleteSectionRequest, opts ...grpc.CallOption) (*DeleteSectionResponse, error)
 	GetQuestions(ctx context.Context, in *GetQuestionsRequest, opts ...grpc.CallOption) (*GetQuestionsResponse, error)
 	CreateQuestion(ctx context.Context, in *CreateQuestionRequest, opts ...grpc.CallOption) (*CreateQuestionResponse, error)
 	GetQuestion(ctx context.Context, in *GetQuestionRequest, opts ...grpc.CallOption) (*GetQuestionResponse, error)
@@ -78,6 +87,7 @@ type ExamServiceClient interface {
 	RequestExamAccess(ctx context.Context, in *RequestExamAccessRequest, opts ...grpc.CallOption) (*RequestExamAccessResponse, error)
 	ApproveExamAccess(ctx context.Context, in *ApproveExamAccessRequest, opts ...grpc.CallOption) (*ApproveExamAccessResponse, error)
 	CheckExamAccess(ctx context.Context, in *CheckExamAccessRequest, opts ...grpc.CallOption) (*CheckExamAccessResponse, error)
+	GetAccessRequests(ctx context.Context, in *GetAccessRequestsRequest, opts ...grpc.CallOption) (*GetAccessRequestsResponse, error)
 	SubmitExam(ctx context.Context, in *SubmitExamRequest, opts ...grpc.CallOption) (*SubmitExamResponse, error)
 	GetSubmission(ctx context.Context, in *GetSubmissionRequest, opts ...grpc.CallOption) (*GetSubmissionResponse, error)
 	GetUserExamStats(ctx context.Context, in *GetUserExamStatsRequest, opts ...grpc.CallOption) (*GetUserExamStatsResponse, error)
@@ -133,6 +143,46 @@ func (c *examServiceClient) GetSections(ctx context.Context, in *GetSectionsRequ
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetSectionsResponse)
 	err := c.cc.Invoke(ctx, ExamService_GetSections_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) UpdateTopic(ctx context.Context, in *UpdateTopicRequest, opts ...grpc.CallOption) (*UpdateTopicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateTopicResponse)
+	err := c.cc.Invoke(ctx, ExamService_UpdateTopic_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) DeleteTopic(ctx context.Context, in *DeleteTopicRequest, opts ...grpc.CallOption) (*DeleteTopicResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTopicResponse)
+	err := c.cc.Invoke(ctx, ExamService_DeleteTopic_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) UpdateSection(ctx context.Context, in *UpdateSectionRequest, opts ...grpc.CallOption) (*UpdateSectionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateSectionResponse)
+	err := c.cc.Invoke(ctx, ExamService_UpdateSection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) DeleteSection(ctx context.Context, in *DeleteSectionRequest, opts ...grpc.CallOption) (*DeleteSectionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteSectionResponse)
+	err := c.cc.Invoke(ctx, ExamService_DeleteSection_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -309,6 +359,16 @@ func (c *examServiceClient) CheckExamAccess(ctx context.Context, in *CheckExamAc
 	return out, nil
 }
 
+func (c *examServiceClient) GetAccessRequests(ctx context.Context, in *GetAccessRequestsRequest, opts ...grpc.CallOption) (*GetAccessRequestsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAccessRequestsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetAccessRequests_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *examServiceClient) SubmitExam(ctx context.Context, in *SubmitExamRequest, opts ...grpc.CallOption) (*SubmitExamResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SubmitExamResponse)
@@ -427,6 +487,10 @@ type ExamServiceServer interface {
 	GetTopics(context.Context, *GetTopicsRequest) (*GetTopicsResponse, error)
 	CreateSection(context.Context, *CreateSectionRequest) (*CreateSectionResponse, error)
 	GetSections(context.Context, *GetSectionsRequest) (*GetSectionsResponse, error)
+	UpdateTopic(context.Context, *UpdateTopicRequest) (*UpdateTopicResponse, error)
+	DeleteTopic(context.Context, *DeleteTopicRequest) (*DeleteTopicResponse, error)
+	UpdateSection(context.Context, *UpdateSectionRequest) (*UpdateSectionResponse, error)
+	DeleteSection(context.Context, *DeleteSectionRequest) (*DeleteSectionResponse, error)
 	GetQuestions(context.Context, *GetQuestionsRequest) (*GetQuestionsResponse, error)
 	CreateQuestion(context.Context, *CreateQuestionRequest) (*CreateQuestionResponse, error)
 	GetQuestion(context.Context, *GetQuestionRequest) (*GetQuestionResponse, error)
@@ -444,6 +508,7 @@ type ExamServiceServer interface {
 	RequestExamAccess(context.Context, *RequestExamAccessRequest) (*RequestExamAccessResponse, error)
 	ApproveExamAccess(context.Context, *ApproveExamAccessRequest) (*ApproveExamAccessResponse, error)
 	CheckExamAccess(context.Context, *CheckExamAccessRequest) (*CheckExamAccessResponse, error)
+	GetAccessRequests(context.Context, *GetAccessRequestsRequest) (*GetAccessRequestsResponse, error)
 	SubmitExam(context.Context, *SubmitExamRequest) (*SubmitExamResponse, error)
 	GetSubmission(context.Context, *GetSubmissionRequest) (*GetSubmissionResponse, error)
 	GetUserExamStats(context.Context, *GetUserExamStatsRequest) (*GetUserExamStatsResponse, error)
@@ -476,6 +541,18 @@ func (UnimplementedExamServiceServer) CreateSection(context.Context, *CreateSect
 }
 func (UnimplementedExamServiceServer) GetSections(context.Context, *GetSectionsRequest) (*GetSectionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSections not implemented")
+}
+func (UnimplementedExamServiceServer) UpdateTopic(context.Context, *UpdateTopicRequest) (*UpdateTopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTopic not implemented")
+}
+func (UnimplementedExamServiceServer) DeleteTopic(context.Context, *DeleteTopicRequest) (*DeleteTopicResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTopic not implemented")
+}
+func (UnimplementedExamServiceServer) UpdateSection(context.Context, *UpdateSectionRequest) (*UpdateSectionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateSection not implemented")
+}
+func (UnimplementedExamServiceServer) DeleteSection(context.Context, *DeleteSectionRequest) (*DeleteSectionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteSection not implemented")
 }
 func (UnimplementedExamServiceServer) GetQuestions(context.Context, *GetQuestionsRequest) (*GetQuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQuestions not implemented")
@@ -527,6 +604,9 @@ func (UnimplementedExamServiceServer) ApproveExamAccess(context.Context, *Approv
 }
 func (UnimplementedExamServiceServer) CheckExamAccess(context.Context, *CheckExamAccessRequest) (*CheckExamAccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckExamAccess not implemented")
+}
+func (UnimplementedExamServiceServer) GetAccessRequests(context.Context, *GetAccessRequestsRequest) (*GetAccessRequestsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccessRequests not implemented")
 }
 func (UnimplementedExamServiceServer) SubmitExam(context.Context, *SubmitExamRequest) (*SubmitExamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitExam not implemented")
@@ -650,6 +730,78 @@ func _ExamService_GetSections_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExamServiceServer).GetSections(ctx, req.(*GetSectionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_UpdateTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).UpdateTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_UpdateTopic_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).UpdateTopic(ctx, req.(*UpdateTopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_DeleteTopic_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTopicRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).DeleteTopic(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_DeleteTopic_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).DeleteTopic(ctx, req.(*DeleteTopicRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_UpdateSection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateSectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).UpdateSection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_UpdateSection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).UpdateSection(ctx, req.(*UpdateSectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_DeleteSection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).DeleteSection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_DeleteSection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).DeleteSection(ctx, req.(*DeleteSectionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -960,6 +1112,24 @@ func _ExamService_CheckExamAccess_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GetAccessRequests_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccessRequestsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetAccessRequests(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetAccessRequests_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetAccessRequests(ctx, req.(*GetAccessRequestsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ExamService_SubmitExam_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SubmitExamRequest)
 	if err := dec(in); err != nil {
@@ -1182,6 +1352,22 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ExamService_GetSections_Handler,
 		},
 		{
+			MethodName: "UpdateTopic",
+			Handler:    _ExamService_UpdateTopic_Handler,
+		},
+		{
+			MethodName: "DeleteTopic",
+			Handler:    _ExamService_DeleteTopic_Handler,
+		},
+		{
+			MethodName: "UpdateSection",
+			Handler:    _ExamService_UpdateSection_Handler,
+		},
+		{
+			MethodName: "DeleteSection",
+			Handler:    _ExamService_DeleteSection_Handler,
+		},
+		{
 			MethodName: "GetQuestions",
 			Handler:    _ExamService_GetQuestions_Handler,
 		},
@@ -1248,6 +1434,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckExamAccess",
 			Handler:    _ExamService_CheckExamAccess_Handler,
+		},
+		{
+			MethodName: "GetAccessRequests",
+			Handler:    _ExamService_GetAccessRequests_Handler,
 		},
 		{
 			MethodName: "SubmitExam",

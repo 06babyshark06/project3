@@ -165,6 +165,9 @@ func (h *ExamHandler) RequestAccess(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
+	claims := jwt.ExtractClaims(c)
+    fullName := fmt.Sprintf("%v", claims["full_name"])
+	req.StudentName = fullName
 	req.UserId = userID
 
 	resp, err := h.examClient.RequestExamAccess(c.Request.Context(), &req)
@@ -232,7 +235,22 @@ func (h *ExamHandler) CreateQuestion(c *gin.Context) {
 }
 
 func (h *ExamHandler) CreateExam(c *gin.Context) {
-	var req pb.CreateExamRequest
+	var req struct {
+		Title       string  `json:"title" binding:"required"`
+		Description string  `json:"description"`
+		TopicId     int64   `json:"topic_id" binding:"required"`
+		QuestionIds []int64 `json:"question_ids"`
+		Settings    struct {
+			DurationMinutes       int    `json:"duration_minutes" binding:"required"`
+			MaxAttempts           int    `json:"max_attempts"`
+			Password              string `json:"password"`
+			StartTime             string `json:"start_time"`
+			EndTime               string `json:"end_time"`
+			ShuffleQuestions      bool   `json:"shuffle_questions"`
+			ShowResultImmediately bool   `json:"show_result_immediately"`
+			RequiresApproval      bool   `json:"requires_approval"`
+		} `json:"settings"`
+	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -243,9 +261,23 @@ func (h *ExamHandler) CreateExam(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	req.CreatorId = userID
-
-	resp, err := h.examClient.CreateExam(c.Request.Context(), &req)
+	resp, err := h.examClient.CreateExam(c.Request.Context(), &pb.CreateExamRequest{
+		Title:       req.Title,
+		Description: req.Description,
+		TopicId:     req.TopicId,
+		QuestionIds: req.QuestionIds,
+		CreatorId:   userID,
+		Settings: &pb.ExamSettings{
+			DurationMinutes:       int32(req.Settings.DurationMinutes),
+			MaxAttempts:           int32(req.Settings.MaxAttempts),
+			Password:              req.Settings.Password,
+			StartTime:             req.Settings.StartTime,
+			EndTime:               req.Settings.EndTime,
+			ShuffleQuestions:      req.Settings.ShuffleQuestions,
+			ShowResultImmediately: req.Settings.ShowResultImmediately,
+			RequiresApproval:      req.Settings.RequiresApproval,
+		},
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -721,4 +753,54 @@ func (h *ExamHandler) StartExam(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) GetAccessRequests(c *gin.Context) {
+	examID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	userID, _ := getUserIDFromContext(c)
+
+	resp, err := h.examClient.GetAccessRequests(c.Request.Context(), &pb.GetAccessRequestsRequest{
+		ExamId:    examID,
+		CreatorId: userID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+func (h *ExamHandler) UpdateTopic(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	var req struct { Name string `json:"name"`; Description string `json:"description"` }
+	if err := c.ShouldBindJSON(&req); err != nil { c.JSON(400, gin.H{"error": err.Error()}); return }
+
+	_, err := h.examClient.UpdateTopic(c.Request.Context(), &pb.UpdateTopicRequest{Id: id, Name: req.Name, Description: req.Description})
+	if err != nil { c.JSON(500, gin.H{"error": err.Error()}); return }
+	c.JSON(200, contracts.APIResponse{Data: gin.H{"success": true}})
+}
+
+func (h *ExamHandler) DeleteTopic(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	_, err := h.examClient.DeleteTopic(c.Request.Context(), &pb.DeleteTopicRequest{Id: id})
+	if err != nil { c.JSON(500, gin.H{"error": err.Error()}); return }
+	c.JSON(200, contracts.APIResponse{Data: gin.H{"success": true}})
+}
+
+func (h *ExamHandler) UpdateSection(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	var req struct { Name string `json:"name"`; Description string `json:"description"` }
+	if err := c.ShouldBindJSON(&req); err != nil { c.JSON(400, gin.H{"error": err.Error()}); return }
+
+	_, err := h.examClient.UpdateSection(c.Request.Context(), &pb.UpdateSectionRequest{Id: id, Name: req.Name, Description: req.Description})
+	if err != nil { c.JSON(500, gin.H{"error": err.Error()}); return }
+	c.JSON(200, contracts.APIResponse{Data: gin.H{"success": true}})
+}
+
+func (h *ExamHandler) DeleteSection(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	_, err := h.examClient.DeleteSection(c.Request.Context(), &pb.DeleteSectionRequest{Id: id})
+	if err != nil { c.JSON(500, gin.H{"error": err.Error()}); return }
+	c.JSON(200, contracts.APIResponse{Data: gin.H{"success": true}})
 }

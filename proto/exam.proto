@@ -9,6 +9,10 @@ service ExamService {
   rpc GetTopics(GetTopicsRequest) returns (GetTopicsResponse);
   rpc CreateSection(CreateSectionRequest) returns (CreateSectionResponse);
   rpc GetSections(GetSectionsRequest) returns (GetSectionsResponse);
+  rpc UpdateTopic(UpdateTopicRequest) returns (UpdateTopicResponse);
+  rpc DeleteTopic(DeleteTopicRequest) returns (DeleteTopicResponse);
+  rpc UpdateSection(UpdateSectionRequest) returns (UpdateSectionResponse);
+  rpc DeleteSection(DeleteSectionRequest) returns (DeleteSectionResponse);
 
   rpc GetQuestions(GetQuestionsRequest) returns (GetQuestionsResponse);
   rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
@@ -30,6 +34,7 @@ service ExamService {
   rpc RequestExamAccess(RequestExamAccessRequest) returns (RequestExamAccessResponse);
   rpc ApproveExamAccess(ApproveExamAccessRequest) returns (ApproveExamAccessResponse);
   rpc CheckExamAccess(CheckExamAccessRequest) returns (CheckExamAccessResponse);
+  rpc GetAccessRequests(GetAccessRequestsRequest) returns (GetAccessRequestsResponse);
 
   rpc SubmitExam(SubmitExamRequest) returns (SubmitExamResponse);
   rpc GetSubmission(GetSubmissionRequest) returns (GetSubmissionResponse);
@@ -159,7 +164,7 @@ message GetExamDetailsResponse {
   bool is_published = 7;
 }
 
-message RequestExamAccessRequest { int64 exam_id = 1; int64 user_id = 2; }
+message RequestExamAccessRequest { int64 exam_id = 1; int64 user_id = 2; string student_name = 3; }
 message RequestExamAccessResponse { bool success = 1; string status = 2; }
 
 message ApproveExamAccessRequest { int64 exam_id = 1; int64 student_id = 2; bool is_approved = 3; }
@@ -191,8 +196,8 @@ message SubmitExamRequest { int64 exam_id = 1; int64 user_id = 2; repeated UserA
 message SubmitExamResponse { int64 submission_id = 1; float score = 2; int32 correct_count = 3; int32 total_questions = 4; }
 
 message GetSubmissionRequest { int64 submission_id = 1; int64 user_id = 2; }
-message SubmissionDetail { int64 question_id = 1; string question_content = 2; string explanation = 3; string question_type = 4; bool is_correct = 5; repeated ChoiceReview choices = 6; }
-message ChoiceReview { int64 id = 1; string content = 2; bool is_correct = 3; bool user_selected = 4; }
+message SubmissionDetail { int64 question_id = 1; string question_content = 2; string explanation = 3; string question_type = 4; bool is_correct = 5; repeated ChoiceReview choices = 6; string attachment_url = 7; }
+message ChoiceReview { int64 id = 1; string content = 2; bool is_correct = 3; bool user_selected = 4; string attachment_url = 5; }
 message GetSubmissionResponse { int64 id = 1; string exam_title = 2; float score = 3; int32 correct_count = 4; int32 total_questions = 5; string status = 6; string submitted_at = 7; repeated SubmissionDetail details = 8; }
 
 message GetUserExamStatsRequest { int64 user_id = 1; }
@@ -299,3 +304,32 @@ message StartExamResponse {
 message Int64List {
   repeated int64 values = 1;
 }
+
+message GetAccessRequestsRequest {
+  int64 exam_id = 1;
+  int64 creator_id = 2;
+}
+
+message AccessRequestItem {
+  int64 id = 1;
+  int64 user_id = 2;
+  string status = 3;
+  string created_at = 4;
+  string full_name = 5;
+}
+
+message GetAccessRequestsResponse {
+  repeated AccessRequestItem requests = 1;
+}
+
+message UpdateTopicRequest { int64 id = 1; string name = 2; string description = 3; }
+message UpdateTopicResponse { bool success = 1; }
+
+message DeleteTopicRequest { int64 id = 1; }
+message DeleteTopicResponse { bool success = 1; }
+
+message UpdateSectionRequest { int64 id = 1; string name = 2; string description = 3; }
+message UpdateSectionResponse { bool success = 1; }
+
+message DeleteSectionRequest { int64 id = 1; }
+message DeleteSectionResponse { bool success = 1; }
