@@ -122,5 +122,27 @@ func seedUsers(db *gorm.DB) {
 			db.Create(&u)
 		}
 	}
-	log.Println("✅ Seeded default users (pass: 123456)")
+
+	log.Println("🌱 Seeding 30 extra students...")
+	
+	for i := 1; i <= 30; i++ {
+		email := fmt.Sprintf("student%d@jqk.com", i)
+		
+		var count int64
+		db.Model(&domain.UserModel{}).Where("email = ?", email).Count(&count)
+		
+		if count == 0 {
+			newStudent := domain.UserModel{
+				FullName:  fmt.Sprintf("Học Sinh Số %d", i),
+				Email:     email,
+				Password:  hashedPasswordStr,
+				RoleId:    studentRole.Id,
+				CreatedAt: time.Now().UTC(),
+				UpdatedAt: time.Now().UTC(),
+			}
+			db.Create(&newStudent)
+		}
+	}
+	
+	log.Println("✅ Seeded default users & 30 extra students (pass: 123456)")
 }
