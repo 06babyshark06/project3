@@ -437,7 +437,7 @@ func (r *examRepository) GetExamsByClass(ctx context.Context, classID int64) ([]
 
 	err := database.DB.WithContext(ctx).
 		Model(&domain.ExamModel{}).
-		Joins("JOIN exam_classes ON exam_classes.exam_id = exams.id").
+		Joins("JOIN exam_classes ON exam_classes.exam_id = exam_models.id").
 		Where("exam_classes.class_id = ? AND exams.is_published = ?", classID, true).
 		Order("exam_classes.assigned_at DESC").
 		Preload("Questions").
