@@ -170,6 +170,17 @@ message CheckUserInClassRequest {
 }
 message CheckUserInClassResponse { bool is_member = 1; }
 
+message JoinClassByCodeRequest {
+  int64 user_id = 1;
+  string code = 2;
+}
+
+message JoinClassByCodeResponse {
+  bool success = 1;
+  string message = 2;
+  int64 class_id = 3;
+}
+
 service UserService {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Login(LoginRequest) returns (LoginResponse);
@@ -191,4 +202,5 @@ service UserService {
   rpc AddMembers(AddMembersRequest) returns (AddMembersResponse);
   rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
   rpc CheckUserInClass(CheckUserInClassRequest) returns (CheckUserInClassResponse);
+  rpc JoinClassByCode(JoinClassByCodeRequest) returns (JoinClassByCodeResponse);
 }

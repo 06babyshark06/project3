@@ -49,7 +49,7 @@ func main() {
 	examHandler := handlers.NewExamHandler(examClient)
 	courseHandler := handlers.NewCourseHandler(courseClient)
 	statsHandler := handlers.NewStatsHandler(userClient, courseClient, examClient)
-	classHandler := handlers.NewClassHandler(userClient)
+	classHandler := handlers.NewClassHandler(userClient, examClient)
 
 	// Tạo router
 	r := gin.Default()
@@ -160,11 +160,15 @@ func main() {
 				instructorOnly.GET("/classes/:id", classHandler.GetClassDetails)
 				instructorOnly.POST("/classes/members", classHandler.AddMembers)
 				instructorOnly.DELETE("/classes/members", classHandler.RemoveMember)
+
+				instructorOnly.GET("/instructor/all-exams", examHandler.GetInstructorAllExams)
+                instructorOnly.POST("/classes/:id/exams", classHandler.AssignExamToClass)
 			}
 
 			studentOnly := auth.Group("/")
 			studentOnly.Use(middlewares.Authorize("student", "admin", "instructor"))
 			{
+				studentOnly.POST("/classes/join", classHandler.JoinClassByCode)
 				studentOnly.POST("/courses/enroll", courseHandler.EnrollCourse)
 				studentOnly.GET("/my-courses", courseHandler.GetMyCourses)
 				studentOnly.POST("/lessons/complete", courseHandler.MarkLessonCompleted)
@@ -176,6 +180,7 @@ func main() {
 				studentOnly.POST("/exams/save-answer", examHandler.SaveAnswer)
 				studentOnly.POST("/exams/log-violation", examHandler.LogViolation)
 				studentOnly.POST("/exams/:id/start", examHandler.StartExam)
+				studentOnly.GET("/classes/:id/exams", classHandler.GetClassExams)
 			}
 		}
 	}

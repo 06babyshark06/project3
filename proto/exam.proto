@@ -48,6 +48,10 @@ service ExamService {
   rpc GetExamViolations(GetExamViolationsRequest) returns (GetExamViolationsResponse);
   rpc ExportQuestions(ExportQuestionsRequest) returns (ExportQuestionsResponse);
   rpc StartExam(StartExamRequest) returns (StartExamResponse);
+
+  rpc GetExamsByClass(GetExamsByClassRequest) returns (GetExamsByClassResponse);
+  rpc AssignExamToClass(AssignExamToClassRequest) returns (AssignExamToClassResponse);
+  rpc GetInstructorExams(GetInstructorExamsRequest) returns (GetInstructorExamsResponse);
 }
 
 message Topic {
@@ -333,3 +337,41 @@ message UpdateSectionResponse { bool success = 1; }
 
 message DeleteSectionRequest { int64 id = 1; }
 message DeleteSectionResponse { bool success = 1; }
+
+message GetExamsByClassRequest {
+  int64 class_id = 1;
+  string status = 2;
+}
+
+message GetExamsByClassResponse {
+  repeated Exam exams = 1;
+}
+
+message AssignExamToClassRequest {
+  int64 exam_id = 1;
+  int64 class_id = 2;
+}
+
+message AssignExamToClassResponse {
+  bool success = 1;
+}
+
+message GetInstructorExamsRequest {
+  int64 teacher_id = 1;
+}
+
+message GetInstructorExamsResponse {
+  repeated Exam exams = 1;
+}
+
+message Exam {
+  int64 id = 1;
+  string title = 2;
+  string description = 3;
+  int32 duration_minutes = 4;
+  int64 topic_id = 5;
+  int64 creator_id = 6;
+  bool is_published = 7;
+  string created_at = 8;
+  int32 question_count = 9;
+}

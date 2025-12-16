@@ -804,3 +804,21 @@ func (h *ExamHandler) DeleteSection(c *gin.Context) {
 	if err != nil { c.JSON(500, gin.H{"error": err.Error()}); return }
 	c.JSON(200, contracts.APIResponse{Data: gin.H{"success": true}})
 }
+
+func (h *ExamHandler) GetInstructorAllExams(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	resp, err := h.examClient.GetInstructorExams(c.Request.Context(), &pb.GetInstructorExamsRequest{
+		TeacherId: userID,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}

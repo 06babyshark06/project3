@@ -2021,6 +2021,118 @@ func (x *CheckUserInClassResponse) GetIsMember() bool {
 	return false
 }
 
+type JoinClassByCodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinClassByCodeRequest) Reset() {
+	*x = JoinClassByCodeRequest{}
+	mi := &file_user_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinClassByCodeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinClassByCodeRequest) ProtoMessage() {}
+
+func (x *JoinClassByCodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinClassByCodeRequest.ProtoReflect.Descriptor instead.
+func (*JoinClassByCodeRequest) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *JoinClassByCodeRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *JoinClassByCodeRequest) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+type JoinClassByCodeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	ClassId       int64                  `protobuf:"varint,3,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JoinClassByCodeResponse) Reset() {
+	*x = JoinClassByCodeResponse{}
+	mi := &file_user_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JoinClassByCodeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinClassByCodeResponse) ProtoMessage() {}
+
+func (x *JoinClassByCodeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinClassByCodeResponse.ProtoReflect.Descriptor instead.
+func (*JoinClassByCodeResponse) Descriptor() ([]byte, []int) {
+	return file_user_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *JoinClassByCodeResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *JoinClassByCodeResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *JoinClassByCodeResponse) GetClassId() int64 {
+	if x != nil {
+		return x.ClassId
+	}
+	return 0
+}
+
 var File_user_proto protoreflect.FileDescriptor
 
 const file_user_proto_rawDesc = "" +
@@ -2160,7 +2272,14 @@ const file_user_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
 	"\tclass_ids\x18\x02 \x03(\x03R\bclassIds\"7\n" +
 	"\x18CheckUserInClassResponse\x12\x1b\n" +
-	"\tis_member\x18\x01 \x01(\bR\bisMember2\x9a\t\n" +
+	"\tis_member\x18\x01 \x01(\bR\bisMember\"E\n" +
+	"\x16JoinClassByCodeRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\tR\x04code\"h\n" +
+	"\x17JoinClassByCodeResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x19\n" +
+	"\bclass_id\x18\x03 \x01(\x03R\aclassId2\xea\t\n" +
 	"\vUserService\x129\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x16.user.RegisterResponse\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x12?\n" +
@@ -2183,7 +2302,8 @@ const file_user_proto_rawDesc = "" +
 	"\n" +
 	"AddMembers\x12\x17.user.AddMembersRequest\x1a\x18.user.AddMembersResponse\x12E\n" +
 	"\fRemoveMember\x12\x19.user.RemoveMemberRequest\x1a\x1a.user.RemoveMemberResponse\x12Q\n" +
-	"\x10CheckUserInClass\x12\x1d.user.CheckUserInClassRequest\x1a\x1e.user.CheckUserInClassResponseB\x18Z\x16shared/proto/user;userb\x06proto3"
+	"\x10CheckUserInClass\x12\x1d.user.CheckUserInClassRequest\x1a\x1e.user.CheckUserInClassResponse\x12N\n" +
+	"\x0fJoinClassByCode\x12\x1c.user.JoinClassByCodeRequest\x1a\x1d.user.JoinClassByCodeResponseB\x18Z\x16shared/proto/user;userb\x06proto3"
 
 var (
 	file_user_proto_rawDescOnce sync.Once
@@ -2197,7 +2317,7 @@ func file_user_proto_rawDescGZIP() []byte {
 	return file_user_proto_rawDescData
 }
 
-var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 36)
+var file_user_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_user_proto_goTypes = []any{
 	(*RegisterRequest)(nil),          // 0: user.RegisterRequest
 	(*RegisterResponse)(nil),         // 1: user.RegisterResponse
@@ -2235,6 +2355,8 @@ var file_user_proto_goTypes = []any{
 	(*RemoveMemberResponse)(nil),     // 33: user.RemoveMemberResponse
 	(*CheckUserInClassRequest)(nil),  // 34: user.CheckUserInClassRequest
 	(*CheckUserInClassResponse)(nil), // 35: user.CheckUserInClassResponse
+	(*JoinClassByCodeRequest)(nil),   // 36: user.JoinClassByCodeRequest
+	(*JoinClassByCodeResponse)(nil),  // 37: user.JoinClassByCodeResponse
 }
 var file_user_proto_depIdxs = []int32{
 	5,  // 0: user.GetAllUsersResponse.users:type_name -> user.GetProfileResponse
@@ -2259,25 +2381,27 @@ var file_user_proto_depIdxs = []int32{
 	30, // 19: user.UserService.AddMembers:input_type -> user.AddMembersRequest
 	32, // 20: user.UserService.RemoveMember:input_type -> user.RemoveMemberRequest
 	34, // 21: user.UserService.CheckUserInClass:input_type -> user.CheckUserInClassRequest
-	1,  // 22: user.UserService.Register:output_type -> user.RegisterResponse
-	3,  // 23: user.UserService.Login:output_type -> user.LoginResponse
-	5,  // 24: user.UserService.GetProfile:output_type -> user.GetProfileResponse
-	7,  // 25: user.UserService.GetAllUsers:output_type -> user.GetAllUsersResponse
-	9,  // 26: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse
-	11, // 27: user.UserService.UpdateUserRole:output_type -> user.UpdateUserRoleResponse
-	13, // 28: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
-	15, // 29: user.UserService.UpdatePassword:output_type -> user.UpdatePasswordResponse
-	17, // 30: user.UserService.GetUserCount:output_type -> user.GetUserCountResponse
-	20, // 31: user.UserService.CreateClass:output_type -> user.CreateClassResponse
-	22, // 32: user.UserService.UpdateClass:output_type -> user.UpdateClassResponse
-	24, // 33: user.UserService.DeleteClass:output_type -> user.DeleteClassResponse
-	26, // 34: user.UserService.GetClasses:output_type -> user.GetClassesResponse
-	28, // 35: user.UserService.GetClassDetails:output_type -> user.GetClassDetailsResponse
-	31, // 36: user.UserService.AddMembers:output_type -> user.AddMembersResponse
-	33, // 37: user.UserService.RemoveMember:output_type -> user.RemoveMemberResponse
-	35, // 38: user.UserService.CheckUserInClass:output_type -> user.CheckUserInClassResponse
-	22, // [22:39] is the sub-list for method output_type
-	5,  // [5:22] is the sub-list for method input_type
+	36, // 22: user.UserService.JoinClassByCode:input_type -> user.JoinClassByCodeRequest
+	1,  // 23: user.UserService.Register:output_type -> user.RegisterResponse
+	3,  // 24: user.UserService.Login:output_type -> user.LoginResponse
+	5,  // 25: user.UserService.GetProfile:output_type -> user.GetProfileResponse
+	7,  // 26: user.UserService.GetAllUsers:output_type -> user.GetAllUsersResponse
+	9,  // 27: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse
+	11, // 28: user.UserService.UpdateUserRole:output_type -> user.UpdateUserRoleResponse
+	13, // 29: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
+	15, // 30: user.UserService.UpdatePassword:output_type -> user.UpdatePasswordResponse
+	17, // 31: user.UserService.GetUserCount:output_type -> user.GetUserCountResponse
+	20, // 32: user.UserService.CreateClass:output_type -> user.CreateClassResponse
+	22, // 33: user.UserService.UpdateClass:output_type -> user.UpdateClassResponse
+	24, // 34: user.UserService.DeleteClass:output_type -> user.DeleteClassResponse
+	26, // 35: user.UserService.GetClasses:output_type -> user.GetClassesResponse
+	28, // 36: user.UserService.GetClassDetails:output_type -> user.GetClassDetailsResponse
+	31, // 37: user.UserService.AddMembers:output_type -> user.AddMembersResponse
+	33, // 38: user.UserService.RemoveMember:output_type -> user.RemoveMemberResponse
+	35, // 39: user.UserService.CheckUserInClass:output_type -> user.CheckUserInClassResponse
+	37, // 40: user.UserService.JoinClassByCode:output_type -> user.JoinClassByCodeResponse
+	23, // [23:41] is the sub-list for method output_type
+	5,  // [5:23] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -2294,7 +2418,7 @@ func file_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_proto_rawDesc), len(file_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   36,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

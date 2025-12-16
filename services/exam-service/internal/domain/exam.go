@@ -158,6 +158,16 @@ type ExamViolationModel struct {
 	CreatedAt     time.Time
 }
 
+type ExamClass struct {
+	ExamID     int64     `gorm:"primaryKey"`
+	ClassID    int64     `gorm:"primaryKey"`
+	AssignedAt time.Time `gorm:"autoCreateTime"`
+}
+
+func (ExamClass) TableName() string {
+	return "exam_classes"
+}
+
 type ExamRepository interface {
 	CreateTopic(ctx context.Context, tx *gorm.DB, topic *TopicModel) (*TopicModel, error)
 	GetTopicByName(ctx context.Context, name string) (*TopicModel, error)
@@ -209,6 +219,10 @@ type ExamRepository interface {
 	GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
 	CountUniqueParticipants(ctx context.Context, examID int64) (int64, error)
 	GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
+
+	AssignExamToClass(ctx context.Context, examID, classID int64) error
+	GetExamsByClass(ctx context.Context, classID int64) ([]*ExamModel, error)
+	GetExamsByTeacher(ctx context.Context, teacherID int64) ([]*ExamModel, error)
 }
 
 type EventProducer interface {
@@ -259,4 +273,8 @@ type ExamService interface {
 	GetExamViolations(ctx context.Context, req *pb.GetExamViolationsRequest) (*pb.GetExamViolationsResponse, error)
 	ExportQuestions(ctx context.Context, req *pb.ExportQuestionsRequest) (*pb.ExportQuestionsResponse, error)
 	StartExam(ctx context.Context, req *pb.StartExamRequest) (*pb.StartExamResponse, error)
+
+	GetExamsByClass(ctx context.Context, req *pb.GetExamsByClassRequest) (*pb.GetExamsByClassResponse, error)
+    AssignExamToClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
+    GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
 }

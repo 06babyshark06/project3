@@ -24,8 +24,7 @@ type ClassMemberModel struct {
 	Status   string      `gorm:"size:20;default:'joined'" json:"status"`
 	JoinedAt time.Time  `json:"joined_at"`
 
-	User     UserModel   `gorm:"foreignKey:UserID" json:"user,omitempty"`
-	Class    ClassModel  `gorm:"foreignKey:ClassID" json:"class,omitempty"`
+	User     *UserModel   `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }
 
 func (ClassMemberModel) TableName() string { return "class_members" }

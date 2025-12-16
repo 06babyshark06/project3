@@ -149,3 +149,15 @@ func (h *gRPCHandler) UpdateSection(ctx context.Context, req *pb.UpdateSectionRe
 func (h *gRPCHandler) DeleteSection(ctx context.Context, req *pb.DeleteSectionRequest) (*pb.DeleteSectionResponse, error) {
 	return h.service.DeleteSection(ctx, req)
 }
+
+func (h *gRPCHandler) GetExamsByClass(ctx context.Context, req *pb.GetExamsByClassRequest) (*pb.GetExamsByClassResponse, error) {
+	return h.service.GetExamsByClass(ctx, req)
+}
+
+func (h *gRPCHandler) AssignExamToClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error) {
+	return h.service.AssignExamToClass(ctx, req)
+}
+
+func (h *gRPCHandler) GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error) {
+	return h.service.GetInstructorExams(ctx, req)
+}

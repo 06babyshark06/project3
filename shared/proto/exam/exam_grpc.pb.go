@@ -56,6 +56,9 @@ const (
 	ExamService_GetExamViolations_FullMethodName    = "/exam.ExamService/GetExamViolations"
 	ExamService_ExportQuestions_FullMethodName      = "/exam.ExamService/ExportQuestions"
 	ExamService_StartExam_FullMethodName            = "/exam.ExamService/StartExam"
+	ExamService_GetExamsByClass_FullMethodName      = "/exam.ExamService/GetExamsByClass"
+	ExamService_AssignExamToClass_FullMethodName    = "/exam.ExamService/AssignExamToClass"
+	ExamService_GetInstructorExams_FullMethodName   = "/exam.ExamService/GetInstructorExams"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -99,6 +102,9 @@ type ExamServiceClient interface {
 	GetExamViolations(ctx context.Context, in *GetExamViolationsRequest, opts ...grpc.CallOption) (*GetExamViolationsResponse, error)
 	ExportQuestions(ctx context.Context, in *ExportQuestionsRequest, opts ...grpc.CallOption) (*ExportQuestionsResponse, error)
 	StartExam(ctx context.Context, in *StartExamRequest, opts ...grpc.CallOption) (*StartExamResponse, error)
+	GetExamsByClass(ctx context.Context, in *GetExamsByClassRequest, opts ...grpc.CallOption) (*GetExamsByClassResponse, error)
+	AssignExamToClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error)
+	GetInstructorExams(ctx context.Context, in *GetInstructorExamsRequest, opts ...grpc.CallOption) (*GetInstructorExamsResponse, error)
 }
 
 type examServiceClient struct {
@@ -479,6 +485,36 @@ func (c *examServiceClient) StartExam(ctx context.Context, in *StartExamRequest,
 	return out, nil
 }
 
+func (c *examServiceClient) GetExamsByClass(ctx context.Context, in *GetExamsByClassRequest, opts ...grpc.CallOption) (*GetExamsByClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExamsByClassResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetExamsByClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) AssignExamToClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignExamToClassResponse)
+	err := c.cc.Invoke(ctx, ExamService_AssignExamToClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) GetInstructorExams(ctx context.Context, in *GetInstructorExamsRequest, opts ...grpc.CallOption) (*GetInstructorExamsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetInstructorExamsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetInstructorExams_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -520,6 +556,9 @@ type ExamServiceServer interface {
 	GetExamViolations(context.Context, *GetExamViolationsRequest) (*GetExamViolationsResponse, error)
 	ExportQuestions(context.Context, *ExportQuestionsRequest) (*ExportQuestionsResponse, error)
 	StartExam(context.Context, *StartExamRequest) (*StartExamResponse, error)
+	GetExamsByClass(context.Context, *GetExamsByClassRequest) (*GetExamsByClassResponse, error)
+	AssignExamToClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error)
+	GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -640,6 +679,15 @@ func (UnimplementedExamServiceServer) ExportQuestions(context.Context, *ExportQu
 }
 func (UnimplementedExamServiceServer) StartExam(context.Context, *StartExamRequest) (*StartExamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartExam not implemented")
+}
+func (UnimplementedExamServiceServer) GetExamsByClass(context.Context, *GetExamsByClassRequest) (*GetExamsByClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExamsByClass not implemented")
+}
+func (UnimplementedExamServiceServer) AssignExamToClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AssignExamToClass not implemented")
+}
+func (UnimplementedExamServiceServer) GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInstructorExams not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -1328,6 +1376,60 @@ func _ExamService_StartExam_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GetExamsByClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExamsByClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetExamsByClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetExamsByClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetExamsByClass(ctx, req.(*GetExamsByClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_AssignExamToClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignExamToClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).AssignExamToClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_AssignExamToClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).AssignExamToClass(ctx, req.(*AssignExamToClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_GetInstructorExams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInstructorExamsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetInstructorExams(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetInstructorExams_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetInstructorExams(ctx, req.(*GetInstructorExamsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1482,6 +1584,18 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StartExam",
 			Handler:    _ExamService_StartExam_Handler,
+		},
+		{
+			MethodName: "GetExamsByClass",
+			Handler:    _ExamService_GetExamsByClass_Handler,
+		},
+		{
+			MethodName: "AssignExamToClass",
+			Handler:    _ExamService_AssignExamToClass_Handler,
+		},
+		{
+			MethodName: "GetInstructorExams",
+			Handler:    _ExamService_GetInstructorExams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

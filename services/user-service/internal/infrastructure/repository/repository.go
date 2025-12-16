@@ -140,3 +140,19 @@ func (r *userRepository) GetClassMember(ctx context.Context, classID, userID int
 	err := database.DB.WithContext(ctx).Where("class_id = ? AND user_id = ?", classID, userID).First(&m).Error
 	return &m, err
 }
+
+func (r *userRepository) GetClassByCode(ctx context.Context, code string) (*domain.ClassModel, error) {
+	var class domain.ClassModel
+	if err := database.DB.WithContext(ctx).Where("code = ?", code).First(&class).Error; err != nil {
+		return nil, err
+	}
+	return &class, nil
+}
+
+func (r *userRepository) IsClassMember(ctx context.Context, classID, userID int64) (bool, error) {
+	var count int64
+	err := database.DB.WithContext(ctx).Model(&domain.ClassMemberModel{}).
+		Where("class_id = ? AND user_id = ?", classID, userID).
+		Count(&count).Error
+	return count > 0, err
+}

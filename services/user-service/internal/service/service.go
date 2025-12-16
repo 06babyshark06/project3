@@ -324,6 +324,46 @@ func (s *userService) CheckUserInClass(ctx context.Context, req *pb.CheckUserInC
     return &pb.CheckUserInClassResponse{IsMember: isMember}, nil
 }
 
+func (s *userService) JoinClassByCode(ctx context.Context, req *pb.JoinClassByCodeRequest) (*pb.JoinClassByCodeResponse, error) {
+	class, err := s.repo.GetClassByCode(ctx, req.Code)
+	if err != nil {
+		return &pb.JoinClassByCodeResponse{
+			Success: false,
+			Message: "Mã lớp không tồn tại",
+		}, nil
+	}
+
+	exists, err := s.repo.IsClassMember(ctx, class.Id, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+	if exists {
+		return &pb.JoinClassByCodeResponse{
+			Success: false,
+			Message: "Bạn đã tham gia lớp này rồi",
+			ClassId: class.Id,
+		}, nil
+	}
+
+	member := &domain.ClassMemberModel{
+		ClassID:  class.Id,
+		UserID:   req.UserId,
+		Role:     "student",
+		JoinedAt: time.Now().UTC(),
+	}
+	
+	err = s.repo.AddClassMember(ctx, member)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.JoinClassByCodeResponse{
+		Success: true, 
+		Message: "Tham gia lớp thành công",
+		ClassId: class.Id,
+	}, nil
+}
+
 func mapClassToProto(c *domain.ClassModel) *pb.Class {
     tName := ""
     if c.Teacher != nil { tName = c.Teacher.FullName }

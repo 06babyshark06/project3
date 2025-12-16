@@ -8,6 +8,7 @@ import (
 	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/exam-service/internal/domain"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type examRepository struct{}
@@ -17,36 +18,50 @@ func NewExamRepository() domain.ExamRepository {
 }
 
 func (r *examRepository) CreateTopic(ctx context.Context, tx *gorm.DB, topic *domain.TopicModel) (*domain.TopicModel, error) {
-	if err := tx.WithContext(ctx).Create(topic).Error; err != nil { return nil, err }
+	if err := tx.WithContext(ctx).Create(topic).Error; err != nil {
+		return nil, err
+	}
 	return topic, nil
 }
 func (r *examRepository) GetTopics(ctx context.Context) ([]*domain.TopicModel, error) {
 	var topics []*domain.TopicModel
-	if err := database.DB.WithContext(ctx).Order("created_at DESC").Find(&topics).Error; err != nil { return nil, err }
+	if err := database.DB.WithContext(ctx).Order("created_at DESC").Find(&topics).Error; err != nil {
+		return nil, err
+	}
 	return topics, nil
 }
 func (r *examRepository) GetTopicByName(ctx context.Context, name string) (*domain.TopicModel, error) {
 	var topic domain.TopicModel
-	if err := database.DB.WithContext(ctx).Where("name = ?", name).First(&topic).Error; err != nil { return nil, err }
+	if err := database.DB.WithContext(ctx).Where("name = ?", name).First(&topic).Error; err != nil {
+		return nil, err
+	}
 	return &topic, nil
 }
 func (r *examRepository) CreateSection(ctx context.Context, tx *gorm.DB, section *domain.SectionModel) (*domain.SectionModel, error) {
-	if err := tx.WithContext(ctx).Create(section).Error; err != nil { return nil, err }
+	if err := tx.WithContext(ctx).Create(section).Error; err != nil {
+		return nil, err
+	}
 	return section, nil
 }
 func (r *examRepository) GetSectionsByTopic(ctx context.Context, topicID int64) ([]*domain.SectionModel, error) {
 	var sections []*domain.SectionModel
-	if err := database.DB.WithContext(ctx).Where("topic_id = ?", topicID).Order("id ASC").Find(&sections).Error; err != nil { return nil, err }
+	if err := database.DB.WithContext(ctx).Where("topic_id = ?", topicID).Order("id ASC").Find(&sections).Error; err != nil {
+		return nil, err
+	}
 	return sections, nil
 }
 func (r *examRepository) GetSectionByID(ctx context.Context, id int64) (*domain.SectionModel, error) {
 	var section domain.SectionModel
-	if err := database.DB.WithContext(ctx).First(&section, id).Error; err != nil { return nil, err }
+	if err := database.DB.WithContext(ctx).First(&section, id).Error; err != nil {
+		return nil, err
+	}
 	return &section, nil
 }
 
 func (r *examRepository) CreateQuestion(ctx context.Context, tx *gorm.DB, question *domain.QuestionModel) (*domain.QuestionModel, error) {
-	if err := tx.WithContext(ctx).Create(question).Error; err != nil { return nil, err }
+	if err := tx.WithContext(ctx).Create(question).Error; err != nil {
+		return nil, err
+	}
 	return question, nil
 }
 func (r *examRepository) CreateChoices(ctx context.Context, tx *gorm.DB, choices []*domain.ChoiceModel) error {
@@ -87,11 +102,15 @@ func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectio
 }
 
 func (r *examRepository) CreateExam(ctx context.Context, tx *gorm.DB, exam *domain.ExamModel) (*domain.ExamModel, error) {
-	if err := tx.WithContext(ctx).Create(exam).Error; err != nil { return nil, err }
+	if err := tx.WithContext(ctx).Create(exam).Error; err != nil {
+		return nil, err
+	}
 	return exam, nil
 }
 func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
-	if len(questionIDs) == 0 { return nil }
+	if len(questionIDs) == 0 {
+		return nil
+	}
 	var examQuestions []*domain.ExamQuestionModel
 	for i, qid := range questionIDs {
 		examQuestions = append(examQuestions, &domain.ExamQuestionModel{ExamID: examID, QuestionID: qid, Sequence: i})
@@ -105,15 +124,17 @@ func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*dom
 		Preload("Questions.Section").
 		Preload("Questions.Section.Topic").Preload("Topic").
 		First(&exam, examID).Error
-	
-	if err != nil { return nil, err }
+
+	if err != nil {
+		return nil, err
+	}
 	type ExamQuestionOrder struct {
 		QuestionID int64
 		Sequence   int
 	}
 	var orders []ExamQuestionOrder
 	database.DB.WithContext(ctx).
-        Table("exam_questions").
+		Table("exam_questions").
 		Select("question_id, sequence").
 		Where("exam_id = ?", examID).
 		Scan(&orders)
@@ -146,7 +167,11 @@ func (r *examRepository) GetExams(ctx context.Context, limit, offset int, creato
 	var exams []*domain.ExamModel
 	var total int64
 	query := database.DB.WithContext(ctx).Model(&domain.ExamModel{})
-	if creatorID > 0 { query = query.Where("creator_id = ?", creatorID) } else { query = query.Where("is_published = ?", true) }
+	if creatorID > 0 {
+		query = query.Where("creator_id = ?", creatorID)
+	} else {
+		query = query.Where("is_published = ?", true)
+	}
 	query.Count(&total)
 	err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&exams).Error
 	return exams, total, err
@@ -175,26 +200,37 @@ func (r *examRepository) UpdateAccessRequestStatus(ctx context.Context, examID, 
 }
 
 func (r *examRepository) GetCorrectAnswers(ctx context.Context, examID int64) (map[int64][]int64, error) {
-	type CorrectAnswer struct { QuestionID int64; ChoiceID int64 }
+	type CorrectAnswer struct {
+		QuestionID int64
+		ChoiceID   int64
+	}
 	var results []CorrectAnswer
 	err := database.DB.WithContext(ctx).Table("choice_models").
 		Select("choice_models.question_id, choice_models.id as choice_id").
 		Joins("JOIN exam_questions eq ON choice_models.question_id = eq.question_id").
 		Where("eq.exam_id = ? AND choice_models.is_correct = ?", examID, true).Scan(&results).Error
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	answerMap := make(map[int64][]int64)
-	for _, res := range results { answerMap[res.QuestionID] = append(answerMap[res.QuestionID], res.ChoiceID) }
+	for _, res := range results {
+		answerMap[res.QuestionID] = append(answerMap[res.QuestionID], res.ChoiceID)
+	}
 	return answerMap, nil
 }
 func (r *examRepository) CreateSubmission(ctx context.Context, tx *gorm.DB, sub *domain.ExamSubmissionModel) (*domain.ExamSubmissionModel, error) {
-	if err := tx.WithContext(ctx).Create(sub).Error; err != nil { return nil, err }
+	if err := tx.WithContext(ctx).Create(sub).Error; err != nil {
+		return nil, err
+	}
 	return sub, nil
 }
 func (r *examRepository) CreateUserAnswers(ctx context.Context, tx *gorm.DB, ans []*domain.UserAnswerModel) error {
 	return tx.WithContext(ctx).Create(ans).Error
 }
 func (r *examRepository) UpdateSubmission(ctx context.Context, tx *gorm.DB, sub *domain.ExamSubmissionModel) (*domain.ExamSubmissionModel, error) {
-	if err := tx.WithContext(ctx).Save(sub).Error; err != nil { return nil, err }
+	if err := tx.WithContext(ctx).Save(sub).Error; err != nil {
+		return nil, err
+	}
 	return sub, nil
 }
 func (r *examRepository) GetSubmissionByID(ctx context.Context, id int64) (*domain.ExamSubmissionModel, error) {
@@ -222,73 +258,73 @@ func (r *examRepository) SaveUserAnswer(ctx context.Context, tx *gorm.DB, ans *d
 
 	if err == nil {
 		existing.ChosenChoiceID = ans.ChosenChoiceID
-        existing.IsCorrect = ans.IsCorrect
+		existing.IsCorrect = ans.IsCorrect
 		return tx.WithContext(ctx).Save(&existing).Error
 	}
 	return tx.WithContext(ctx).Create(ans).Error
 }
 
 func (r *examRepository) LogViolation(ctx context.Context, v *domain.ExamViolationModel) error {
-    return database.DB.WithContext(ctx).Create(v).Error
+	return database.DB.WithContext(ctx).Create(v).Error
 }
 
 func (r *examRepository) GetExamSubmissions(ctx context.Context, examID int64) ([]*domain.ExamSubmissionModel, error) {
-    var subs []*domain.ExamSubmissionModel
-    err := database.DB.WithContext(ctx).
-        Preload("Status").
-        Where("exam_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", examID).
-        Find(&subs).Error
-    return subs, err
+	var subs []*domain.ExamSubmissionModel
+	err := database.DB.WithContext(ctx).
+		Preload("Status").
+		Where("exam_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", examID).
+		Find(&subs).Error
+	return subs, err
 }
 
 func (r *examRepository) GetViolationsByExam(ctx context.Context, examID int64) ([]*domain.ExamViolationModel, error) {
-    var vs []*domain.ExamViolationModel
-    err := database.DB.WithContext(ctx).Where("exam_id = ?", examID).Find(&vs).Error
-    return vs, err
+	var vs []*domain.ExamViolationModel
+	err := database.DB.WithContext(ctx).Where("exam_id = ?", examID).Find(&vs).Error
+	return vs, err
 }
 
 func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*domain.QuestionListItem, int64, error) {
-    var questions []*domain.QuestionListItem
-    var total int64
+	var questions []*domain.QuestionListItem
+	var total int64
 
-    query := database.DB.WithContext(ctx).
-        Table("question_models q").
-        Select(`
+	query := database.DB.WithContext(ctx).
+		Table("question_models q").
+		Select(`
             q.id, q.content, qt.type as question_type, qd.difficulty,
             q.section_id, s.name as section_name, 
             s.topic_id, t.name as topic_name,
             q.attachment_url,
             (SELECT COUNT(*) FROM choice_models WHERE question_id = q.id) as choice_count
         `).
-        Joins("LEFT JOIN question_type_models qt ON q.type_id = qt.id").
-        Joins("LEFT JOIN question_difficulty_models qd ON q.difficulty_id = qd.id").
-        Joins("LEFT JOIN exam_sections s ON q.section_id = s.id").
-        Joins("LEFT JOIN topic_models t ON s.topic_id = t.id")
+		Joins("LEFT JOIN question_type_models qt ON q.type_id = qt.id").
+		Joins("LEFT JOIN question_difficulty_models qd ON q.difficulty_id = qd.id").
+		Joins("LEFT JOIN exam_sections s ON q.section_id = s.id").
+		Joins("LEFT JOIN topic_models t ON s.topic_id = t.id")
 
-    if sectionID > 0 {
-        query = query.Where("q.section_id = ?", sectionID)
-    }
+	if sectionID > 0 {
+		query = query.Where("q.section_id = ?", sectionID)
+	}
 
 	if topicID > 0 && sectionID == 0 {
-        query = query.Where("q.topic_id = ?", topicID)
-    }
+		query = query.Where("q.topic_id = ?", topicID)
+	}
 
-    if difficulty != "" {
-        query = query.Where("qd.difficulty = ?", difficulty)
-    }
+	if difficulty != "" {
+		query = query.Where("qd.difficulty = ?", difficulty)
+	}
 
-    if search != "" {
-        query = query.Where("q.content ILIKE ?", "%"+search+"%")
-    }
+	if search != "" {
+		query = query.Where("q.content ILIKE ?", "%"+search+"%")
+	}
 
-    if err := query.Count(&total).Error; err != nil {
-        return nil, 0, err
-    }
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
 
-    offset := (page - 1) * limit
-    err := query.Order("q.created_at DESC").Limit(limit).Offset(offset).Scan(&questions).Error
+	offset := (page - 1) * limit
+	err := query.Order("q.created_at DESC").Limit(limit).Offset(offset).Scan(&questions).Error
 
-    return questions, total, err
+	return questions, total, err
 }
 
 func (r *examRepository) GetQuestionByID(ctx context.Context, id int64) (*domain.QuestionModel, error) {
@@ -303,13 +339,13 @@ func (r *examRepository) GetQuestionByID(ctx context.Context, id int64) (*domain
 }
 
 func (r *examRepository) CountUniqueParticipants(ctx context.Context, examID int64) (int64, error) {
-    var count int64
-    err := database.DB.WithContext(ctx).
-        Model(&domain.ExamSubmissionModel{}).
-        Where("exam_id = ?", examID).
-        Distinct("user_id").
-        Count(&count).Error
-    return count, err
+	var count int64
+	err := database.DB.WithContext(ctx).
+		Model(&domain.ExamSubmissionModel{}).
+		Where("exam_id = ?", examID).
+		Distinct("user_id").
+		Count(&count).Error
+	return count, err
 }
 
 func (r *examRepository) ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
@@ -320,16 +356,16 @@ func (r *examRepository) ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, 
 	if len(questionIDs) > 0 {
 		return r.LinkQuestionsToExam(ctx, tx, examID, questionIDs)
 	}
-	
+
 	return nil
 }
 
 func (r *examRepository) GetAccessRequestsByExam(ctx context.Context, examID int64) ([]*domain.ExamAccessRequestModel, error) {
 	var reqs []*domain.ExamAccessRequestModel
 	err := database.DB.WithContext(ctx).
-        Where("exam_id = ?", examID).
-        Order("created_at DESC").
-        Find(&reqs).Error
+		Where("exam_id = ?", examID).
+		Order("created_at DESC").
+		Find(&reqs).Error
 	return reqs, err
 }
 
@@ -363,14 +399,62 @@ func (r *examRepository) DeleteSection(ctx context.Context, tx *gorm.DB, section
 	}
 
 	if len(questionIDs) > 0 {
-		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ChoiceModel{}).Error; err != nil { return err }
-		
-		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ExamQuestionModel{}).Error; err != nil { return err }
-		
-		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.UserAnswerModel{}).Error; err != nil { return err }
+		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ChoiceModel{}).Error; err != nil {
+			return err
+		}
 
-		if err := tx.WithContext(ctx).Where("id IN ?", questionIDs).Delete(&domain.QuestionModel{}).Error; err != nil { return err }
+		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ExamQuestionModel{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.UserAnswerModel{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.WithContext(ctx).Where("id IN ?", questionIDs).Delete(&domain.QuestionModel{}).Error; err != nil {
+			return err
+		}
 	}
 
 	return tx.WithContext(ctx).Delete(&domain.SectionModel{}, sectionID).Error
+}
+
+func (r *examRepository) AssignExamToClass(ctx context.Context, examID, classID int64) error {
+	link := &domain.ExamClass{
+		ExamID:     examID,
+		ClassID:    classID,
+		AssignedAt: time.Now(),
+	}
+
+	return database.DB.WithContext(ctx).
+		Model(&domain.ExamClass{}).
+		Clauses(clause.OnConflict{DoNothing: true}).
+		Create(link).Error
+}
+
+func (r *examRepository) GetExamsByClass(ctx context.Context, classID int64) ([]*domain.ExamModel, error) {
+	var exams []*domain.ExamModel
+
+	err := database.DB.WithContext(ctx).
+		Model(&domain.ExamModel{}).
+		Joins("JOIN exam_classes ON exam_classes.exam_id = exams.id").
+		Where("exam_classes.class_id = ? AND exams.is_published = ?", classID, true).
+		Order("exam_classes.assigned_at DESC").
+		Preload("Questions").
+		Find(&exams).Error
+
+	return exams, err
+}
+
+func (r *examRepository) GetExamsByTeacher(ctx context.Context, teacherID int64) ([]*domain.ExamModel, error) {
+	var exams []*domain.ExamModel
+
+	err := database.DB.WithContext(ctx).
+		Model(&domain.ExamModel{}).
+		Where("creator_id = ?", teacherID).
+		Order("created_at DESC").
+		Preload("Questions").
+		Find(&exams).Error
+
+	return exams, err
 }

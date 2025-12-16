@@ -100,3 +100,7 @@ func (h *gRPCHandler) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequ
 func (h *gRPCHandler) CheckUserInClass(ctx context.Context, req *pb.CheckUserInClassRequest) (*pb.CheckUserInClassResponse, error) {
 	return h.service.CheckUserInClass(ctx, req)
 }
+
+func (h *gRPCHandler) JoinClassByCode(ctx context.Context, req *pb.JoinClassByCodeRequest) (*pb.JoinClassByCodeResponse, error) {
+	return h.service.JoinClassByCode(ctx, req)
+}

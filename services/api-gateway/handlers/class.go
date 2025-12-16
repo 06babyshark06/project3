@@ -7,17 +7,19 @@ import (
 
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
-	pb "github.com/06babyshark06/JQKStudy/shared/proto/user"
+	pbUser "github.com/06babyshark06/JQKStudy/shared/proto/user"
+	pbExam "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
 type ClassHandler struct {
-	userClient pb.UserServiceClient
+	userClient pbUser.UserServiceClient
+	examClient pbExam.ExamServiceClient
 }
 
-func NewClassHandler(client *grpcclients.UserServiceClient) *ClassHandler {
-	return &ClassHandler{userClient: client.Client}
+func NewClassHandler(userClient *grpcclients.UserServiceClient, examClient *grpcclients.ExamServiceClient) *ClassHandler {
+	return &ClassHandler{userClient: userClient.Client, examClient: examClient.Client,}
 }
 
 // --- QUẢN LÝ LỚP HỌC ---
@@ -39,7 +41,7 @@ func (h *ClassHandler) CreateClass(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.userClient.CreateClass(c.Request.Context(), &pb.CreateClassRequest{
+	resp, err := h.userClient.CreateClass(c.Request.Context(), &pbUser.CreateClassRequest{
 		Name:        req.Name,
 		Code:        req.Code,
 		Description: req.Description,
@@ -64,7 +66,7 @@ func (h *ClassHandler) UpdateClass(c *gin.Context) {
 	}
 	userID, _ := getUserIDFromContext(c)
 
-	_, err := h.userClient.UpdateClass(c.Request.Context(), &pb.UpdateClassRequest{
+	_, err := h.userClient.UpdateClass(c.Request.Context(), &pbUser.UpdateClassRequest{
 		Id:          id,
 		Name:        req.Name,
 		Description: req.Description,
@@ -81,7 +83,7 @@ func (h *ClassHandler) DeleteClass(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	userID, _ := getUserIDFromContext(c)
 
-	_, err := h.userClient.DeleteClass(c.Request.Context(), &pb.DeleteClassRequest{
+	_, err := h.userClient.DeleteClass(c.Request.Context(), &pbUser.DeleteClassRequest{
 		Id:        id,
 		TeacherId: userID,
 	})
@@ -99,7 +101,7 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 	userID, _ := getUserIDFromContext(c)
 	role := getUserRoleFromContext(c)
 
-	req := &pb.GetClassesRequest{
+	req := &pbUser.GetClassesRequest{
 		Page:  int32(page),
 		Limit: int32(limit),
 	}
@@ -120,7 +122,7 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 
 func (h *ClassHandler) GetClassDetails(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	resp, err := h.userClient.GetClassDetails(c.Request.Context(), &pb.GetClassDetailsRequest{ClassId: id})
+	resp, err := h.userClient.GetClassDetails(c.Request.Context(), &pbUser.GetClassDetailsRequest{ClassId: id})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -139,7 +141,7 @@ func (h *ClassHandler) AddMembers(c *gin.Context) {
 	}
 	userID, _ := getUserIDFromContext(c)
 
-	resp, err := h.userClient.AddMembers(c.Request.Context(), &pb.AddMembersRequest{
+	resp, err := h.userClient.AddMembers(c.Request.Context(), &pbUser.AddMembersRequest{
 		ClassId:   req.ClassId,
 		Emails:    req.Emails,
 		TeacherId: userID,
@@ -156,7 +158,7 @@ func (h *ClassHandler) RemoveMember(c *gin.Context) {
 	studentID, _ := strconv.ParseInt(c.Query("user_id"), 10, 64)
 	teacherID, _ := getUserIDFromContext(c)
 
-	_, err := h.userClient.RemoveMember(c.Request.Context(), &pb.RemoveMemberRequest{
+	_, err := h.userClient.RemoveMember(c.Request.Context(), &pbUser.RemoveMemberRequest{
 		ClassId:   classID,
 		UserId:    studentID,
 		TeacherId: teacherID,
@@ -166,6 +168,94 @@ func (h *ClassHandler) RemoveMember(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{"success": true}})
+}
+
+func (h *ClassHandler) JoinClassByCode(c *gin.Context) {
+	var req struct {
+		Code string `json:"code" binding:"required"`
+	}
+	
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Vui lòng nhập mã lớp"})
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	resp, err := h.userClient.JoinClassByCode(c.Request.Context(), &pbUser.JoinClassByCodeRequest{
+		UserId: userID,
+		Code:   req.Code,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !resp.Success {
+		c.JSON(http.StatusBadRequest, gin.H{"error": resp.Message})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": resp.Message, 
+		"classId": resp.ClassId,
+	})
+}
+
+func (h *ClassHandler) AssignExamToClass(c *gin.Context) {
+	classID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Class ID"})
+		return
+	}
+
+	var req struct {
+		ExamID int64 `json:"exam_id" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+    // Gọi sang Exam Service
+	_, err = h.examClient.AssignExamToClass(c.Request.Context(), &pbExam.AssignExamToClassRequest{
+		ClassId: classID,
+		ExamId:  req.ExamID,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Đã gán bài thi vào lớp thành công"})
+}
+
+// GET /classes/:id/exams
+func (h *ClassHandler) GetClassExams(c *gin.Context) {
+	classID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Class ID"})
+		return
+	}
+
+    // Gọi sang Exam Service
+	resp, err := h.examClient.GetExamsByClass(c.Request.Context(), &pbExam.GetExamsByClassRequest{
+		ClassId: classID,
+		Status:  "published", // Mặc định chỉ lấy bài đã publish cho học sinh xem
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp.Exams})
 }
 
 func getUserRoleFromContext(c *gin.Context) string {

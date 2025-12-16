@@ -49,6 +49,8 @@ type UserRepository interface {
     AddClassMember(ctx context.Context, member *ClassMemberModel) error
     RemoveClassMember(ctx context.Context, classID, userID int64) error
     GetClassMember(ctx context.Context, classID, userID int64) (*ClassMemberModel, error)
+	GetClassByCode(ctx context.Context, code string) (*ClassModel, error)
+	IsClassMember(ctx context.Context, classID, userID int64) (bool, error)
 }
 
 type EventProducer interface {
@@ -75,4 +77,5 @@ type UserService interface {
 	AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error)
 	RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error)
 	CheckUserInClass(ctx context.Context, req *pb.CheckUserInClassRequest) (*pb.CheckUserInClassResponse, error)
+	JoinClassByCode(ctx context.Context, req *pb.JoinClassByCodeRequest) (*pb.JoinClassByCodeResponse, error)
 }

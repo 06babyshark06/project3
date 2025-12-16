@@ -47,6 +47,8 @@ func Connect() {
 		&domain.UserAnswerModel{},
 		&domain.ExamViolationModel{},
 		&domain.ExamAccessRequestModel{},
+
+		&domain.ExamClass{},
 	); err != nil {
 		log.Fatalf("❌ Migration failed: %v", err)
 	}

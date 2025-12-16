@@ -36,6 +36,7 @@ const (
 	UserService_AddMembers_FullMethodName       = "/user.UserService/AddMembers"
 	UserService_RemoveMember_FullMethodName     = "/user.UserService/RemoveMember"
 	UserService_CheckUserInClass_FullMethodName = "/user.UserService/CheckUserInClass"
+	UserService_JoinClassByCode_FullMethodName  = "/user.UserService/JoinClassByCode"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -59,6 +60,7 @@ type UserServiceClient interface {
 	AddMembers(ctx context.Context, in *AddMembersRequest, opts ...grpc.CallOption) (*AddMembersResponse, error)
 	RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error)
 	CheckUserInClass(ctx context.Context, in *CheckUserInClassRequest, opts ...grpc.CallOption) (*CheckUserInClassResponse, error)
+	JoinClassByCode(ctx context.Context, in *JoinClassByCodeRequest, opts ...grpc.CallOption) (*JoinClassByCodeResponse, error)
 }
 
 type userServiceClient struct {
@@ -239,6 +241,16 @@ func (c *userServiceClient) CheckUserInClass(ctx context.Context, in *CheckUserI
 	return out, nil
 }
 
+func (c *userServiceClient) JoinClassByCode(ctx context.Context, in *JoinClassByCodeRequest, opts ...grpc.CallOption) (*JoinClassByCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JoinClassByCodeResponse)
+	err := c.cc.Invoke(ctx, UserService_JoinClassByCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -260,6 +272,7 @@ type UserServiceServer interface {
 	AddMembers(context.Context, *AddMembersRequest) (*AddMembersResponse, error)
 	RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error)
 	CheckUserInClass(context.Context, *CheckUserInClassRequest) (*CheckUserInClassResponse, error)
+	JoinClassByCode(context.Context, *JoinClassByCodeRequest) (*JoinClassByCodeResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -320,6 +333,9 @@ func (UnimplementedUserServiceServer) RemoveMember(context.Context, *RemoveMembe
 }
 func (UnimplementedUserServiceServer) CheckUserInClass(context.Context, *CheckUserInClassRequest) (*CheckUserInClassResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckUserInClass not implemented")
+}
+func (UnimplementedUserServiceServer) JoinClassByCode(context.Context, *JoinClassByCodeRequest) (*JoinClassByCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinClassByCode not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -648,6 +664,24 @@ func _UserService_CheckUserInClass_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_JoinClassByCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinClassByCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).JoinClassByCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_JoinClassByCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).JoinClassByCode(ctx, req.(*JoinClassByCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -722,6 +756,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CheckUserInClass",
 			Handler:    _UserService_CheckUserInClass_Handler,
+		},
+		{
+			MethodName: "JoinClassByCode",
+			Handler:    _UserService_JoinClassByCode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
