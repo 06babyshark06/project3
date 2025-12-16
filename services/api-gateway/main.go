@@ -156,13 +156,11 @@ func main() {
 				instructorOnly.POST("/classes", classHandler.CreateClass)
 				instructorOnly.PUT("/classes/:id", classHandler.UpdateClass)
 				instructorOnly.DELETE("/classes/:id", classHandler.DeleteClass)
-				instructorOnly.GET("/classes", classHandler.GetClasses)
-				instructorOnly.GET("/classes/:id", classHandler.GetClassDetails)
 				instructorOnly.POST("/classes/members", classHandler.AddMembers)
 				instructorOnly.DELETE("/classes/members", classHandler.RemoveMember)
 
 				instructorOnly.GET("/instructor/all-exams", examHandler.GetInstructorAllExams)
-                instructorOnly.POST("/classes/:id/exams", classHandler.AssignExamToClass)
+				instructorOnly.POST("/classes/:id/exams", classHandler.AssignExamToClass)
 			}
 
 			studentOnly := auth.Group("/")
@@ -181,6 +179,8 @@ func main() {
 				studentOnly.POST("/exams/log-violation", examHandler.LogViolation)
 				studentOnly.POST("/exams/:id/start", examHandler.StartExam)
 				studentOnly.GET("/classes/:id/exams", classHandler.GetClassExams)
+				studentOnly.GET("/classes", classHandler.GetClasses)
+				studentOnly.GET("/classes/:id", classHandler.GetClassDetails)
 			}
 		}
 	}
