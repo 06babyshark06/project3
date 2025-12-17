@@ -1547,6 +1547,14 @@ func (s *examService) GetExamsByClass(ctx context.Context, req *pb.GetExamsByCla
 	return &pb.GetExamsByClassResponse{Exams: pbExams}, nil
 }
 
+func (s *examService) UnassignExamFromClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error) {
+	err := s.repo.UnassignExamFromClass(ctx, req.ExamId, req.ClassId)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.AssignExamToClassResponse{Success: true}, nil
+}
+
 func (s *examService) GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error) {
 	exams, err := s.repo.GetExamsByTeacher(ctx, req.TeacherId)
 	if err != nil {

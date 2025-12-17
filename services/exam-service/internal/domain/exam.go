@@ -221,6 +221,7 @@ type ExamRepository interface {
 	GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
 
 	AssignExamToClass(ctx context.Context, examID, classID int64) error
+	UnassignExamFromClass(ctx context.Context, examID, classID int64) error
 	GetExamsByClass(ctx context.Context, classID int64) ([]*ExamModel, error)
 	GetExamsByTeacher(ctx context.Context, teacherID int64) ([]*ExamModel, error)
 }
@@ -275,6 +276,6 @@ type ExamService interface {
 	StartExam(ctx context.Context, req *pb.StartExamRequest) (*pb.StartExamResponse, error)
 
 	GetExamsByClass(ctx context.Context, req *pb.GetExamsByClassRequest) (*pb.GetExamsByClassResponse, error)
-    AssignExamToClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
-    GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
+	AssignExamToClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
+	GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
 }

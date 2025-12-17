@@ -161,6 +161,7 @@ func main() {
 
 				instructorOnly.GET("/instructor/all-exams", examHandler.GetInstructorAllExams)
 				instructorOnly.POST("/classes/:id/exams", classHandler.AssignExamToClass)
+				instructorOnly.DELETE("/classes/:id/exams/:exam_id", classHandler.RemoveExamFromClass)
 			}
 
 			studentOnly := auth.Group("/")

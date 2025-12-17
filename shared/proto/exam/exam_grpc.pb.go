@@ -19,46 +19,47 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ExamService_CreateTopic_FullMethodName          = "/exam.ExamService/CreateTopic"
-	ExamService_GetTopics_FullMethodName            = "/exam.ExamService/GetTopics"
-	ExamService_CreateSection_FullMethodName        = "/exam.ExamService/CreateSection"
-	ExamService_GetSections_FullMethodName          = "/exam.ExamService/GetSections"
-	ExamService_UpdateTopic_FullMethodName          = "/exam.ExamService/UpdateTopic"
-	ExamService_DeleteTopic_FullMethodName          = "/exam.ExamService/DeleteTopic"
-	ExamService_UpdateSection_FullMethodName        = "/exam.ExamService/UpdateSection"
-	ExamService_DeleteSection_FullMethodName        = "/exam.ExamService/DeleteSection"
-	ExamService_GetQuestions_FullMethodName         = "/exam.ExamService/GetQuestions"
-	ExamService_CreateQuestion_FullMethodName       = "/exam.ExamService/CreateQuestion"
-	ExamService_GetQuestion_FullMethodName          = "/exam.ExamService/GetQuestion"
-	ExamService_ImportQuestions_FullMethodName      = "/exam.ExamService/ImportQuestions"
-	ExamService_UpdateQuestion_FullMethodName       = "/exam.ExamService/UpdateQuestion"
-	ExamService_DeleteQuestion_FullMethodName       = "/exam.ExamService/DeleteQuestion"
-	ExamService_GetUploadURL_FullMethodName         = "/exam.ExamService/GetUploadURL"
-	ExamService_CreateExam_FullMethodName           = "/exam.ExamService/CreateExam"
-	ExamService_GenerateExam_FullMethodName         = "/exam.ExamService/GenerateExam"
-	ExamService_GetExamDetails_FullMethodName       = "/exam.ExamService/GetExamDetails"
-	ExamService_GetExams_FullMethodName             = "/exam.ExamService/GetExams"
-	ExamService_UpdateExam_FullMethodName           = "/exam.ExamService/UpdateExam"
-	ExamService_DeleteExam_FullMethodName           = "/exam.ExamService/DeleteExam"
-	ExamService_PublishExam_FullMethodName          = "/exam.ExamService/PublishExam"
-	ExamService_RequestExamAccess_FullMethodName    = "/exam.ExamService/RequestExamAccess"
-	ExamService_ApproveExamAccess_FullMethodName    = "/exam.ExamService/ApproveExamAccess"
-	ExamService_CheckExamAccess_FullMethodName      = "/exam.ExamService/CheckExamAccess"
-	ExamService_GetAccessRequests_FullMethodName    = "/exam.ExamService/GetAccessRequests"
-	ExamService_SubmitExam_FullMethodName           = "/exam.ExamService/SubmitExam"
-	ExamService_GetSubmission_FullMethodName        = "/exam.ExamService/GetSubmission"
-	ExamService_GetUserExamStats_FullMethodName     = "/exam.ExamService/GetUserExamStats"
-	ExamService_GetExamCount_FullMethodName         = "/exam.ExamService/GetExamCount"
-	ExamService_SaveAnswer_FullMethodName           = "/exam.ExamService/SaveAnswer"
-	ExamService_LogViolation_FullMethodName         = "/exam.ExamService/LogViolation"
-	ExamService_GetExamStatsDetailed_FullMethodName = "/exam.ExamService/GetExamStatsDetailed"
-	ExamService_ExportExamResults_FullMethodName    = "/exam.ExamService/ExportExamResults"
-	ExamService_GetExamViolations_FullMethodName    = "/exam.ExamService/GetExamViolations"
-	ExamService_ExportQuestions_FullMethodName      = "/exam.ExamService/ExportQuestions"
-	ExamService_StartExam_FullMethodName            = "/exam.ExamService/StartExam"
-	ExamService_GetExamsByClass_FullMethodName      = "/exam.ExamService/GetExamsByClass"
-	ExamService_AssignExamToClass_FullMethodName    = "/exam.ExamService/AssignExamToClass"
-	ExamService_GetInstructorExams_FullMethodName   = "/exam.ExamService/GetInstructorExams"
+	ExamService_CreateTopic_FullMethodName           = "/exam.ExamService/CreateTopic"
+	ExamService_GetTopics_FullMethodName             = "/exam.ExamService/GetTopics"
+	ExamService_CreateSection_FullMethodName         = "/exam.ExamService/CreateSection"
+	ExamService_GetSections_FullMethodName           = "/exam.ExamService/GetSections"
+	ExamService_UpdateTopic_FullMethodName           = "/exam.ExamService/UpdateTopic"
+	ExamService_DeleteTopic_FullMethodName           = "/exam.ExamService/DeleteTopic"
+	ExamService_UpdateSection_FullMethodName         = "/exam.ExamService/UpdateSection"
+	ExamService_DeleteSection_FullMethodName         = "/exam.ExamService/DeleteSection"
+	ExamService_GetQuestions_FullMethodName          = "/exam.ExamService/GetQuestions"
+	ExamService_CreateQuestion_FullMethodName        = "/exam.ExamService/CreateQuestion"
+	ExamService_GetQuestion_FullMethodName           = "/exam.ExamService/GetQuestion"
+	ExamService_ImportQuestions_FullMethodName       = "/exam.ExamService/ImportQuestions"
+	ExamService_UpdateQuestion_FullMethodName        = "/exam.ExamService/UpdateQuestion"
+	ExamService_DeleteQuestion_FullMethodName        = "/exam.ExamService/DeleteQuestion"
+	ExamService_GetUploadURL_FullMethodName          = "/exam.ExamService/GetUploadURL"
+	ExamService_CreateExam_FullMethodName            = "/exam.ExamService/CreateExam"
+	ExamService_GenerateExam_FullMethodName          = "/exam.ExamService/GenerateExam"
+	ExamService_GetExamDetails_FullMethodName        = "/exam.ExamService/GetExamDetails"
+	ExamService_GetExams_FullMethodName              = "/exam.ExamService/GetExams"
+	ExamService_UpdateExam_FullMethodName            = "/exam.ExamService/UpdateExam"
+	ExamService_DeleteExam_FullMethodName            = "/exam.ExamService/DeleteExam"
+	ExamService_PublishExam_FullMethodName           = "/exam.ExamService/PublishExam"
+	ExamService_RequestExamAccess_FullMethodName     = "/exam.ExamService/RequestExamAccess"
+	ExamService_ApproveExamAccess_FullMethodName     = "/exam.ExamService/ApproveExamAccess"
+	ExamService_CheckExamAccess_FullMethodName       = "/exam.ExamService/CheckExamAccess"
+	ExamService_GetAccessRequests_FullMethodName     = "/exam.ExamService/GetAccessRequests"
+	ExamService_SubmitExam_FullMethodName            = "/exam.ExamService/SubmitExam"
+	ExamService_GetSubmission_FullMethodName         = "/exam.ExamService/GetSubmission"
+	ExamService_GetUserExamStats_FullMethodName      = "/exam.ExamService/GetUserExamStats"
+	ExamService_GetExamCount_FullMethodName          = "/exam.ExamService/GetExamCount"
+	ExamService_SaveAnswer_FullMethodName            = "/exam.ExamService/SaveAnswer"
+	ExamService_LogViolation_FullMethodName          = "/exam.ExamService/LogViolation"
+	ExamService_GetExamStatsDetailed_FullMethodName  = "/exam.ExamService/GetExamStatsDetailed"
+	ExamService_ExportExamResults_FullMethodName     = "/exam.ExamService/ExportExamResults"
+	ExamService_GetExamViolations_FullMethodName     = "/exam.ExamService/GetExamViolations"
+	ExamService_ExportQuestions_FullMethodName       = "/exam.ExamService/ExportQuestions"
+	ExamService_StartExam_FullMethodName             = "/exam.ExamService/StartExam"
+	ExamService_GetExamsByClass_FullMethodName       = "/exam.ExamService/GetExamsByClass"
+	ExamService_AssignExamToClass_FullMethodName     = "/exam.ExamService/AssignExamToClass"
+	ExamService_UnassignExamFromClass_FullMethodName = "/exam.ExamService/UnassignExamFromClass"
+	ExamService_GetInstructorExams_FullMethodName    = "/exam.ExamService/GetInstructorExams"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -104,6 +105,7 @@ type ExamServiceClient interface {
 	StartExam(ctx context.Context, in *StartExamRequest, opts ...grpc.CallOption) (*StartExamResponse, error)
 	GetExamsByClass(ctx context.Context, in *GetExamsByClassRequest, opts ...grpc.CallOption) (*GetExamsByClassResponse, error)
 	AssignExamToClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error)
+	UnassignExamFromClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error)
 	GetInstructorExams(ctx context.Context, in *GetInstructorExamsRequest, opts ...grpc.CallOption) (*GetInstructorExamsResponse, error)
 }
 
@@ -505,6 +507,16 @@ func (c *examServiceClient) AssignExamToClass(ctx context.Context, in *AssignExa
 	return out, nil
 }
 
+func (c *examServiceClient) UnassignExamFromClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AssignExamToClassResponse)
+	err := c.cc.Invoke(ctx, ExamService_UnassignExamFromClass_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *examServiceClient) GetInstructorExams(ctx context.Context, in *GetInstructorExamsRequest, opts ...grpc.CallOption) (*GetInstructorExamsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetInstructorExamsResponse)
@@ -558,6 +570,7 @@ type ExamServiceServer interface {
 	StartExam(context.Context, *StartExamRequest) (*StartExamResponse, error)
 	GetExamsByClass(context.Context, *GetExamsByClassRequest) (*GetExamsByClassResponse, error)
 	AssignExamToClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error)
+	UnassignExamFromClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error)
 	GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
@@ -685,6 +698,9 @@ func (UnimplementedExamServiceServer) GetExamsByClass(context.Context, *GetExams
 }
 func (UnimplementedExamServiceServer) AssignExamToClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AssignExamToClass not implemented")
+}
+func (UnimplementedExamServiceServer) UnassignExamFromClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnassignExamFromClass not implemented")
 }
 func (UnimplementedExamServiceServer) GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInstructorExams not implemented")
@@ -1412,6 +1428,24 @@ func _ExamService_AssignExamToClass_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_UnassignExamFromClass_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AssignExamToClassRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).UnassignExamFromClass(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_UnassignExamFromClass_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).UnassignExamFromClass(ctx, req.(*AssignExamToClassRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ExamService_GetInstructorExams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetInstructorExamsRequest)
 	if err := dec(in); err != nil {
@@ -1592,6 +1626,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AssignExamToClass",
 			Handler:    _ExamService_AssignExamToClass_Handler,
+		},
+		{
+			MethodName: "UnassignExamFromClass",
+			Handler:    _ExamService_UnassignExamFromClass_Handler,
 		},
 		{
 			MethodName: "GetInstructorExams",

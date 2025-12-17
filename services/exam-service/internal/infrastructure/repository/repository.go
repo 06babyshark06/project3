@@ -419,6 +419,12 @@ func (r *examRepository) DeleteSection(ctx context.Context, tx *gorm.DB, section
 	return tx.WithContext(ctx).Delete(&domain.SectionModel{}, sectionID).Error
 }
 
+func (r *examRepository) UnassignExamFromClass(ctx context.Context, examID, classID int64) error {
+	return database.DB.WithContext(ctx).
+		Where("exam_id = ? AND class_id = ?", examID, classID).
+		Delete(&domain.ExamClass{}).Error
+}
+
 func (r *examRepository) AssignExamToClass(ctx context.Context, examID, classID int64) error {
 	link := &domain.ExamClass{
 		ExamID:     examID,
@@ -438,7 +444,7 @@ func (r *examRepository) GetExamsByClass(ctx context.Context, classID int64) ([]
 	err := database.DB.WithContext(ctx).
 		Model(&domain.ExamModel{}).
 		Joins("JOIN exam_classes ON exam_classes.exam_id = exam_models.id").
-		Where("exam_classes.class_id = ? AND exams.is_published = ?", classID, true).
+		Where("exam_classes.class_id = ? AND exam_models.is_published = ?", classID, true).
 		Order("exam_classes.assigned_at DESC").
 		Preload("Questions").
 		Find(&exams).Error

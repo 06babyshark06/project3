@@ -51,6 +51,7 @@ service ExamService {
 
   rpc GetExamsByClass(GetExamsByClassRequest) returns (GetExamsByClassResponse);
   rpc AssignExamToClass(AssignExamToClassRequest) returns (AssignExamToClassResponse);
+  rpc UnassignExamFromClass(AssignExamToClassRequest) returns (AssignExamToClassResponse);
   rpc GetInstructorExams(GetInstructorExamsRequest) returns (GetInstructorExamsResponse);
 }
 

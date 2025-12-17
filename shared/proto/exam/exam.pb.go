@@ -6001,7 +6001,7 @@ const file_exam_proto_rawDesc = "" +
 	"\fis_published\x18\a \x01(\bR\visPublished\x12\x1d\n" +
 	"\n" +
 	"created_at\x18\b \x01(\tR\tcreatedAt\x12%\n" +
-	"\x0equestion_count\x18\t \x01(\x05R\rquestionCount2\xad\x17\n" +
+	"\x0equestion_count\x18\t \x01(\x05R\rquestionCount2\x87\x18\n" +
 	"\vExamService\x12B\n" +
 	"\vCreateTopic\x12\x18.exam.CreateTopicRequest\x1a\x19.exam.CreateTopicResponse\x12<\n" +
 	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12H\n" +
@@ -6046,7 +6046,8 @@ const file_exam_proto_rawDesc = "" +
 	"\x0fExportQuestions\x12\x1c.exam.ExportQuestionsRequest\x1a\x1d.exam.ExportQuestionsResponse\x12<\n" +
 	"\tStartExam\x12\x16.exam.StartExamRequest\x1a\x17.exam.StartExamResponse\x12N\n" +
 	"\x0fGetExamsByClass\x12\x1c.exam.GetExamsByClassRequest\x1a\x1d.exam.GetExamsByClassResponse\x12T\n" +
-	"\x11AssignExamToClass\x12\x1e.exam.AssignExamToClassRequest\x1a\x1f.exam.AssignExamToClassResponse\x12W\n" +
+	"\x11AssignExamToClass\x12\x1e.exam.AssignExamToClassRequest\x1a\x1f.exam.AssignExamToClassResponse\x12X\n" +
+	"\x15UnassignExamFromClass\x12\x1e.exam.AssignExamToClassRequest\x1a\x1f.exam.AssignExamToClassResponse\x12W\n" +
 	"\x12GetInstructorExams\x12\x1f.exam.GetInstructorExamsRequest\x1a .exam.GetInstructorExamsResponseB\x18Z\x16shared/proto/exam;examb\x06proto3"
 
 var (
@@ -6227,49 +6228,51 @@ var file_exam_proto_depIdxs = []int32{
 	74, // 62: exam.ExamService.StartExam:input_type -> exam.StartExamRequest
 	88, // 63: exam.ExamService.GetExamsByClass:input_type -> exam.GetExamsByClassRequest
 	90, // 64: exam.ExamService.AssignExamToClass:input_type -> exam.AssignExamToClassRequest
-	92, // 65: exam.ExamService.GetInstructorExams:input_type -> exam.GetInstructorExamsRequest
-	3,  // 66: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
-	5,  // 67: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
-	7,  // 68: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
-	9,  // 69: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
-	81, // 70: exam.ExamService.UpdateTopic:output_type -> exam.UpdateTopicResponse
-	83, // 71: exam.ExamService.DeleteTopic:output_type -> exam.DeleteTopicResponse
-	85, // 72: exam.ExamService.UpdateSection:output_type -> exam.UpdateSectionResponse
-	87, // 73: exam.ExamService.DeleteSection:output_type -> exam.DeleteSectionResponse
-	68, // 74: exam.ExamService.GetQuestions:output_type -> exam.GetQuestionsResponse
-	12, // 75: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
-	33, // 76: exam.ExamService.GetQuestion:output_type -> exam.GetQuestionResponse
-	16, // 77: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
-	35, // 78: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
-	37, // 79: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
-	14, // 80: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
-	21, // 81: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
-	21, // 82: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
-	25, // 83: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
-	40, // 84: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
-	42, // 85: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
-	44, // 86: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
-	46, // 87: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
-	27, // 88: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
-	29, // 89: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
-	31, // 90: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
-	79, // 91: exam.ExamService.GetAccessRequests:output_type -> exam.GetAccessRequestsResponse
-	49, // 92: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
-	53, // 93: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
-	55, // 94: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
-	57, // 95: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
-	59, // 96: exam.ExamService.SaveAnswer:output_type -> exam.SaveAnswerResponse
-	61, // 97: exam.ExamService.LogViolation:output_type -> exam.LogViolationResponse
-	63, // 98: exam.ExamService.GetExamStatsDetailed:output_type -> exam.GetExamStatsDetailedResponse
-	65, // 99: exam.ExamService.ExportExamResults:output_type -> exam.ExportExamResultsResponse
-	71, // 100: exam.ExamService.GetExamViolations:output_type -> exam.GetExamViolationsResponse
-	73, // 101: exam.ExamService.ExportQuestions:output_type -> exam.ExportQuestionsResponse
-	75, // 102: exam.ExamService.StartExam:output_type -> exam.StartExamResponse
-	89, // 103: exam.ExamService.GetExamsByClass:output_type -> exam.GetExamsByClassResponse
-	91, // 104: exam.ExamService.AssignExamToClass:output_type -> exam.AssignExamToClassResponse
-	93, // 105: exam.ExamService.GetInstructorExams:output_type -> exam.GetInstructorExamsResponse
-	66, // [66:106] is the sub-list for method output_type
-	26, // [26:66] is the sub-list for method input_type
+	90, // 65: exam.ExamService.UnassignExamFromClass:input_type -> exam.AssignExamToClassRequest
+	92, // 66: exam.ExamService.GetInstructorExams:input_type -> exam.GetInstructorExamsRequest
+	3,  // 67: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
+	5,  // 68: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
+	7,  // 69: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
+	9,  // 70: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
+	81, // 71: exam.ExamService.UpdateTopic:output_type -> exam.UpdateTopicResponse
+	83, // 72: exam.ExamService.DeleteTopic:output_type -> exam.DeleteTopicResponse
+	85, // 73: exam.ExamService.UpdateSection:output_type -> exam.UpdateSectionResponse
+	87, // 74: exam.ExamService.DeleteSection:output_type -> exam.DeleteSectionResponse
+	68, // 75: exam.ExamService.GetQuestions:output_type -> exam.GetQuestionsResponse
+	12, // 76: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
+	33, // 77: exam.ExamService.GetQuestion:output_type -> exam.GetQuestionResponse
+	16, // 78: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
+	35, // 79: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
+	37, // 80: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
+	14, // 81: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
+	21, // 82: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
+	21, // 83: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
+	25, // 84: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
+	40, // 85: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
+	42, // 86: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
+	44, // 87: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
+	46, // 88: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
+	27, // 89: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
+	29, // 90: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
+	31, // 91: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
+	79, // 92: exam.ExamService.GetAccessRequests:output_type -> exam.GetAccessRequestsResponse
+	49, // 93: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
+	53, // 94: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
+	55, // 95: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
+	57, // 96: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
+	59, // 97: exam.ExamService.SaveAnswer:output_type -> exam.SaveAnswerResponse
+	61, // 98: exam.ExamService.LogViolation:output_type -> exam.LogViolationResponse
+	63, // 99: exam.ExamService.GetExamStatsDetailed:output_type -> exam.GetExamStatsDetailedResponse
+	65, // 100: exam.ExamService.ExportExamResults:output_type -> exam.ExportExamResultsResponse
+	71, // 101: exam.ExamService.GetExamViolations:output_type -> exam.GetExamViolationsResponse
+	73, // 102: exam.ExamService.ExportQuestions:output_type -> exam.ExportQuestionsResponse
+	75, // 103: exam.ExamService.StartExam:output_type -> exam.StartExamResponse
+	89, // 104: exam.ExamService.GetExamsByClass:output_type -> exam.GetExamsByClassResponse
+	91, // 105: exam.ExamService.AssignExamToClass:output_type -> exam.AssignExamToClassResponse
+	91, // 106: exam.ExamService.UnassignExamFromClass:output_type -> exam.AssignExamToClassResponse
+	93, // 107: exam.ExamService.GetInstructorExams:output_type -> exam.GetInstructorExamsResponse
+	67, // [67:108] is the sub-list for method output_type
+	26, // [26:67] is the sub-list for method input_type
 	26, // [26:26] is the sub-list for extension type_name
 	26, // [26:26] is the sub-list for extension extendee
 	0,  // [0:26] is the sub-list for field type_name
