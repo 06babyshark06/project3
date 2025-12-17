@@ -190,7 +190,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 			return t.Id, nil
 		}
 
-		newTopic := &domain.TopicModel{Name: name, Description: "Auto imported"}
+		newTopic := &domain.TopicModel{Name: name, Description: "Auto imported", CreatorID: req.CreatorId}
 		created, err := s.repo.CreateTopic(ctx, database.DB, newTopic)
 		if err != nil {
 			return 0, err
@@ -214,7 +214,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 			}
 		}
 
-		newSec := &domain.SectionModel{Name: name, Description: "Auto imported", TopicID: topicID}
+		newSec := &domain.SectionModel{Name: name, Description: "Auto imported", TopicID: topicID} // Section doesn't have CreatorID in model yet? Let's check.
 		created, err := s.repo.CreateSection(ctx, database.DB, newSec)
 		if err != nil {
 			return 0, err
@@ -1179,14 +1179,31 @@ func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequ
 		limit = 10
 	}
 
+	// Parse search hijacking for creator_id
+	search := req.Search
+	var creatorID int64
+	if strings.HasPrefix(search, "creator:") {
+		parts := strings.SplitN(search, "|", 2)
+		if len(parts) > 0 {
+			idStr := strings.TrimPrefix(parts[0], "creator:")
+			creatorID, _ = strconv.ParseInt(idStr, 10, 64)
+		}
+		if len(parts) > 1 {
+			search = parts[1]
+		} else {
+			search = ""
+		}
+	}
+
 	questions, total, err := s.repo.GetQuestions(
 		ctx,
 		req.SectionId,
 		req.TopicId,
 		req.Difficulty,
-		req.Search,
+		search,
 		page,
 		limit,
+		creatorID,
 	)
 	if err != nil {
 		return nil, err
@@ -1202,7 +1219,7 @@ func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequ
 			SectionId:     q.SectionID,
 			SectionName:   q.SectionName,
 			TopicId:       q.TopicID,
-			TopicName:     q.TopicName,
+			TopicName:     q.TopicName + "|cid:" + strconv.FormatInt(q.CreatorID, 10),
 			AttachmentUrl: q.AttachmentURL,
 			ChoiceCount:   q.ChoiceCount,
 		})

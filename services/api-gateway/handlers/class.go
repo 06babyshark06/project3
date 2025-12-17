@@ -108,9 +108,10 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 
 	if role == "student" {
 		req.StudentId = userID
-	} else {
+	} else if role == "instructor" {
 		req.TeacherId = userID
 	}
+	// Nếu role là admin, để TeacherId và StudentId = 0 (mặc định) để lấy tất cả
 
 	resp, err := h.userClient.GetClasses(c.Request.Context(), req)
 	if err != nil {

@@ -6,20 +6,26 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
+	pbUser "github.com/06babyshark06/JQKStudy/shared/proto/user"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
 type ExamHandler struct {
 	examClient pb.ExamServiceClient
+	userClient pbUser.UserServiceClient
 }
 
-func NewExamHandler(client *grpcclients.ExamServiceClient) *ExamHandler {
-	return &ExamHandler{examClient: client.Client}
+func NewExamHandler(client *grpcclients.ExamServiceClient, userClient *grpcclients.UserServiceClient) *ExamHandler {
+	return &ExamHandler{
+		examClient: client.Client,
+		userClient: userClient.Client,
+	}
 }
 
 func getUserIDFromContext(c *gin.Context) (int64, error) {
@@ -39,7 +45,42 @@ func (h *ExamHandler) GetTopics(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+
+	// Enrichment Logic
+	type TopicWithCreator struct {
+		*pb.Topic
+		CreatorName string `json:"creator_name"`
+	}
+	var enrichedTopics []TopicWithCreator
+	userNames := make(map[int64]string)
+
+	for _, t := range resp.Topics {
+		var creatorID int64
+		if strings.Contains(t.Name, "|cid:") {
+			parts := strings.Split(t.Name, "|cid:")
+			t.Name = parts[0]
+			if len(parts) > 1 {
+				creatorID, _ = strconv.ParseInt(parts[1], 10, 64)
+			}
+		}
+
+		if creatorID > 0 {
+			if _, exists := userNames[creatorID]; !exists {
+				userProfile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: creatorID})
+				if err == nil {
+					userNames[creatorID] = userProfile.FullName
+				} else {
+					userNames[creatorID] = "Unknown"
+				}
+			}
+		}
+		enrichedTopics = append(enrichedTopics, TopicWithCreator{
+			Topic:       t,
+			CreatorName: userNames[creatorID],
+		})
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{"topics": enrichedTopics}})
 }
 
 func (h *ExamHandler) CreateTopic(c *gin.Context) {
@@ -49,11 +90,21 @@ func (h *ExamHandler) CreateTopic(c *gin.Context) {
 		return
 	}
 
+	userID, err := getUserIDFromContext(c)
+	if err == nil {
+		req.Name = fmt.Sprintf("%s|cid:%d", req.Name, userID)
+	}
+
 	resp, err := h.examClient.CreateTopic(c.Request.Context(), &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	// Strip hidden ID from response if present (although repo should strictly return clean name if it follows logic, but to be safe)
+	if strings.Contains(resp.Topic.Name, "|cid:") {
+		resp.Topic.Name = strings.Split(resp.Topic.Name, "|cid:")[0]
+	}
+
 	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
 }
 
@@ -660,7 +711,21 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
 	sectionID, _ := strconv.ParseInt(c.Query("section_id"), 10, 64)
 	topicID, _ := strconv.ParseInt(c.Query("topic_id"), 10, 64)
 	difficulty := c.Query("difficulty")
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+	claims := jwt.ExtractClaims(c)
+	role := fmt.Sprint(claims["role"])
+
 	search := c.Query("search")
+	searchParam := search
+	if role == "admin" {
+		searchParam = "creator:0|" + search
+	} else {
+		searchParam = fmt.Sprintf("creator:%d|%s", userID, search)
+	}
 
 	resp, err := h.examClient.GetQuestions(c.Request.Context(), &pb.GetQuestionsRequest{
 		Page:       int32(page),
@@ -668,13 +733,58 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
 		SectionId:  sectionID,
 		TopicId:    topicID,
 		Difficulty: difficulty,
-		Search:     search,
+		Search:     searchParam,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+
+	// Enrichment Logic: Extract creator_id from TopicName and fetch Teacher Name
+	type QuestionWithCreator struct {
+		*pb.QuestionListItem
+		CreatorName string `json:"creator_name"`
+	}
+	var enrichedQuestions []QuestionWithCreator
+	userNames := make(map[int64]string)
+
+	for _, q := range resp.Questions {
+		var creatorID int64
+		if strings.Contains(q.TopicName, "|cid:") {
+			parts := strings.Split(q.TopicName, "|cid:")
+			q.TopicName = parts[0] // Restore clean topic name
+			if len(parts) > 1 {
+				creatorID, _ = strconv.ParseInt(parts[1], 10, 64)
+			}
+		}
+
+		if creatorID > 0 {
+			if _, exists := userNames[creatorID]; !exists {
+				// Fetch user profile
+				userProfile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: creatorID})
+				if err == nil {
+					userNames[creatorID] = userProfile.FullName
+				} else {
+					userNames[creatorID] = "Unknown"
+				}
+			}
+		} else {
+			// If no creatorID found (e.g. old data), try to get from context if it's the caller?
+			// No, for admin view we need the real creator. If 0, it stays unknown.
+		}
+
+		enrichedQuestions = append(enrichedQuestions, QuestionWithCreator{
+			QuestionListItem: q,
+			CreatorName:      userNames[creatorID],
+		})
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{
+		"questions":   enrichedQuestions,
+		"total":       resp.Total,
+		"page":        resp.Page,
+		"total_pages": resp.TotalPages,
+	}})
 }
 
 func (h *ExamHandler) GetQuestion(c *gin.Context) {

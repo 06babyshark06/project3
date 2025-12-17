@@ -12,6 +12,7 @@ type TopicModel struct {
 	Id          int64          `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name        string         `gorm:"size:255;uniqueIndex;not null" json:"name"`
 	Description string         `gorm:"type:text" json:"description"`
+	CreatorID   int64          `gorm:"not null;default:0" json:"creator_id"`
 	CreatedAt   time.Time      `json:"created_at"`
 	Sections    []SectionModel `gorm:"foreignKey:TopicID" json:"sections"`
 }
@@ -76,6 +77,7 @@ type QuestionListItem struct {
 	TopicName     string
 	AttachmentURL string
 	ChoiceCount   int32
+	CreatorID     int64
 }
 
 type ExamModel struct {
@@ -218,7 +220,7 @@ type ExamRepository interface {
 	GetExamSubmissions(ctx context.Context, examID int64) ([]*ExamSubmissionModel, error)
 	GetViolationsByExam(ctx context.Context, examID int64) ([]*ExamViolationModel, error)
 	CountUniqueParticipants(ctx context.Context, examID int64) (int64, error)
-	GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*QuestionListItem, int64, error)
+	GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int, creatorID int64) ([]*QuestionListItem, int64, error)
 
 	AssignExamToClass(ctx context.Context, examID, classID int64) error
 	UnassignExamFromClass(ctx context.Context, examID, classID int64) error

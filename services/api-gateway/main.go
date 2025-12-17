@@ -46,7 +46,7 @@ func main() {
 
 	userHandler := handlers.NewUserHandler(userClient)
 	authHandler := handlers.NewAuthHandler(userClient, jwtMiddleware)
-	examHandler := handlers.NewExamHandler(examClient)
+	examHandler := handlers.NewExamHandler(examClient, userClient)
 	courseHandler := handlers.NewCourseHandler(courseClient)
 	statsHandler := handlers.NewStatsHandler(userClient, courseClient, examClient)
 	classHandler := handlers.NewClassHandler(userClient, examClient)

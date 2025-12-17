@@ -2,7 +2,10 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
@@ -18,6 +21,15 @@ func NewExamRepository() domain.ExamRepository {
 }
 
 func (r *examRepository) CreateTopic(ctx context.Context, tx *gorm.DB, topic *domain.TopicModel) (*domain.TopicModel, error) {
+	// Hijack Logic: Check if CreatorID is embedded in Name
+	if strings.Contains(topic.Name, "|cid:") {
+		parts := strings.Split(topic.Name, "|cid:")
+		if len(parts) > 1 {
+			topic.Name = parts[0]
+			cid, _ := strconv.ParseInt(parts[1], 10, 64)
+			topic.CreatorID = cid
+		}
+	}
 	if err := tx.WithContext(ctx).Create(topic).Error; err != nil {
 		return nil, err
 	}
@@ -27,6 +39,12 @@ func (r *examRepository) GetTopics(ctx context.Context) ([]*domain.TopicModel, e
 	var topics []*domain.TopicModel
 	if err := database.DB.WithContext(ctx).Order("created_at DESC").Find(&topics).Error; err != nil {
 		return nil, err
+	}
+	// Enrich with hijacked creator ID
+	for _, t := range topics {
+		if t.CreatorID > 0 {
+			t.Name = fmt.Sprintf("%s|cid:%d", t.Name, t.CreatorID)
+		}
 	}
 	return topics, nil
 }
@@ -287,7 +305,7 @@ func (r *examRepository) GetViolationsByExam(ctx context.Context, examID int64) 
 	return vs, err
 }
 
-func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int) ([]*domain.QuestionListItem, int64, error) {
+func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topicID int64, difficulty, search string, page, limit int, creatorID int64) ([]*domain.QuestionListItem, int64, error) {
 	var questions []*domain.QuestionListItem
 	var total int64
 
@@ -298,12 +316,17 @@ func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topi
             q.section_id, s.name as section_name, 
             s.topic_id, t.name as topic_name,
             q.attachment_url,
+            q.creator_id,
             (SELECT COUNT(*) FROM choice_models WHERE question_id = q.id) as choice_count
         `).
 		Joins("LEFT JOIN question_type_models qt ON q.type_id = qt.id").
 		Joins("LEFT JOIN question_difficulty_models qd ON q.difficulty_id = qd.id").
 		Joins("LEFT JOIN exam_sections s ON q.section_id = s.id").
 		Joins("LEFT JOIN topic_models t ON s.topic_id = t.id")
+
+	if creatorID > 0 {
+		query = query.Where("q.creator_id = ?", creatorID)
+	}
 
 	if sectionID > 0 {
 		query = query.Where("q.section_id = ?", sectionID)

@@ -249,7 +249,14 @@ func (s *userService) UpdateClass(ctx context.Context, req *pb.UpdateClassReques
 	if err != nil {
 		return nil, errors.New("class not found")
 	}
-	if class.TeacherID != req.TeacherId {
+	// Check requester permission
+	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
+	if err != nil {
+		return nil, errors.New("requester not found")
+	}
+
+	// Validate: must be Owner OR Admin
+	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
 
@@ -270,7 +277,14 @@ func (s *userService) DeleteClass(ctx context.Context, req *pb.DeleteClassReques
 	if err != nil {
 		return nil, errors.New("class not found")
 	}
-	if class.TeacherID != req.TeacherId {
+	// Check requester permission
+	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
+	if err != nil {
+		return nil, errors.New("requester not found")
+	}
+
+	// Validate: must be Owner OR Admin
+	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
 
@@ -311,8 +325,19 @@ func (s *userService) GetClassDetails(ctx context.Context, req *pb.GetClassDetai
 
 func (s *userService) AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error) {
 	class, err := s.repo.GetClassByID(ctx, req.ClassId)
-	if err != nil || class.TeacherID != req.TeacherId {
-		return nil, errors.New("unauthorized or class not found")
+	if err != nil {
+		return nil, errors.New("class not found")
+	}
+
+	// Check requester permission
+	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
+	if err != nil {
+		return nil, errors.New("requester not found")
+	}
+
+	// Validate: must be Owner OR Admin
+	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
+		return nil, errors.New("unauthorized")
 	}
 
 	success := 0
@@ -338,7 +363,18 @@ func (s *userService) AddMembers(ctx context.Context, req *pb.AddMembersRequest)
 
 func (s *userService) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {
 	class, err := s.repo.GetClassByID(ctx, req.ClassId)
-	if err != nil || class.TeacherID != req.TeacherId {
+	if err != nil {
+		return nil, errors.New("class not found")
+	}
+
+	// Check requester permission
+	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
+	if err != nil {
+		return nil, errors.New("requester not found")
+	}
+
+	// Validate: must be Owner OR Admin
+	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
 
