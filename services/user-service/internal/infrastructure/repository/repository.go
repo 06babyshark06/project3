@@ -62,7 +62,7 @@ func (r *userRepository) GetUsersWithPagination(ctx context.Context, limit, offs
 	}
 
 	if role != "" {
-		query = query.Joins("JOIN roles ON roles.id = users.role_id").Where("roles.name = ?", role)
+		query = query.Joins("JOIN roles ON roles.id = user_models.role_id").Where("roles.name = ?", role)
 	}
 
 	if err := query.Count(&total).Error; err != nil {
@@ -70,7 +70,7 @@ func (r *userRepository) GetUsersWithPagination(ctx context.Context, limit, offs
 	}
 
 	if err := query.Preload("Role").
-		Order("users.created_at DESC").
+		Order("user_models.created_at DESC").
 		Limit(limit).
 		Offset(offset).
 		Find(&users).Error; err != nil {
