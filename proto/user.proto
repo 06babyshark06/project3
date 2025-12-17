@@ -36,8 +36,10 @@ message GetProfileResponse {
 }
 
 message GetAllUsersRequest {
-  int32 page = 1;        
-  int32 page_size = 2;   
+  int32 page = 1;
+  int32 page_size = 2;
+  string search = 3;
+  string role = 4;
 }
 
 message GetAllUsersResponse {

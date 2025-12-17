@@ -36,6 +36,8 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 		&pb.GetAllUsersRequest{
 			Page:     int32(page),
 			PageSize: int32(pageSize),
+			Search:   c.Query("search"),
+			Role:     c.Query("role"),
 		},
 	)
 	if err != nil {
@@ -99,8 +101,8 @@ func (h *UserHandler) UpdateUserRole(c *gin.Context) {
 	}
 
 	resp, err := h.userClient.UpdateUserRole(c.Request.Context(), &pb.UpdateUserRoleRequest{
-		Id: userID,
-		Role:   req.Role,
+		Id:   userID,
+		Role: req.Role,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -146,7 +148,7 @@ func (h *UserHandler) UpdateUserInfo(c *gin.Context) {
 	}
 
 	resp, err := h.userClient.UpdateUser(c.Request.Context(), &pb.UpdateUserRequest{
-		Id:   userID,
+		Id:       userID,
 		FullName: req.FullName,
 		Email:    req.Email,
 	})
@@ -175,7 +177,7 @@ func (h *UserHandler) UpdateUserPassword(c *gin.Context) {
 	}
 
 	_, err = h.userClient.UpdatePassword(c.Request.Context(), &pb.UpdatePasswordRequest{
-		Id:      userID,
+		Id:          userID,
 		OldPassword: req.OldPassword,
 		NewPassword: req.NewPassword,
 	})

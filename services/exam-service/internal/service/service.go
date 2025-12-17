@@ -16,6 +16,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/xuri/excelize/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	database "github.com/06babyshark06/JQKStudy/services/exam-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/exam-service/internal/domain"
@@ -461,7 +463,7 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
 			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
-			TopicID: req.TopicId, CreatorID: req.CreatorId,
+			TopicID: req.TopicId, CreatorID: req.CreatorId, Status: req.Status,
 		}
 		if req.Settings.StartTime != "" {
 			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
@@ -562,7 +564,7 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 		},
 		Questions:   pbQuestions,
 		TopicId:     examModel.TopicID,
-		IsPublished: examModel.IsPublished,
+		Status:      examModel.Status,
 		Description: examModel.Description,
 	}, nil
 }
@@ -809,7 +811,7 @@ func (s *examService) GetExams(ctx context.Context, req *pb.GetExamsRequest) (*p
 		offset = 0
 	}
 
-	exams, total, err := s.repo.GetExams(ctx, limit, offset, req.CreatorId)
+	exams, total, err := s.repo.GetExams(ctx, limit, offset, req.CreatorId, req.Status)
 	if err != nil {
 		return nil, err
 	}
@@ -822,7 +824,7 @@ func (s *examService) GetExams(ctx context.Context, req *pb.GetExamsRequest) (*p
 			DurationMinutes: int32(e.DurationMinutes),
 			TopicId:         e.TopicID,
 			CreatorId:       e.CreatorID,
-			IsPublished:     e.IsPublished,
+			Status:          e.Status,
 		})
 	}
 
@@ -837,12 +839,14 @@ func (s *examService) GetExams(ctx context.Context, req *pb.GetExamsRequest) (*p
 }
 
 func (s *examService) PublishExam(ctx context.Context, req *pb.PublishExamRequest) (*pb.PublishExamResponse, error) {
-	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		return s.repo.UpdateExamStatus(ctx, tx, req.ExamId, req.IsPublished)
-	})
-	if err != nil {
-		return nil, err
+	if req.ExamId == 0 {
+		return nil, status.Error(codes.InvalidArgument, "exam_id is required")
 	}
+
+	if err := s.repo.UpdateExamStatus(ctx, database.DB, req.ExamId, req.Status); err != nil {
+		return nil, status.Error(codes.Internal, "failed to update exam status")
+	}
+
 	return &pb.PublishExamResponse{Success: true}, nil
 }
 
@@ -899,6 +903,9 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 		}
 		if req.Description != "" {
 			updates["description"] = req.Description
+		}
+		if req.Status != "" {
+			updates["status"] = req.Status
 		}
 		if req.Settings.DurationMinutes > 0 {
 			updates["duration_minutes"] = req.Settings.DurationMinutes
@@ -1588,7 +1595,7 @@ func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {
 		DurationMinutes: int32(e.DurationMinutes),
 		TopicId:         topicID,
 		CreatorId:       e.CreatorID,
-		IsPublished:     e.IsPublished,
+		Status:          e.Status,
 		CreatedAt:       createdAt,
 		QuestionCount:   int32(len(e.Questions)),
 	}

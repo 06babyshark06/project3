@@ -160,17 +160,21 @@ func (r *examRepository) DeleteExam(ctx context.Context, tx *gorm.DB, examID int
 	tx.WithContext(ctx).Where("exam_id = ?", examID).Delete(&domain.ExamAccessRequestModel{})
 	return tx.WithContext(ctx).Delete(&domain.ExamModel{}, examID).Error
 }
-func (r *examRepository) UpdateExamStatus(ctx context.Context, tx *gorm.DB, examID int64, isPublished bool) error {
-	return tx.WithContext(ctx).Model(&domain.ExamModel{}).Where("id = ?", examID).Update("is_published", isPublished).Error
+func (r *examRepository) UpdateExamStatus(ctx context.Context, tx *gorm.DB, examID int64, status string) error {
+	return tx.WithContext(ctx).Model(&domain.ExamModel{}).Where("id = ?", examID).Update("status", status).Error
 }
-func (r *examRepository) GetExams(ctx context.Context, limit, offset int, creatorID int64) ([]*domain.ExamModel, int64, error) {
+func (r *examRepository) GetExams(ctx context.Context, limit, offset int, creatorID int64, status string) ([]*domain.ExamModel, int64, error) {
 	var exams []*domain.ExamModel
 	var total int64
 	query := database.DB.WithContext(ctx).Model(&domain.ExamModel{})
 	if creatorID > 0 {
 		query = query.Where("creator_id = ?", creatorID)
+	} else if status == "all" {
+		// No status filter
+	} else if status != "" {
+		query = query.Where("status = ?", status)
 	} else {
-		query = query.Where("is_published = ?", true)
+		query = query.Where("status = ?", "public")
 	}
 	query.Count(&total)
 	err := query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&exams).Error
@@ -444,7 +448,7 @@ func (r *examRepository) GetExamsByClass(ctx context.Context, classID int64) ([]
 	err := database.DB.WithContext(ctx).
 		Model(&domain.ExamModel{}).
 		Joins("JOIN exam_classes ON exam_classes.exam_id = exam_models.id").
-		Where("exam_classes.class_id = ? AND exam_models.is_published = ?", classID, true).
+		Where("exam_classes.class_id = ? AND (exam_models.status = ? OR exam_models.status = ?)", classID, "public", "private").
 		Order("exam_classes.assigned_at DESC").
 		Preload("Questions").
 		Find(&exams).Error
@@ -457,7 +461,7 @@ func (r *examRepository) GetExamsByTeacher(ctx context.Context, teacherID int64)
 
 	err := database.DB.WithContext(ctx).
 		Model(&domain.ExamModel{}).
-		Where("creator_id = ?", teacherID).
+		Where("creator_id = ? AND status != ?", teacherID, "draft").
 		Order("created_at DESC").
 		Preload("Questions").
 		Find(&exams).Error

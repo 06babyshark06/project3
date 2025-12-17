@@ -36,19 +36,19 @@ type UserRepository interface {
 	GetUserById(ctx context.Context, id int64) (*UserModel, error)
 	UpdateUser(ctx context.Context, user *UserModel) (*UserModel, error)
 	DeleteUser(ctx context.Context, id int64) error
-	GetUsersWithPagination(ctx context.Context, limit, offset int) ([]*UserModel, int64, error)
+	GetUsersWithPagination(ctx context.Context, limit, offset int, search, role string) ([]*UserModel, int64, error)
 	CountUsers(ctx context.Context) (int64, error)
 	GetRoleByName(ctx context.Context, name string) (*Role, error)
 
 	CreateClass(ctx context.Context, class *ClassModel) error
-    UpdateClass(ctx context.Context, id int64, updates map[string]interface{}) error
-    DeleteClass(ctx context.Context, id int64) error
-    GetClassByID(ctx context.Context, id int64) (*ClassModel, error)
-    GetClasses(ctx context.Context, teacherID, studentID int64, limit, offset int) ([]*ClassModel, int64, error)
-    
-    AddClassMember(ctx context.Context, member *ClassMemberModel) error
-    RemoveClassMember(ctx context.Context, classID, userID int64) error
-    GetClassMember(ctx context.Context, classID, userID int64) (*ClassMemberModel, error)
+	UpdateClass(ctx context.Context, id int64, updates map[string]interface{}) error
+	DeleteClass(ctx context.Context, id int64) error
+	GetClassByID(ctx context.Context, id int64) (*ClassModel, error)
+	GetClasses(ctx context.Context, teacherID, studentID int64, limit, offset int) ([]*ClassModel, int64, error)
+
+	AddClassMember(ctx context.Context, member *ClassMemberModel) error
+	RemoveClassMember(ctx context.Context, classID, userID int64) error
+	GetClassMember(ctx context.Context, classID, userID int64) (*ClassMemberModel, error)
 	GetClassByCode(ctx context.Context, code string) (*ClassModel, error)
 	IsClassMember(ctx context.Context, classID, userID int64) (bool, error)
 }

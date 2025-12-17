@@ -92,13 +92,13 @@ type ExamModel struct {
 	ShowResultImmediately bool `json:"show_result_immediately"`
 	RequiresApproval      bool `json:"requires_approval"`
 
-	TopicID     int64            `gorm:"not null;index" json:"topic_id"`
-	Topic       *TopicModel      `gorm:"foreignKey:TopicID" json:"topic"`
-	CreatorID   int64            `gorm:"not null" json:"creator_id"`
-	IsPublished bool             `gorm:"not null;default:false" json:"is_published"`
-	CreatedAt   time.Time        `json:"created_at"`
-	UpdatedAt   time.Time        `json:"updated_at"`
-	Questions   []*QuestionModel `gorm:"many2many:exam_questions;joinForeignKey:exam_id;joinReferences:question_id" json:"questions"`
+	TopicID   int64            `gorm:"not null;index" json:"topic_id"`
+	Topic     *TopicModel      `gorm:"foreignKey:TopicID" json:"topic"`
+	CreatorID int64            `gorm:"not null" json:"creator_id"`
+	Status    string           `gorm:"size:20;default:'draft';index" json:"status"`
+	CreatedAt time.Time        `json:"created_at"`
+	UpdatedAt time.Time        `json:"updated_at"`
+	Questions []*QuestionModel `gorm:"many2many:exam_questions;joinForeignKey:exam_id;joinReferences:question_id" json:"questions"`
 }
 
 type ExamQuestionModel struct {
@@ -195,8 +195,8 @@ type ExamRepository interface {
 	GetExamDetails(ctx context.Context, examID int64) (*ExamModel, error)
 	UpdateExam(ctx context.Context, tx *gorm.DB, examID int64, updates map[string]interface{}) error
 	DeleteExam(ctx context.Context, tx *gorm.DB, examID int64) error
-	UpdateExamStatus(ctx context.Context, tx *gorm.DB, examID int64, isPublished bool) error
-	GetExams(ctx context.Context, limit, offset int, creatorID int64) ([]*ExamModel, int64, error)
+	UpdateExamStatus(ctx context.Context, tx *gorm.DB, examID int64, status string) error
+	GetExams(ctx context.Context, limit, offset int, creatorID int64, status string) ([]*ExamModel, int64, error)
 	CountExams(ctx context.Context) (int64, error)
 	ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error
 
@@ -278,4 +278,5 @@ type ExamService interface {
 	GetExamsByClass(ctx context.Context, req *pb.GetExamsByClassRequest) (*pb.GetExamsByClassResponse, error)
 	AssignExamToClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
 	GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
+	UnassignExamFromClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
 }

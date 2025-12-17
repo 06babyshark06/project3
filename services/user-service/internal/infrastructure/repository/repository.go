@@ -50,17 +50,27 @@ func (r *userRepository) DeleteUser(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (r *userRepository) GetUsersWithPagination(ctx context.Context, limit, offset int) ([]*domain.UserModel, int64, error) {
+func (r *userRepository) GetUsersWithPagination(ctx context.Context, limit, offset int, search, role string) ([]*domain.UserModel, int64, error) {
 	var users []*domain.UserModel
 	var total int64
 
-	if err := database.DB.WithContext(ctx).Model(&domain.UserModel{}).Count(&total).Error; err != nil {
+	query := database.DB.WithContext(ctx).Model(&domain.UserModel{})
+
+	if search != "" {
+		like := "%" + search + "%"
+		query = query.Where("full_name ILIKE ? OR email ILIKE ?", like, like)
+	}
+
+	if role != "" {
+		query = query.Joins("JOIN roles ON roles.id = users.role_id").Where("roles.name = ?", role)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	if err := database.DB.WithContext(ctx).
-		Preload("Role").
-		Order("created_at DESC").
+	if err := query.Preload("Role").
+		Order("users.created_at DESC").
 		Limit(limit).
 		Offset(offset).
 		Find(&users).Error; err != nil {
@@ -71,11 +81,11 @@ func (r *userRepository) GetUsersWithPagination(ctx context.Context, limit, offs
 }
 
 func (r *userRepository) CountUsers(ctx context.Context) (int64, error) {
-    var count int64
-    if err := database.DB.WithContext(ctx).Model(&domain.UserModel{}).Count(&count).Error; err != nil {
-        return 0, err
-    }
-    return count, nil
+	var count int64
+	if err := database.DB.WithContext(ctx).Model(&domain.UserModel{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (r *userRepository) GetRoleByName(ctx context.Context, name string) (*domain.Role, error) {
@@ -122,8 +132,8 @@ func (r *userRepository) GetClasses(ctx context.Context, teacherID, studentID in
 
 	db.Count(&total)
 	err := db.Preload("Teacher").
-        Preload("Members").
-        Order("created_at DESC").Limit(limit).Offset(offset).Find(&classes).Error
+		Preload("Members").
+		Order("created_at DESC").Limit(limit).Offset(offset).Find(&classes).Error
 	return classes, total, err
 }
 

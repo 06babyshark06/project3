@@ -124,6 +124,7 @@ message CreateExamRequest {
   repeated int64 question_ids = 4;
   ExamSettings settings = 5;
   int64 creator_id = 6;
+  string status = 7;
 }
 
 message SectionConfig {
@@ -166,7 +167,7 @@ message GetExamDetailsResponse {
   ExamSettings settings = 4;
   repeated QuestionDetails questions = 5;
   int64 topic_id = 6;
-  bool is_published = 7;
+  string status = 7;
 }
 
 message RequestExamAccessRequest { int64 exam_id = 1; int64 user_id = 2; string student_name = 3; }
@@ -185,15 +186,15 @@ message UpdateQuestionResponse { bool success = 1; }
 message DeleteQuestionRequest { int64 question_id = 1; }
 message DeleteQuestionResponse { bool success = 1; }
 
-message ExamListItem { int64 id = 1; string title = 2; int32 duration_minutes = 3; int64 topic_id = 4; int64 creator_id = 5; bool is_published = 6; }
-message GetExamsRequest { int32 page = 1; int32 limit = 2; int64 creator_id = 3; }
+message ExamListItem { int64 id = 1; string title = 2; int32 duration_minutes = 3; int64 topic_id = 4; int64 creator_id = 5; string status = 6; }
+message GetExamsRequest { int32 page = 1; int32 limit = 2; int64 creator_id = 3; string status = 4; }
 message GetExamsResponse { repeated ExamListItem exams = 1; int64 total = 2; int32 page = 3; int32 total_pages = 4; }
 
-message UpdateExamRequest { int64 exam_id = 1; string title = 2; string description = 3; ExamSettings settings = 4; int64 topic_id = 5; repeated int64 question_ids = 6;}
+message UpdateExamRequest { int64 exam_id = 1; string title = 2; string description = 3; ExamSettings settings = 4; int64 topic_id = 5; repeated int64 question_ids = 6; string status = 7;}
 message UpdateExamResponse { bool success = 1; }
 message DeleteExamRequest { int64 exam_id = 1; }
 message DeleteExamResponse { bool success = 1; }
-message PublishExamRequest { int64 exam_id = 1; bool is_published = 2; }
+message PublishExamRequest { int64 exam_id = 1; string status = 2; }
 message PublishExamResponse { bool success = 1; }
 
 message UserAnswer { int64 question_id = 1; int64 chosen_choice_id = 2; }
@@ -372,7 +373,7 @@ message Exam {
   int32 duration_minutes = 4;
   int64 topic_id = 5;
   int64 creator_id = 6;
-  bool is_published = 7;
-  string created_at = 8;
-  int32 question_count = 9;
+  string created_at = 7;
+  int32 question_count = 8;
+  string status = 9;
 }

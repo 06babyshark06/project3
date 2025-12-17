@@ -1053,6 +1053,7 @@ type CreateExamRequest struct {
 	QuestionIds   []int64                `protobuf:"varint,4,rep,packed,name=question_ids,json=questionIds,proto3" json:"question_ids,omitempty"`
 	Settings      *ExamSettings          `protobuf:"bytes,5,opt,name=settings,proto3" json:"settings,omitempty"`
 	CreatorId     int64                  `protobuf:"varint,6,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1127,6 +1128,13 @@ func (x *CreateExamRequest) GetCreatorId() int64 {
 		return x.CreatorId
 	}
 	return 0
+}
+
+func (x *CreateExamRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 type SectionConfig struct {
@@ -1569,7 +1577,7 @@ type GetExamDetailsResponse struct {
 	Settings      *ExamSettings          `protobuf:"bytes,4,opt,name=settings,proto3" json:"settings,omitempty"`
 	Questions     []*QuestionDetails     `protobuf:"bytes,5,rep,name=questions,proto3" json:"questions,omitempty"`
 	TopicId       int64                  `protobuf:"varint,6,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
-	IsPublished   bool                   `protobuf:"varint,7,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1646,11 +1654,11 @@ func (x *GetExamDetailsResponse) GetTopicId() int64 {
 	return 0
 }
 
-func (x *GetExamDetailsResponse) GetIsPublished() bool {
+func (x *GetExamDetailsResponse) GetStatus() string {
 	if x != nil {
-		return x.IsPublished
+		return x.Status
 	}
-	return false
+	return ""
 }
 
 type RequestExamAccessRequest struct {
@@ -2292,7 +2300,7 @@ type ExamListItem struct {
 	DurationMinutes int32                  `protobuf:"varint,3,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
 	TopicId         int64                  `protobuf:"varint,4,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
 	CreatorId       int64                  `protobuf:"varint,5,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
-	IsPublished     bool                   `protobuf:"varint,6,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	Status          string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -2362,11 +2370,11 @@ func (x *ExamListItem) GetCreatorId() int64 {
 	return 0
 }
 
-func (x *ExamListItem) GetIsPublished() bool {
+func (x *ExamListItem) GetStatus() string {
 	if x != nil {
-		return x.IsPublished
+		return x.Status
 	}
-	return false
+	return ""
 }
 
 type GetExamsRequest struct {
@@ -2374,6 +2382,7 @@ type GetExamsRequest struct {
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	CreatorId     int64                  `protobuf:"varint,3,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2427,6 +2436,13 @@ func (x *GetExamsRequest) GetCreatorId() int64 {
 		return x.CreatorId
 	}
 	return 0
+}
+
+func (x *GetExamsRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 type GetExamsResponse struct {
@@ -2505,6 +2521,7 @@ type UpdateExamRequest struct {
 	Settings      *ExamSettings          `protobuf:"bytes,4,opt,name=settings,proto3" json:"settings,omitempty"`
 	TopicId       int64                  `protobuf:"varint,5,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
 	QuestionIds   []int64                `protobuf:"varint,6,rep,packed,name=question_ids,json=questionIds,proto3" json:"question_ids,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2579,6 +2596,13 @@ func (x *UpdateExamRequest) GetQuestionIds() []int64 {
 		return x.QuestionIds
 	}
 	return nil
+}
+
+func (x *UpdateExamRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 type UpdateExamResponse struct {
@@ -2716,7 +2740,7 @@ func (x *DeleteExamResponse) GetSuccess() bool {
 type PublishExamRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
-	IsPublished   bool                   `protobuf:"varint,2,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2758,11 +2782,11 @@ func (x *PublishExamRequest) GetExamId() int64 {
 	return 0
 }
 
-func (x *PublishExamRequest) GetIsPublished() bool {
+func (x *PublishExamRequest) GetStatus() string {
 	if x != nil {
-		return x.IsPublished
+		return x.Status
 	}
-	return false
+	return ""
 }
 
 type PublishExamResponse struct {
@@ -5469,9 +5493,9 @@ type Exam struct {
 	DurationMinutes int32                  `protobuf:"varint,4,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
 	TopicId         int64                  `protobuf:"varint,5,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
 	CreatorId       int64                  `protobuf:"varint,6,opt,name=creator_id,json=creatorId,proto3" json:"creator_id,omitempty"`
-	IsPublished     bool                   `protobuf:"varint,7,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
-	CreatedAt       string                 `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	QuestionCount   int32                  `protobuf:"varint,9,opt,name=question_count,json=questionCount,proto3" json:"question_count,omitempty"`
+	CreatedAt       string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	QuestionCount   int32                  `protobuf:"varint,8,opt,name=question_count,json=questionCount,proto3" json:"question_count,omitempty"`
+	Status          string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -5548,13 +5572,6 @@ func (x *Exam) GetCreatorId() int64 {
 	return 0
 }
 
-func (x *Exam) GetIsPublished() bool {
-	if x != nil {
-		return x.IsPublished
-	}
-	return false
-}
-
 func (x *Exam) GetCreatedAt() string {
 	if x != nil {
 		return x.CreatedAt
@@ -5567,6 +5584,13 @@ func (x *Exam) GetQuestionCount() int32 {
 		return x.QuestionCount
 	}
 	return 0
+}
+
+func (x *Exam) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
 }
 
 var File_exam_proto protoreflect.FileDescriptor
@@ -5648,7 +5672,7 @@ const file_exam_proto_rawDesc = "" +
 	"\bend_time\x18\x05 \x01(\tR\aendTime\x12+\n" +
 	"\x11shuffle_questions\x18\x06 \x01(\bR\x10shuffleQuestions\x126\n" +
 	"\x17show_result_immediately\x18\a \x01(\bR\x15showResultImmediately\x12+\n" +
-	"\x11requires_approval\x18\b \x01(\bR\x10requiresApproval\"\xd8\x01\n" +
+	"\x11requires_approval\x18\b \x01(\bR\x10requiresApproval\"\xf0\x01\n" +
 	"\x11CreateExamRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x19\n" +
@@ -5656,7 +5680,8 @@ const file_exam_proto_rawDesc = "" +
 	"\fquestion_ids\x18\x04 \x03(\x03R\vquestionIds\x12.\n" +
 	"\bsettings\x18\x05 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x12\x1d\n" +
 	"\n" +
-	"creator_id\x18\x06 \x01(\x03R\tcreatorId\"d\n" +
+	"creator_id\x18\x06 \x01(\x03R\tcreatorId\x12\x16\n" +
+	"\x06status\x18\a \x01(\tR\x06status\"d\n" +
 	"\rSectionConfig\x12\x1d\n" +
 	"\n" +
 	"section_id\x18\x01 \x01(\x03R\tsectionId\x12\x14\n" +
@@ -5699,15 +5724,15 @@ const file_exam_proto_rawDesc = "" +
 	" \x01(\x03R\tsectionId\x12\x19\n" +
 	"\btopic_id\x18\v \x01(\x03R\atopicId\"0\n" +
 	"\x15GetExamDetailsRequest\x12\x17\n" +
-	"\aexam_id\x18\x01 \x01(\x03R\x06examId\"\x83\x02\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\"\xf8\x01\n" +
 	"\x16GetExamDetailsResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12.\n" +
 	"\bsettings\x18\x04 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x123\n" +
 	"\tquestions\x18\x05 \x03(\v2\x15.exam.QuestionDetailsR\tquestions\x12\x19\n" +
-	"\btopic_id\x18\x06 \x01(\x03R\atopicId\x12!\n" +
-	"\fis_published\x18\a \x01(\bR\visPublished\"o\n" +
+	"\btopic_id\x18\x06 \x01(\x03R\atopicId\x12\x16\n" +
+	"\x06status\x18\a \x01(\tR\x06status\"o\n" +
 	"\x18RequestExamAccessRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12!\n" +
@@ -5752,42 +5777,44 @@ const file_exam_proto_rawDesc = "" +
 	"\vquestion_id\x18\x01 \x01(\x03R\n" +
 	"questionId\"2\n" +
 	"\x16DeleteQuestionResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xbc\x01\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xb1\x01\n" +
 	"\fExamListItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12)\n" +
 	"\x10duration_minutes\x18\x03 \x01(\x05R\x0fdurationMinutes\x12\x19\n" +
 	"\btopic_id\x18\x04 \x01(\x03R\atopicId\x12\x1d\n" +
 	"\n" +
-	"creator_id\x18\x05 \x01(\x03R\tcreatorId\x12!\n" +
-	"\fis_published\x18\x06 \x01(\bR\visPublished\"Z\n" +
+	"creator_id\x18\x05 \x01(\x03R\tcreatorId\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\"r\n" +
 	"\x0fGetExamsRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x1d\n" +
 	"\n" +
-	"creator_id\x18\x03 \x01(\x03R\tcreatorId\"\x87\x01\n" +
+	"creator_id\x18\x03 \x01(\x03R\tcreatorId\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\"\x87\x01\n" +
 	"\x10GetExamsResponse\x12(\n" +
 	"\x05exams\x18\x01 \x03(\v2\x12.exam.ExamListItemR\x05exams\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1f\n" +
 	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
-	"totalPages\"\xd2\x01\n" +
+	"totalPages\"\xea\x01\n" +
 	"\x11UpdateExamRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12.\n" +
 	"\bsettings\x18\x04 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x12\x19\n" +
 	"\btopic_id\x18\x05 \x01(\x03R\atopicId\x12!\n" +
-	"\fquestion_ids\x18\x06 \x03(\x03R\vquestionIds\".\n" +
+	"\fquestion_ids\x18\x06 \x03(\x03R\vquestionIds\x12\x16\n" +
+	"\x06status\x18\a \x01(\tR\x06status\".\n" +
 	"\x12UpdateExamResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\",\n" +
 	"\x11DeleteExamRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\".\n" +
 	"\x12DeleteExamResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"P\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"E\n" +
 	"\x12PublishExamRequest\x12\x17\n" +
-	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12!\n" +
-	"\fis_published\x18\x02 \x01(\bR\visPublished\"/\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x16\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"/\n" +
 	"\x13PublishExamResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"W\n" +
 	"\n" +
@@ -5989,7 +6016,7 @@ const file_exam_proto_rawDesc = "" +
 	"teacher_id\x18\x01 \x01(\x03R\tteacherId\">\n" +
 	"\x1aGetInstructorExamsResponse\x12 \n" +
 	"\x05exams\x18\x01 \x03(\v2\n" +
-	".exam.ExamR\x05exams\"\x9c\x02\n" +
+	".exam.ExamR\x05exams\"\x91\x02\n" +
 	"\x04Exam\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -5997,11 +6024,11 @@ const file_exam_proto_rawDesc = "" +
 	"\x10duration_minutes\x18\x04 \x01(\x05R\x0fdurationMinutes\x12\x19\n" +
 	"\btopic_id\x18\x05 \x01(\x03R\atopicId\x12\x1d\n" +
 	"\n" +
-	"creator_id\x18\x06 \x01(\x03R\tcreatorId\x12!\n" +
-	"\fis_published\x18\a \x01(\bR\visPublished\x12\x1d\n" +
+	"creator_id\x18\x06 \x01(\x03R\tcreatorId\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\b \x01(\tR\tcreatedAt\x12%\n" +
-	"\x0equestion_count\x18\t \x01(\x05R\rquestionCount2\x87\x18\n" +
+	"created_at\x18\a \x01(\tR\tcreatedAt\x12%\n" +
+	"\x0equestion_count\x18\b \x01(\x05R\rquestionCount\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status2\x87\x18\n" +
 	"\vExamService\x12B\n" +
 	"\vCreateTopic\x12\x18.exam.CreateTopicRequest\x1a\x19.exam.CreateTopicResponse\x12<\n" +
 	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12H\n" +
