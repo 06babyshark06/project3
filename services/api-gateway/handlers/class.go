@@ -268,11 +268,13 @@ func (h *ClassHandler) GetClassExams(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Class ID"})
 		return
 	}
+	userID, _ := getUserIDFromContext(c)
 
 	// Gọi sang Exam Service
 	resp, err := h.examClient.GetExamsByClass(c.Request.Context(), &pbExam.GetExamsByClassRequest{
-		ClassId: classID,
-		Status:  "published", // Mặc định chỉ lấy bài đã publish cho học sinh xem
+		ClassId:   classID,
+		Status:    "published",
+		StudentId: userID,
 	})
 
 	if err != nil {

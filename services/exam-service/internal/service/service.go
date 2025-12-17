@@ -1548,7 +1548,12 @@ func (s *examService) GetExamsByClass(ctx context.Context, req *pb.GetExamsByCla
 
 	var pbExams []*pb.Exam
 	for _, e := range exams {
-		pbExams = append(pbExams, mapDomainExamToProto(e))
+		pbE := mapDomainExamToProto(e)
+		if req.StudentId > 0 {
+			count, _ := s.repo.CountSubmissionsForExam(ctx, e.Id, req.StudentId)
+			pbE.AttemptsUsed = int32(count)
+		}
+		pbExams = append(pbExams, pbE)
 	}
 
 	return &pb.GetExamsByClassResponse{Exams: pbExams}, nil
@@ -1588,6 +1593,15 @@ func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {
 		createdAt = e.CreatedAt.Format(time.RFC3339)
 	}
 
+	startTime := ""
+	if e.StartTime != nil {
+		startTime = e.StartTime.Format(time.RFC3339)
+	}
+	endTime := ""
+	if e.EndTime != nil {
+		endTime = e.EndTime.Format(time.RFC3339)
+	}
+
 	return &pb.Exam{
 		Id:              e.Id,
 		Title:           e.Title,
@@ -1598,5 +1612,8 @@ func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {
 		Status:          e.Status,
 		CreatedAt:       createdAt,
 		QuestionCount:   int32(len(e.Questions)),
+		StartTime:       startTime,
+		EndTime:         endTime,
+		MaxAttempts:     int32(e.MaxAttempts),
 	}
 }

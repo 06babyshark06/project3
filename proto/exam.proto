@@ -343,6 +343,7 @@ message DeleteSectionResponse { bool success = 1; }
 message GetExamsByClassRequest {
   int64 class_id = 1;
   string status = 2;
+  int64 student_id = 3;
 }
 
 message GetExamsByClassResponse {
@@ -376,4 +377,8 @@ message Exam {
   string created_at = 7;
   int32 question_count = 8;
   string status = 9;
+  string start_time = 10;
+  string end_time = 11;
+  int32 max_attempts = 12;
+  int32 attempts_used = 13;
 }

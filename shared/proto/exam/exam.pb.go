@@ -5209,6 +5209,7 @@ type GetExamsByClassRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ClassId       int64                  `protobuf:"varint,1,opt,name=class_id,json=classId,proto3" json:"class_id,omitempty"`
 	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	StudentId     int64                  `protobuf:"varint,3,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -5255,6 +5256,13 @@ func (x *GetExamsByClassRequest) GetStatus() string {
 		return x.Status
 	}
 	return ""
+}
+
+func (x *GetExamsByClassRequest) GetStudentId() int64 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
 }
 
 type GetExamsByClassResponse struct {
@@ -5496,6 +5504,10 @@ type Exam struct {
 	CreatedAt       string                 `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	QuestionCount   int32                  `protobuf:"varint,8,opt,name=question_count,json=questionCount,proto3" json:"question_count,omitempty"`
 	Status          string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	StartTime       string                 `protobuf:"bytes,10,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
+	EndTime         string                 `protobuf:"bytes,11,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
+	MaxAttempts     int32                  `protobuf:"varint,12,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
+	AttemptsUsed    int32                  `protobuf:"varint,13,opt,name=attempts_used,json=attemptsUsed,proto3" json:"attempts_used,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -5591,6 +5603,34 @@ func (x *Exam) GetStatus() string {
 		return x.Status
 	}
 	return ""
+}
+
+func (x *Exam) GetStartTime() string {
+	if x != nil {
+		return x.StartTime
+	}
+	return ""
+}
+
+func (x *Exam) GetEndTime() string {
+	if x != nil {
+		return x.EndTime
+	}
+	return ""
+}
+
+func (x *Exam) GetMaxAttempts() int32 {
+	if x != nil {
+		return x.MaxAttempts
+	}
+	return 0
+}
+
+func (x *Exam) GetAttemptsUsed() int32 {
+	if x != nil {
+		return x.AttemptsUsed
+	}
+	return 0
 }
 
 var File_exam_proto protoreflect.FileDescriptor
@@ -5999,10 +6039,12 @@ const file_exam_proto_rawDesc = "" +
 	"\x14DeleteSectionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\"1\n" +
 	"\x15DeleteSectionResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"K\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"j\n" +
 	"\x16GetExamsByClassRequest\x12\x19\n" +
 	"\bclass_id\x18\x01 \x01(\x03R\aclassId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\";\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x03 \x01(\x03R\tstudentId\";\n" +
 	"\x17GetExamsByClassResponse\x12 \n" +
 	"\x05exams\x18\x01 \x03(\v2\n" +
 	".exam.ExamR\x05exams\"N\n" +
@@ -6016,7 +6058,7 @@ const file_exam_proto_rawDesc = "" +
 	"teacher_id\x18\x01 \x01(\x03R\tteacherId\">\n" +
 	"\x1aGetInstructorExamsResponse\x12 \n" +
 	"\x05exams\x18\x01 \x03(\v2\n" +
-	".exam.ExamR\x05exams\"\x91\x02\n" +
+	".exam.ExamR\x05exams\"\x93\x03\n" +
 	"\x04Exam\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -6028,7 +6070,13 @@ const file_exam_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\tR\tcreatedAt\x12%\n" +
 	"\x0equestion_count\x18\b \x01(\x05R\rquestionCount\x12\x16\n" +
-	"\x06status\x18\t \x01(\tR\x06status2\x87\x18\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\n" +
+	" \x01(\tR\tstartTime\x12\x19\n" +
+	"\bend_time\x18\v \x01(\tR\aendTime\x12!\n" +
+	"\fmax_attempts\x18\f \x01(\x05R\vmaxAttempts\x12#\n" +
+	"\rattempts_used\x18\r \x01(\x05R\fattemptsUsed2\x87\x18\n" +
 	"\vExamService\x12B\n" +
 	"\vCreateTopic\x12\x18.exam.CreateTopicRequest\x1a\x19.exam.CreateTopicResponse\x12<\n" +
 	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12H\n" +
