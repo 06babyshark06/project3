@@ -37,7 +37,7 @@ func (r *userRepository) GetUserById(ctx context.Context, id int64) (*domain.Use
 }
 
 func (r *userRepository) UpdateUser(ctx context.Context, user *domain.UserModel) (*domain.UserModel, error) {
-	if err := database.DB.WithContext(ctx).Save(user).Error; err != nil {
+	if err := database.DB.WithContext(ctx).Omit("Role").Save(user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil

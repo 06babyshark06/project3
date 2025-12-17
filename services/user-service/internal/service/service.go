@@ -170,6 +170,7 @@ func (s *userService) UpdateUserRole(ctx context.Context, req *pb.UpdateUserRole
 	}
 
 	user.RoleId = role.Id
+	user.Role = domain.Role{} // Clear preloaded association to ensure RoleId update persists
 	user.UpdatedAt = time.Now().UTC()
 
 	if _, err := s.repo.UpdateUser(ctx, user); err != nil {
