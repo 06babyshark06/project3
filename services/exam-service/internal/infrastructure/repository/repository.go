@@ -299,6 +299,39 @@ func (r *examRepository) GetExamSubmissions(ctx context.Context, examID int64) (
 	return subs, err
 }
 
+func (r *examRepository) GetExamSubmissionsByExamID(ctx context.Context, examID int64, page, limit int, search string) ([]*domain.ExamSubmissionModel, int64, error) {
+	var subs []*domain.ExamSubmissionModel
+	var total int64
+	query := database.DB.WithContext(ctx).
+		Preload("Status").
+		Model(&domain.ExamSubmissionModel{}).
+		Where("exam_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", examID)
+
+	// Since we don't have user names in this service easily accessible for search unless we join,
+	// and we decided to handle name enrichment in Gateway or Frontend.
+	// We will skip search by name here for now, or if we have ExamAccessRequest we could join.
+	// However, standard requirement usually implies searching by student name.
+
+	// Let's try to join with ExamAccessRequest if available to search by student_name
+	if search != "" {
+		if strings.HasPrefix(search, "uids:") {
+			idsStr := strings.TrimPrefix(search, "uids:")
+			if idsStr != "" {
+				idParts := strings.Split(idsStr, ",")
+				query = query.Where("user_id IN ?", idParts)
+			}
+		}
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err := query.Order("submitted_at DESC").Limit(limit).Offset(offset).Find(&subs).Error
+	return subs, total, err
+}
+
 func (r *examRepository) GetViolationsByExam(ctx context.Context, examID int64) ([]*domain.ExamViolationModel, error) {
 	var vs []*domain.ExamViolationModel
 	err := database.DB.WithContext(ctx).Where("exam_id = ?", examID).Find(&vs).Error

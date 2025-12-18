@@ -52,6 +52,7 @@ const (
 	ExamService_SaveAnswer_FullMethodName            = "/exam.ExamService/SaveAnswer"
 	ExamService_LogViolation_FullMethodName          = "/exam.ExamService/LogViolation"
 	ExamService_GetExamStatsDetailed_FullMethodName  = "/exam.ExamService/GetExamStatsDetailed"
+	ExamService_GetExamSubmissions_FullMethodName    = "/exam.ExamService/GetExamSubmissions"
 	ExamService_ExportExamResults_FullMethodName     = "/exam.ExamService/ExportExamResults"
 	ExamService_GetExamViolations_FullMethodName     = "/exam.ExamService/GetExamViolations"
 	ExamService_ExportQuestions_FullMethodName       = "/exam.ExamService/ExportQuestions"
@@ -99,6 +100,7 @@ type ExamServiceClient interface {
 	SaveAnswer(ctx context.Context, in *SaveAnswerRequest, opts ...grpc.CallOption) (*SaveAnswerResponse, error)
 	LogViolation(ctx context.Context, in *LogViolationRequest, opts ...grpc.CallOption) (*LogViolationResponse, error)
 	GetExamStatsDetailed(ctx context.Context, in *GetExamStatsDetailedRequest, opts ...grpc.CallOption) (*GetExamStatsDetailedResponse, error)
+	GetExamSubmissions(ctx context.Context, in *GetExamSubmissionsRequest, opts ...grpc.CallOption) (*GetExamSubmissionsResponse, error)
 	ExportExamResults(ctx context.Context, in *ExportExamResultsRequest, opts ...grpc.CallOption) (*ExportExamResultsResponse, error)
 	GetExamViolations(ctx context.Context, in *GetExamViolationsRequest, opts ...grpc.CallOption) (*GetExamViolationsResponse, error)
 	ExportQuestions(ctx context.Context, in *ExportQuestionsRequest, opts ...grpc.CallOption) (*ExportQuestionsResponse, error)
@@ -447,6 +449,16 @@ func (c *examServiceClient) GetExamStatsDetailed(ctx context.Context, in *GetExa
 	return out, nil
 }
 
+func (c *examServiceClient) GetExamSubmissions(ctx context.Context, in *GetExamSubmissionsRequest, opts ...grpc.CallOption) (*GetExamSubmissionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExamSubmissionsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetExamSubmissions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *examServiceClient) ExportExamResults(ctx context.Context, in *ExportExamResultsRequest, opts ...grpc.CallOption) (*ExportExamResultsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExportExamResultsResponse)
@@ -564,6 +576,7 @@ type ExamServiceServer interface {
 	SaveAnswer(context.Context, *SaveAnswerRequest) (*SaveAnswerResponse, error)
 	LogViolation(context.Context, *LogViolationRequest) (*LogViolationResponse, error)
 	GetExamStatsDetailed(context.Context, *GetExamStatsDetailedRequest) (*GetExamStatsDetailedResponse, error)
+	GetExamSubmissions(context.Context, *GetExamSubmissionsRequest) (*GetExamSubmissionsResponse, error)
 	ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error)
 	GetExamViolations(context.Context, *GetExamViolationsRequest) (*GetExamViolationsResponse, error)
 	ExportQuestions(context.Context, *ExportQuestionsRequest) (*ExportQuestionsResponse, error)
@@ -680,6 +693,9 @@ func (UnimplementedExamServiceServer) LogViolation(context.Context, *LogViolatio
 }
 func (UnimplementedExamServiceServer) GetExamStatsDetailed(context.Context, *GetExamStatsDetailedRequest) (*GetExamStatsDetailedResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetExamStatsDetailed not implemented")
+}
+func (UnimplementedExamServiceServer) GetExamSubmissions(context.Context, *GetExamSubmissionsRequest) (*GetExamSubmissionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExamSubmissions not implemented")
 }
 func (UnimplementedExamServiceServer) ExportExamResults(context.Context, *ExportExamResultsRequest) (*ExportExamResultsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ExportExamResults not implemented")
@@ -1320,6 +1336,24 @@ func _ExamService_GetExamStatsDetailed_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GetExamSubmissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExamSubmissionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetExamSubmissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetExamSubmissions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetExamSubmissions(ctx, req.(*GetExamSubmissionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ExamService_ExportExamResults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExportExamResultsRequest)
 	if err := dec(in); err != nil {
@@ -1602,6 +1636,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExamStatsDetailed",
 			Handler:    _ExamService_GetExamStatsDetailed_Handler,
+		},
+		{
+			MethodName: "GetExamSubmissions",
+			Handler:    _ExamService_GetExamSubmissions_Handler,
 		},
 		{
 			MethodName: "ExportExamResults",

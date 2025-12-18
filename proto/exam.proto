@@ -44,6 +44,7 @@ service ExamService {
   rpc SaveAnswer(SaveAnswerRequest) returns (SaveAnswerResponse);
   rpc LogViolation(LogViolationRequest) returns (LogViolationResponse);
   rpc GetExamStatsDetailed(GetExamStatsDetailedRequest) returns (GetExamStatsDetailedResponse);
+  rpc GetExamSubmissions(GetExamSubmissionsRequest) returns (GetExamSubmissionsResponse);
   rpc ExportExamResults(ExportExamResultsRequest) returns (ExportExamResultsResponse);
   rpc GetExamViolations(GetExamViolationsRequest) returns (GetExamViolationsResponse);
   rpc ExportQuestions(ExportQuestionsRequest) returns (ExportQuestionsResponse);
@@ -235,6 +236,33 @@ message GetExamStatsDetailedResponse {
   double highest_score = 4;
   double lowest_score = 5;
   map<string, int32> score_distribution = 6;
+}
+
+message SubmissionSummary {
+  int64 submission_id = 1;
+  int64 user_id = 2;
+  string student_name = 3;
+  float score = 4;
+  string submitted_at = 5;
+  string status = 6;
+  int32 correct_count = 7;
+  int32 total_questions = 8;
+  int32 attempt_number = 9;
+}
+
+message GetExamSubmissionsRequest {
+  int64 exam_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+  string search = 4; // search by student name
+  int64 instructor_id = 5; // to verify ownership
+}
+
+message GetExamSubmissionsResponse {
+  repeated SubmissionSummary submissions = 1;
+  int64 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;
 }
 
 message ExportExamResultsRequest { int64 exam_id = 1; int64 requester_id = 2; }

@@ -702,8 +702,16 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 	}
 
 	if submission.UserID != req.UserId {
-		return nil, errors.New("bạn không có quyền xem kết quả này")
+		// Check if requester is the creator of the exam
+		exam, err := s.repo.GetExamDetails(ctx, submission.ExamID)
+		if err != nil {
+			return nil, errors.New("không thể kiểm tra quyền truy cập")
+		}
+		if exam.CreatorID != req.UserId {
+			return nil, errors.New("bạn không có quyền xem kết quả này")
+		}
 	}
+
 	examFull, err := s.repo.GetExamDetails(ctx, submission.ExamID)
 	if err != nil {
 		return nil, errors.New("không thể tải nội dung đề thi gốc")
@@ -1596,6 +1604,78 @@ func (s *examService) GetInstructorExams(ctx context.Context, req *pb.GetInstruc
 	}
 
 	return &pb.GetInstructorExamsResponse{Exams: pbExams}, nil
+}
+
+func (s *examService) GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error) {
+	// 1. Verify ownership if instructor_id is provided
+	if req.InstructorId > 0 {
+		exam, err := s.repo.GetExamDetails(ctx, req.ExamId)
+		if err != nil {
+			return nil, err
+		}
+		if exam.CreatorID != req.InstructorId {
+			return nil, errors.New("bạn không có quyền xem danh sách bài thi này")
+		}
+	}
+
+	// 2. Get Submissions
+	page := int(req.Page)
+	if page < 1 {
+		page = 1
+	}
+	limit := int(req.Limit)
+	if limit < 1 {
+		limit = 10
+	}
+
+	subs, total, err := s.repo.GetExamSubmissionsByExamID(ctx, req.ExamId, page, limit, req.Search)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Convert to Proto
+	var pbSubs []*pb.SubmissionSummary
+	for _, sub := range subs {
+		submittedAt := ""
+		if sub.SubmittedAt != nil {
+			submittedAt = sub.SubmittedAt.Format(time.RFC3339)
+		}
+
+		status := "unknown"
+		if sub.Status.Status != "" {
+			status = sub.Status.Status
+		}
+
+		// Calculate correct count
+		// Note: Repository currently doesn't count correct answer in GetExamSubmissionsByExamID query for performance?
+		// We might need to load it or just trust score.
+		// Actually score is stored. Correct Count might need calculation or storage.
+		// For summary list, maybe we don't need exact correct count if it's expensive.
+		// Or we can count if we preload UserAnswers.
+		// Let's check repository query... it preloads Status but not UserAnswers.
+		// So correct_count will be 0 unless we change repo.
+		// For list view, Score is most important.
+
+		pbSubs = append(pbSubs, &pb.SubmissionSummary{
+			SubmissionId:   sub.Id,
+			UserId:         sub.UserID,
+			StudentName:    "", // Gateway will fill this
+			Score:          float32(sub.Score),
+			SubmittedAt:    submittedAt,
+			Status:         status,
+			CorrectCount:   0, // Not available in summary list for performance
+			TotalQuestions: 0, // Not available
+		})
+	}
+
+	totalPages := int32((total + int64(limit) - 1) / int64(limit))
+
+	return &pb.GetExamSubmissionsResponse{
+		Submissions: pbSubs,
+		Total:       total,
+		Page:        int32(page),
+		TotalPages:  totalPages,
+	}, nil
 }
 
 func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {

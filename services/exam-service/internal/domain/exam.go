@@ -226,6 +226,7 @@ type ExamRepository interface {
 	UnassignExamFromClass(ctx context.Context, examID, classID int64) error
 	GetExamsByClass(ctx context.Context, classID int64) ([]*ExamModel, error)
 	GetExamsByTeacher(ctx context.Context, teacherID int64) ([]*ExamModel, error)
+	GetExamSubmissionsByExamID(ctx context.Context, examID int64, page, limit int, search string) ([]*ExamSubmissionModel, int64, error)
 }
 
 type EventProducer interface {
@@ -281,4 +282,5 @@ type ExamService interface {
 	AssignExamToClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
 	GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
 	UnassignExamFromClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
+	GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error)
 }

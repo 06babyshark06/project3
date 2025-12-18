@@ -414,7 +414,54 @@ func (h *ExamHandler) GetExams(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+
+	// Enrich with Creator Names
+	creatorIDs := make([]int64, 0)
+	uniqueMap := make(map[int64]bool)
+	for _, e := range resp.Exams {
+		if e.CreatorId > 0 && !uniqueMap[e.CreatorId] {
+			uniqueMap[e.CreatorId] = true
+			creatorIDs = append(creatorIDs, e.CreatorId)
+		}
+	}
+
+	userMap := make(map[int64]string)
+	for _, uid := range creatorIDs {
+		profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: uid})
+		if err == nil && profile != nil {
+			userMap[uid] = profile.FullName
+		} else {
+			userMap[uid] = fmt.Sprintf("User #%d", uid)
+		}
+	}
+
+	type ExamWithCreator struct {
+		*pb.ExamListItem
+		CreatorName string `json:"creator_name"`
+	}
+
+	var enrichedExams []ExamWithCreator
+	for _, e := range resp.Exams {
+		name := userMap[e.CreatorId]
+		if name == "" {
+			name = fmt.Sprintf("User #%d", e.CreatorId)
+		}
+		enrichedExams = append(enrichedExams, ExamWithCreator{
+			ExamListItem: e,
+			CreatorName:  name,
+		})
+	}
+
+	// We need to reconstruct the response structure to keep 'exams', 'total', 'page', 'total_pages'
+	// But 'resp' is a proto struct, we can't easily add fields to it.
+	// The frontend expects res.data.data.exams.
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{
+		"exams":       enrichedExams,
+		"total":       resp.Total,
+		"page":        resp.Page,
+		"total_pages": resp.TotalPages,
+	}})
 }
 
 func (h *ExamHandler) PublishExam(c *gin.Context) {
@@ -883,6 +930,42 @@ func (h *ExamHandler) GetAccessRequests(c *gin.Context) {
 		return
 	}
 
+	// Enrich with user names
+	userIDs := make([]int64, 0)
+	for _, req := range resp.Requests {
+		if req.FullName == "" && req.UserId > 0 {
+			userIDs = append(userIDs, req.UserId)
+		}
+	}
+
+	if len(userIDs) > 0 {
+		userMap := make(map[int64]string)
+		// Basic deduplication
+		uniqueIDs := make(map[int64]bool)
+		var dedupedIDs []int64
+		for _, id := range userIDs {
+			if !uniqueIDs[id] {
+				uniqueIDs[id] = true
+				dedupedIDs = append(dedupedIDs, id)
+			}
+		}
+
+		for _, uid := range dedupedIDs {
+			profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: uid})
+			if err == nil && profile != nil {
+				userMap[uid] = profile.FullName
+			}
+		}
+
+		for _, req := range resp.Requests {
+			if req.FullName == "" && req.UserId > 0 {
+				if name, ok := userMap[req.UserId]; ok {
+					req.FullName = name
+				}
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
@@ -942,6 +1025,83 @@ func (h *ExamHandler) DeleteSection(c *gin.Context) {
 		return
 	}
 	c.JSON(200, contracts.APIResponse{Data: gin.H{"success": true}})
+}
+
+func (h *ExamHandler) GetExamSubmissions(c *gin.Context) {
+	examID, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	search := c.Query("search")
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Enrichment: If search is provided, try to find matching user IDs from User Service
+	if search != "" {
+		usersResp, err := h.userClient.GetAllUsers(c.Request.Context(), &pbUser.GetAllUsersRequest{
+			Page:     1,
+			PageSize: 100,
+			Search:   search,
+		})
+
+		var targetUserIDs []string
+		if err == nil && usersResp != nil {
+			for _, u := range usersResp.Users {
+				targetUserIDs = append(targetUserIDs, fmt.Sprintf("%d", u.Id))
+			}
+		}
+
+		if len(targetUserIDs) > 0 {
+			search = "uids:" + strings.Join(targetUserIDs, ",")
+		} else {
+			// Search term yielded no users, so force a filter that matches nothing
+			search = "uids:-1"
+		}
+	}
+
+	// 1. Call Exam Service
+	resp, err := h.examClient.GetExamSubmissions(c.Request.Context(), &pb.GetExamSubmissionsRequest{
+		ExamId:       examID,
+		Page:         int32(page),
+		Limit:        int32(limit),
+		Search:       search,
+		InstructorId: userID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 2. Enrich with User Names
+	userIDs := make([]int64, 0)
+	uniqueMap := make(map[int64]bool)
+	for _, sub := range resp.Submissions {
+		if !uniqueMap[sub.UserId] {
+			uniqueMap[sub.UserId] = true
+			userIDs = append(userIDs, sub.UserId)
+		}
+	}
+
+	userMap := make(map[int64]string)
+	for _, uid := range userIDs {
+		profile, _ := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: uid})
+		if profile != nil {
+			userMap[uid] = profile.FullName
+		} else {
+			userMap[uid] = fmt.Sprintf("User #%d", uid)
+		}
+	}
+
+	for _, sub := range resp.Submissions {
+		if name, ok := userMap[sub.UserId]; ok {
+			sub.StudentName = name
+		}
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *ExamHandler) GetInstructorAllExams(c *gin.Context) {

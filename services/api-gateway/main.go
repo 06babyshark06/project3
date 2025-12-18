@@ -150,6 +150,7 @@ func main() {
 				instructorOnly.PUT("/exams/access/approve", examHandler.ApproveAccess)
 				instructorOnly.GET("/exams/:id/stats", examHandler.GetExamStats)
 				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
+				instructorOnly.GET("/exams/:id/submissions", examHandler.GetExamSubmissions) // NEW ROUTE
 				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
 				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)
 
