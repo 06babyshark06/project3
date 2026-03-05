@@ -1,0 +1,356 @@
+@startuml Entity Relationship Diagram - All Services
+skinparam linetype ortho
+skinparam ranksep 50
+skinparam nodesep 30
+
+!define TABLE(x) entity x << (T, #FFAAAA) >>
+!define PK(x) <b><u>x</u></b>
+!define FK(x) <i>x</i>
+
+title Backend Entity Relationship Diagram
+
+' ==========================================
+' USER SERVICE ENTITIES
+' ==========================================
+package "User Service" #E8F5E9 {
+    TABLE(roles) {
+        PK(id): BIGINT
+        --
+        name: VARCHAR(50) <<unique>>
+    }
+
+    TABLE(users) {
+        PK(id): BIGINT
+        --
+        full_name: VARCHAR(255)
+        email: VARCHAR(255) <<unique>>
+        password: VARCHAR(255)
+        FK(role_id): BIGINT
+        created_at: TIMESTAMP
+        updated_at: TIMESTAMP
+    }
+
+    TABLE(classes) {
+        PK(id): BIGINT
+        --
+        name: VARCHAR(255)
+        code: VARCHAR(50) <<unique>>
+        description: TEXT
+        FK(teacher_id): BIGINT
+        is_active: BOOLEAN
+        created_at: TIMESTAMP
+        updated_at: TIMESTAMP
+    }
+
+    TABLE(class_members) {
+        PK(FK(class_id)): BIGINT
+        PK(FK(user_id)): BIGINT
+        --
+        role: VARCHAR(20)
+        status: VARCHAR(20)
+        joined_at: TIMESTAMP
+    }
+}
+
+' ==========================================
+' COURSE SERVICE ENTITIES
+' ==========================================
+package "Course Service" #E3F2FD {
+    TABLE(courses) {
+        PK(id): BIGINT
+        --
+        title: VARCHAR(255)
+        description: TEXT
+        thumbnail_url: VARCHAR(255)
+        FK(instructor_id): BIGINT
+        price: DECIMAL
+        is_published: BOOLEAN
+        created_at: TIMESTAMP
+        updated_at: TIMESTAMP
+    }
+
+    TABLE(course_sections) {
+        PK(id): BIGINT
+        --
+        FK(course_id): BIGINT
+        title: VARCHAR(255)
+        order_index: INT
+        created_at: TIMESTAMP
+    }
+
+    TABLE(lesson_types) {
+        PK(id): BIGINT
+        --
+        type: VARCHAR(50) <<unique>>
+    }
+
+    TABLE(lessons) {
+        PK(id): BIGINT
+        --
+        FK(section_id): BIGINT
+        title: VARCHAR(255)
+        FK(type_id): BIGINT
+        content_url: VARCHAR(255)
+        duration_seconds: INT
+        order_index: INT
+        created_at: TIMESTAMP
+    }
+
+    TABLE(enrollments) {
+        PK(FK(user_id)): BIGINT
+        PK(FK(course_id)): BIGINT
+        --
+        enrolled_at: TIMESTAMP
+    }
+
+    TABLE(lesson_progress) {
+        PK(FK(user_id)): BIGINT
+        PK(FK(lesson_id)): BIGINT
+        --
+        completed_at: TIMESTAMP
+    }
+}
+
+' ==========================================
+' EXAM SERVICE ENTITIES
+' ==========================================
+package "Exam Service" #FFF3E0 {
+    TABLE(topics) {
+        PK(id): BIGINT
+        --
+        name: VARCHAR(255) <<unique>>
+        description: TEXT
+        FK(creator_id): BIGINT
+        created_at: TIMESTAMP
+    }
+
+    TABLE(exam_sections) {
+        PK(id): BIGINT
+        --
+        name: VARCHAR(255)
+        description: TEXT
+        FK(topic_id): BIGINT
+        created_at: TIMESTAMP
+    }
+
+    TABLE(question_types) {
+        PK(id): BIGINT
+        --
+        type: VARCHAR(50)
+    }
+
+    TABLE(question_difficulties) {
+        PK(id): BIGINT
+        --
+        difficulty: VARCHAR(50)
+    }
+
+    TABLE(questions) {
+        PK(id): BIGINT
+        --
+        FK(section_id): BIGINT
+        FK(topic_id): BIGINT
+        FK(creator_id): BIGINT
+        content: TEXT
+        FK(type_id): BIGINT
+        FK(difficulty_id): BIGINT
+        explanation: TEXT
+        attachment_url: VARCHAR(255)
+        created_at: TIMESTAMP
+        updated_at: TIMESTAMP
+    }
+
+    TABLE(choices) {
+        PK(id): BIGINT
+        --
+        FK(question_id): BIGINT
+        content: TEXT
+        is_correct: BOOLEAN
+        attachment_url: VARCHAR(255)
+        created_at: TIMESTAMP
+    }
+
+    TABLE(exams) {
+        PK(id): BIGINT
+        --
+        title: VARCHAR(255)
+        description: TEXT
+        duration_minutes: INT
+        start_time: TIMESTAMP
+        end_time: TIMESTAMP
+        max_attempts: INT
+        password: VARCHAR(50)
+        shuffle_questions: BOOLEAN
+        show_result_immediately: BOOLEAN
+        requires_approval: BOOLEAN
+        FK(topic_id): BIGINT
+        FK(creator_id): BIGINT
+        status: VARCHAR(20)
+        created_at: TIMESTAMP
+        updated_at: TIMESTAMP
+    }
+
+    TABLE(exam_questions) {
+        PK(FK(exam_id)): BIGINT
+        PK(FK(question_id)): BIGINT
+        --
+        sequence: INT
+    }
+
+    TABLE(exam_classes) {
+        PK(FK(exam_id)): BIGINT
+        PK(FK(class_id)): BIGINT
+        --
+        assigned_at: TIMESTAMP
+    }
+
+    TABLE(exam_access_requests) {
+        PK(id): BIGINT
+        --
+        FK(exam_id): BIGINT
+        FK(user_id): BIGINT
+        student_name: VARCHAR(255)
+        status: VARCHAR(20)
+        created_at: TIMESTAMP
+        updated_at: TIMESTAMP
+    }
+
+    TABLE(submission_statuses) {
+        PK(id): BIGINT
+        --
+        status: VARCHAR(50)
+    }
+
+    TABLE(exam_submissions) {
+        PK(id): BIGINT
+        --
+        FK(exam_id): BIGINT
+        FK(user_id): BIGINT
+        FK(status_id): BIGINT
+        score: DECIMAL
+        started_at: TIMESTAMP
+        submitted_at: TIMESTAMP
+    }
+
+    TABLE(user_answers) {
+        PK(id): BIGINT
+        --
+        FK(submission_id): BIGINT
+        FK(question_id): BIGINT
+        FK(chosen_choice_id): BIGINT
+        is_correct: BOOLEAN
+        created_at: TIMESTAMP
+    }
+
+    TABLE(exam_violations) {
+        PK(id): BIGINT
+        --
+        FK(exam_id): BIGINT
+        FK(user_id): BIGINT
+        violation_type: VARCHAR(50)
+        violation_time: TIMESTAMP
+        created_at: TIMESTAMP
+    }
+}
+
+' ==========================================
+' NOTIFICATION SERVICE ENTITIES
+' ==========================================
+package "Notification Service" #FCE4EC {
+    TABLE(channel_types) {
+        PK(id): BIGINT
+        --
+        type: VARCHAR(50) <<unique>>
+    }
+
+    TABLE(notification_statuses) {
+        PK(id): BIGINT
+        --
+        status: VARCHAR(50) <<unique>>
+    }
+
+    TABLE(notification_templates) {
+        PK(id): BIGINT
+        --
+        name: VARCHAR(100) <<unique>>
+        FK(type_id): BIGINT
+        subject: VARCHAR(255)
+        body: TEXT
+        created_at: TIMESTAMP
+    }
+
+    TABLE(notifications) {
+        PK(id): BIGINT
+        --
+        FK(recipient_id): BIGINT
+        FK(type_id): BIGINT
+        FK(status_id): BIGINT
+        rendered_content: TEXT
+        error_message: TEXT
+        scheduled_at: TIMESTAMP
+        sent_at: TIMESTAMP
+        created_at: TIMESTAMP
+    }
+}
+
+' ==========================================
+' RELATIONSHIPS - USER SERVICE
+' ==========================================
+users }o--|| roles : "has role"
+classes }o--|| users : "teacher"
+class_members }o--|| classes : "belongs to"
+class_members }o--|| users : "member"
+
+' ==========================================
+' RELATIONSHIPS - COURSE SERVICE
+' ==========================================
+courses }o--|| users : "instructor"
+course_sections }o--|| courses : "belongs to"
+lessons }o--|| course_sections : "belongs to"
+lessons }o--|| lesson_types : "has type"
+enrollments }o--|| users : "student"
+enrollments }o--|| courses : "course"
+lesson_progress }o--|| users : "student"
+lesson_progress }o--|| lessons : "lesson"
+
+' ==========================================
+' RELATIONSHIPS - EXAM SERVICE
+' ==========================================
+topics }o--|| users : "creator"
+exam_sections }o--|| topics : "belongs to"
+questions }o--|| exam_sections : "belongs to"
+questions }o--|| topics : "in topic"
+questions }o--|| users : "creator"
+questions }o--|| question_types : "has type"
+questions }o--|| question_difficulties : "has difficulty"
+choices }o--|| questions : "belongs to"
+
+exams }o--|| topics : "in topic"
+exams }o--|| users : "creator"
+exam_questions }o--|| exams : "exam"
+exam_questions }o--|| questions : "question"
+exam_classes }o--|| exams : "exam"
+exam_classes }o--|| classes : "class"
+
+exam_access_requests }o--|| exams : "for exam"
+exam_access_requests }o--|| users : "requester"
+
+exam_submissions }o--|| exams : "for exam"
+exam_submissions }o--|| users : "student"
+exam_submissions }o--|| submission_statuses : "status"
+user_answers }o--|| exam_submissions : "in submission"
+user_answers }o--|| questions : "answers"
+user_answers }o--|| choices : "chosen"
+
+exam_violations }o--|| exams : "in exam"
+exam_violations }o--|| users : "violator"
+
+' ==========================================
+' RELATIONSHIPS - NOTIFICATION SERVICE
+' ==========================================
+notification_templates }o--|| channel_types : "for channel"
+notifications }o--|| users : "recipient"
+notifications }o--|| channel_types : "via channel"
+notifications }o--|| notification_statuses : "status"
+
+@enduml

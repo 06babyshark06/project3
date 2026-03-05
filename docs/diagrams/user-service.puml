@@ -1,0 +1,115 @@
+@startuml User Service Class Diagram
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Domain Models" {
+    class Role {
+        +Id: int64
+        +Name: string
+    }
+
+    class UserModel {
+        +Id: int64
+        +FullName: string
+        +Email: string
+        -Password: string
+        +RoleId: int64
+        +Role: Role
+        +CreatedAt: time.Time
+        +UpdatedAt: time.Time
+    }
+
+    class ClassModel {
+        +Id: int64
+        +Name: string
+        +Code: string
+        +Description: string
+        +TeacherID: int64
+        +Teacher: *UserModel
+        +IsActive: bool
+        +CreatedAt: time.Time
+        +UpdatedAt: time.Time
+        +Members: []ClassMemberModel
+        --
+        +TableName(): string
+    }
+
+    class ClassMemberModel {
+        +ClassID: int64
+        +UserID: int64
+        +Role: string
+        +Status: string
+        +JoinedAt: time.Time
+        +User: *UserModel
+        --
+        +TableName(): string
+    }
+
+    class UserPayload {
+        +FullName: string
+        +Email: string
+        +Password: string
+        +RoleId: int64
+    }
+}
+
+package "Interfaces" {
+    interface UserRepository {
+        +CreateUser(ctx, user): (*UserModel, error)
+        +GetUserByEmail(ctx, email): (*UserModel, error)
+        +GetUserById(ctx, id): (*UserModel, error)
+        +UpdateUser(ctx, user): (*UserModel, error)
+        +DeleteUser(ctx, id): error
+        +GetUsersWithPagination(ctx, limit, offset, search, role): ([]*UserModel, int64, error)
+        +CountUsers(ctx): (int64, error)
+        +GetRoleByName(ctx, name): (*Role, error)
+        +CreateClass(ctx, class): error
+        +UpdateClass(ctx, id, updates): error
+        +DeleteClass(ctx, id): error
+        +GetClassByID(ctx, id): (*ClassModel, error)
+        +GetClasses(ctx, teacherID, studentID, limit, offset): ([]*ClassModel, int64, error)
+        +AddClassMember(ctx, member): error
+        +RemoveClassMember(ctx, classID, userID): error
+        +GetClassMember(ctx, classID, userID): (*ClassMemberModel, error)
+        +GetClassByCode(ctx, code): (*ClassModel, error)
+        +IsClassMember(ctx, classID, userID): (bool, error)
+    }
+
+    interface UserService {
+        +Register(ctx, user): (*RegisterResponse, error)
+        +Login(ctx, user): (*LoginResponse, error)
+        +GetProfile(ctx, userId): (*GetProfileResponse, error)
+        +GetAllUsers(ctx, req): (*GetAllUsersResponse, error)
+        +GetUserCount(ctx, req): (*GetUserCountResponse, error)
+        +DeleteUser(ctx, req): (*DeleteUserResponse, error)
+        +UpdateUserRole(ctx, req): (*UpdateUserRoleResponse, error)
+        +UpdateUser(ctx, req): (*UpdateUserResponse, error)
+        +UpdatePassword(ctx, req): (*UpdatePasswordResponse, error)
+        +CreateClass(ctx, req): (*CreateClassResponse, error)
+        +UpdateClass(ctx, req): (*UpdateClassResponse, error)
+        +DeleteClass(ctx, req): (*DeleteClassResponse, error)
+        +GetClasses(ctx, req): (*GetClassesResponse, error)
+        +GetClassDetails(ctx, req): (*GetClassDetailsResponse, error)
+        +AddMembers(ctx, req): (*AddMembersResponse, error)
+        +RemoveMember(ctx, req): (*RemoveMemberResponse, error)
+        +CheckUserInClass(ctx, req): (*CheckUserInClassResponse, error)
+        +JoinClassByCode(ctx, req): (*JoinClassByCodeResponse, error)
+    }
+
+    interface EventProducer {
+        +Produce(topic, key, message): error
+        +Close()
+    }
+}
+
+' Relationships
+UserModel --> Role : has
+ClassModel --> UserModel : Teacher
+ClassModel "1" *-- "0..*" ClassMemberModel : contains
+ClassMemberModel --> UserModel : references
+
+UserRepository ..> UserModel : uses
+UserRepository ..> ClassModel : uses
+UserService ..> UserRepository : uses
+
+@enduml

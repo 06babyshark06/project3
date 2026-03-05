@@ -1,0 +1,239 @@
+@startuml Exam Service Class Diagram
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Domain Models - Topic & Section" {
+    class TopicModel {
+        +Id: int64
+        +Name: string
+        +Description: string
+        +CreatorID: int64
+        +CreatedAt: time.Time
+        +Sections: []SectionModel
+    }
+
+    class SectionModel {
+        +Id: int64
+        +Name: string
+        +Description: string
+        +TopicID: int64
+        +Topic: *TopicModel
+        +Questions: []QuestionModel
+        +CreatedAt: time.Time
+        --
+        +TableName(): string
+    }
+}
+
+package "Domain Models - Question" {
+    class QuestionDifficultyModel {
+        +Id: int64
+        +Difficulty: string
+    }
+
+    class QuestionTypeModel {
+        +Id: int64
+        +Type: string
+    }
+
+    class ChoiceModel {
+        +Id: int64
+        +QuestionID: int64
+        +Content: string
+        +IsCorrect: bool
+        +AttachmentURL: string
+        +CreatedAt: time.Time
+    }
+
+    class QuestionModel {
+        +Id: int64
+        +SectionID: int64
+        +Section: *SectionModel
+        +TopicID: int64
+        +CreatorID: int64
+        +Content: string
+        +TypeID: int64
+        +Type: QuestionTypeModel
+        +DifficultyID: int64
+        +Difficulty: QuestionDifficultyModel
+        +Explanation: string
+        +CreatedAt: time.Time
+        +UpdatedAt: time.Time
+        +Choices: []ChoiceModel
+        +AttachmentURL: string
+    }
+
+    class QuestionListItem {
+        +ID: int64
+        +Content: string
+        +QuestionType: string
+        +Difficulty: string
+        +SectionID: int64
+        +SectionName: string
+        +TopicID: int64
+        +TopicName: string
+        +AttachmentURL: string
+        +ChoiceCount: int32
+        +CreatorID: int64
+    }
+}
+
+package "Domain Models - Exam" {
+    class ExamModel {
+        +Id: int64
+        +Title: string
+        +Description: string
+        +DurationMinutes: int
+        +StartTime: *time.Time
+        +EndTime: *time.Time
+        +MaxAttempts: int
+        +Password: string
+        +ShuffleQuestions: bool
+        +ShowResultImmediately: bool
+        +RequiresApproval: bool
+        +TopicID: int64
+        +Topic: *TopicModel
+        +CreatorID: int64
+        +Status: string
+        +CreatedAt: time.Time
+        +UpdatedAt: time.Time
+        +Questions: []*QuestionModel
+    }
+
+    class ExamQuestionModel {
+        +ExamID: int64
+        +QuestionID: int64
+        +Sequence: int
+        --
+        +TableName(): string
+    }
+
+    class ExamClass {
+        +ExamID: int64
+        +ClassID: int64
+        +AssignedAt: time.Time
+        --
+        +TableName(): string
+    }
+}
+
+package "Domain Models - Access & Submission" {
+    class ExamAccessRequestModel {
+        +Id: int64
+        +ExamID: int64
+        +UserID: int64
+        +StudentName: string
+        +Status: string
+        +CreatedAt: time.Time
+        +UpdatedAt: time.Time
+    }
+
+    class SubmissionStatusModel {
+        +Id: int64
+        +Status: string
+    }
+
+    class ExamSubmissionModel {
+        +Id: int64
+        +ExamID: int64
+        +Exam: ExamModel
+        +UserID: int64
+        +StatusID: int64
+        +Status: SubmissionStatusModel
+        +Score: float64
+        +StartedAt: time.Time
+        +SubmittedAt: *time.Time
+        +UserAnswers: []UserAnswerModel
+    }
+
+    class UserAnswerModel {
+        +Id: int64
+        +SubmissionID: int64
+        +QuestionID: int64
+        +ChosenChoiceID: *int64
+        +Choice: ChoiceModel
+        +Question: QuestionModel
+        +IsCorrect: *bool
+        +CreatedAt: time.Time
+    }
+
+    class ExamViolationModel {
+        +Id: int64
+        +ExamID: int64
+        +UserID: int64
+        +ViolationType: string
+        +ViolationTime: time.Time
+        +CreatedAt: time.Time
+    }
+}
+
+package "Interfaces" {
+    interface ExamRepository {
+        +CreateTopic(ctx, tx, topic): (*TopicModel, error)
+        +GetTopicByName(ctx, name): (*TopicModel, error)
+        +GetTopics(ctx): ([]*TopicModel, error)
+        +CreateSection(ctx, tx, section): (*SectionModel, error)
+        +GetSectionsByTopic(ctx, topicID): ([]*SectionModel, error)
+        +GetQuestionByID(ctx, id): (*QuestionModel, error)
+        +CreateQuestion(ctx, tx, question): (*QuestionModel, error)
+        +CreateChoices(ctx, tx, choices): error
+        +CreateExam(ctx, tx, exam): (*ExamModel, error)
+        +LinkQuestionsToExam(ctx, tx, examID, questionIDs): error
+        +GetExamDetails(ctx, examID): (*ExamModel, error)
+        +CreateAccessRequest(ctx, req): error
+        +CreateSubmission(ctx, tx, submission): (*ExamSubmissionModel, error)
+        +CreateUserAnswers(ctx, tx, answers): error
+        +LogViolation(ctx, violation): error
+        ...
+    }
+
+    interface ExamService {
+        +CreateTopic(ctx, req): (*CreateTopicResponse, error)
+        +GetTopics(ctx, req): (*GetTopicsResponse, error)
+        +CreateSection(ctx, req): (*CreateSectionResponse, error)
+        +GetQuestions(ctx, req): (*GetQuestionsResponse, error)
+        +CreateQuestion(ctx, req): (*CreateQuestionResponse, error)
+        +ImportQuestions(ctx, req): (*ImportQuestionsResponse, error)
+        +CreateExam(ctx, req): (*CreateExamResponse, error)
+        +GenerateExam(ctx, req): (*CreateExamResponse, error)
+        +GetExamDetails(ctx, req): (*GetExamDetailsResponse, error)
+        +SubmitExam(ctx, req): (*SubmitExamResponse, error)
+        +RequestExamAccess(ctx, req): (*RequestExamAccessResponse, error)
+        +ApproveExamAccess(ctx, req): (*ApproveExamAccessResponse, error)
+        +GetExamStatsDetailed(ctx, req): (*GetExamStatsDetailedResponse, error)
+        +StartExam(ctx, req): (*StartExamResponse, error)
+        +GetExamsByClass(ctx, req): (*GetExamsByClassResponse, error)
+        +AssignExamToClass(ctx, req): (*AssignExamToClassResponse, error)
+        ...
+    }
+
+    interface EventProducer {
+        +Produce(topic, key, message): error
+        +Close()
+    }
+}
+
+' Relationships
+TopicModel "1" *-- "0..*" SectionModel : contains
+SectionModel "1" *-- "0..*" QuestionModel : contains
+QuestionModel --> QuestionTypeModel : has type
+QuestionModel --> QuestionDifficultyModel : has difficulty
+QuestionModel "1" *-- "0..*" ChoiceModel : has
+
+ExamModel --> TopicModel : belongs to
+ExamModel "0..*" -- "0..*" QuestionModel : contains
+
+ExamSubmissionModel --> ExamModel : for
+ExamSubmissionModel --> SubmissionStatusModel : has status
+ExamSubmissionModel "1" *-- "0..*" UserAnswerModel : contains
+UserAnswerModel --> QuestionModel : answers
+UserAnswerModel --> ChoiceModel : chosen
+
+ExamAccessRequestModel --> ExamModel : requests access
+ExamViolationModel --> ExamModel : logged for
+
+ExamRepository ..> TopicModel : manages
+ExamRepository ..> ExamModel : manages
+ExamService ..> ExamRepository : uses
+
+@enduml

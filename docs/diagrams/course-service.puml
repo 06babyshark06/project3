@@ -1,0 +1,125 @@
+@startuml Course Service Class Diagram
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Domain Models" {
+    class CourseModel {
+        +Id: int64
+        +Title: string
+        +Description: string
+        +ThumbnailURL: string
+        +InstructorID: int64
+        +Price: float64
+        +IsPublished: bool
+        +CreatedAt: time.Time
+        +UpdatedAt: time.Time
+        +Sections: []SectionModel
+    }
+
+    class SectionModel {
+        +Id: int64
+        +CourseID: int64
+        +Course: CourseModel
+        +Title: string
+        +OrderIndex: int
+        +CreatedAt: time.Time
+        +Lessons: []LessonModel
+    }
+
+    class LessonTypeModel {
+        +Id: int64
+        +Type: string
+    }
+
+    class LessonModel {
+        +Id: int64
+        +SectionID: int64
+        +Section: SectionModel
+        +Title: string
+        +TypeID: int64
+        +Type: LessonTypeModel
+        +ContentURL: string
+        +DurationSeconds: int
+        +OrderIndex: int
+        +CreatedAt: time.Time
+    }
+
+    class EnrollmentModel {
+        +UserID: int64
+        +CourseID: int64
+        +Course: CourseModel
+        +EnrolledAt: time.Time
+    }
+
+    class LessonProgressModel {
+        +UserID: int64
+        +LessonID: int64
+        +Lesson: LessonModel
+        +CompletedAt: time.Time
+    }
+}
+
+package "Interfaces" {
+    interface CourseRepository {
+        +CreateCourse(ctx, tx, course): (*CourseModel, error)
+        +GetCourseByID(ctx, courseID): (*CourseModel, error)
+        +GetCourses(ctx, search, minPrice, maxPrice, sortBy, page, limit, instructorID): ([]*CourseModel, int64, error)
+        +GetCourseDetails(ctx, courseID): (*CourseModel, error)
+        +GetEnrolledCourses(ctx, userID): ([]*CourseModel, error)
+        +CreateSection(ctx, tx, section): (*SectionModel, error)
+        +CreateLesson(ctx, tx, lesson): (*LessonModel, error)
+        +GetLessonType(ctx, typeName): (*LessonTypeModel, error)
+        +CreateEnrollment(ctx, tx, enrollment): error
+        +GetEnrollment(ctx, userID, courseID): (*EnrollmentModel, error)
+        +CreateLessonProgress(ctx, tx, progress): error
+        +GetLessonProgress(ctx, userID, lessonID): (*LessonProgressModel, error)
+        +GetCompletedLessonIDs(ctx, userID, courseID): (map[int64]bool, error)
+        +UpdateCourse(ctx, tx, courseID, updates): error
+        +UpdateSection(ctx, tx, sectionID, title): error
+        +DeleteSection(ctx, tx, sectionID): error
+        +DeleteLesson(ctx, tx, lessonID): error
+        +UpdateLesson(ctx, tx, lessonID, updates): error
+        +UpdateCourseStatus(ctx, tx, courseID, isPublished): error
+        +CountCourses(ctx): (int64, error)
+        +DeleteCourse(ctx, tx, courseID): error
+    }
+
+    interface CourseService {
+        +CreateCourse(ctx, req): (*CreateCourseResponse, error)
+        +CreateSection(ctx, req): (*CreateSectionResponse, error)
+        +CreateLesson(ctx, req): (*CreateLessonResponse, error)
+        +GetCourses(ctx, req): (*GetCoursesResponse, error)
+        +GetCourseDetails(ctx, req): (*GetCourseDetailsResponse, error)
+        +EnrollCourse(ctx, req): (*EnrollCourseResponse, error)
+        +GetMyCourses(ctx, req): (*GetMyCoursesResponse, error)
+        +MarkLessonCompleted(ctx, req): (*MarkLessonCompletedResponse, error)
+        +GetUploadURL(ctx, req): (*GetUploadURLResponse, error)
+        +UpdateCourse(ctx, req): (*UpdateCourseResponse, error)
+        +UpdateSection(ctx, req): (*UpdateSectionResponse, error)
+        +DeleteSection(ctx, req): (*DeleteSectionResponse, error)
+        +DeleteLesson(ctx, req): (*DeleteLessonResponse, error)
+        +UpdateLesson(ctx, req): (*UpdateLessonResponse, error)
+        +PublishCourse(ctx, req): (*PublishCourseResponse, error)
+        +GetCourseCount(ctx, req): (*GetCourseCountResponse, error)
+        +DeleteCourse(ctx, req): (*DeleteCourseResponse, error)
+    }
+
+    interface EventProducer {
+        +Produce(topic, key, message): error
+        +Close()
+    }
+}
+
+' Relationships
+CourseModel "1" *-- "0..*" SectionModel : contains
+SectionModel "1" *-- "0..*" LessonModel : contains
+LessonModel --> LessonTypeModel : has type
+EnrollmentModel --> CourseModel : enrolls in
+LessonProgressModel --> LessonModel : tracks
+
+CourseRepository ..> CourseModel : manages
+CourseRepository ..> SectionModel : manages
+CourseRepository ..> LessonModel : manages
+CourseService ..> CourseRepository : uses
+
+@enduml

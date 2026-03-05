@@ -1,0 +1,70 @@
+@startuml Notification Service Class Diagram
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Domain Models" {
+    class ChannelTypeModel {
+        +Id: int64
+        +Type: string
+    }
+
+    class NotificationStatusModel {
+        +Id: int64
+        +Status: string
+    }
+
+    class NotificationTemplateModel {
+        +Id: int64
+        +Name: string
+        +TypeID: int64
+        +Type: ChannelTypeModel
+        +Subject: string
+        +Body: string
+        +CreatedAt: time.Time
+    }
+
+    class NotificationModel {
+        +Id: int64
+        +RecipientID: int64
+        +TypeID: int64
+        +Type: ChannelTypeModel
+        +StatusID: int64
+        +Status: NotificationStatusModel
+        +RenderedContent: string
+        +ErrorMessage: string
+        +ScheduledAt: time.Time
+        +SentAt: *time.Time
+        +CreatedAt: time.Time
+    }
+}
+
+package "Interfaces" {
+    interface NotificationRepository {
+        +GetTemplateByName(ctx, name): (*NotificationTemplateModel, error)
+        +GetStatusByName(ctx, status): (*NotificationStatusModel, error)
+        +CreateNotificationLog(ctx, tx, log): (*NotificationModel, error)
+        +UpdateLogStatus(ctx, tx, logID, statusID, errorMessage): error
+    }
+
+    interface NotificationService {
+        +HandleUserRegisteredEvent(ctx, eventBytes): error
+        +HandleExamSubmittedEvent(ctx, eventBytes): error
+        +HandleCourseEnrolledEvent(ctx, eventBytes): error
+    }
+
+    interface EmailProvider {
+        +SendEmail(ctx, toEmail, subject, htmlBody): error
+    }
+}
+
+' Relationships
+NotificationModel --> ChannelTypeModel : has type
+NotificationModel --> NotificationStatusModel : has status
+NotificationTemplateModel --> ChannelTypeModel : for channel
+
+NotificationRepository ..> NotificationModel : manages
+NotificationRepository ..> NotificationTemplateModel : manages
+NotificationService ..> NotificationRepository : uses
+NotificationService ..> EmailProvider : uses
+
+@enduml

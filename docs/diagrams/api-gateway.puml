@@ -1,0 +1,182 @@
+@startuml API Gateway Class Diagram
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+package "Handlers" {
+    class AuthHandler {
+        -AuthClient: UserServiceClient
+        -jwt: *GinJWTMiddleware
+        --
+        +NewAuthHandler(client, jwt): *AuthHandler
+        +Register(c *gin.Context)
+        +Login(c *gin.Context)
+        +Logout(c *gin.Context)
+        +Refresh(c *gin.Context)
+    }
+
+    class UserHandler {
+        -UserClient: UserServiceClient
+        --
+        +NewUserHandler(client): *UserHandler
+        +GetUserFromToken(c *gin.Context)
+        +GetAllUsers(c *gin.Context)
+        +GetUser(c *gin.Context)
+        +DeleteUser(c *gin.Context)
+        +UpdateUserRole(c *gin.Context)
+        +UpdateUserInfo(c *gin.Context)
+        +UpdateUserPassword(c *gin.Context)
+    }
+
+    class ExamHandler {
+        -ExamClient: ExamServiceClient
+        -UserClient: UserServiceClient
+        --
+        +NewExamHandler(examClient, userClient): *ExamHandler
+        +CreateTopic(c *gin.Context)
+        +GetTopics(c *gin.Context)
+        +CreateSection(c *gin.Context)
+        +GetSections(c *gin.Context)
+        +CreateQuestion(c *gin.Context)
+        +GetQuestions(c *gin.Context)
+        +ImportQuestions(c *gin.Context)
+        +CreateExam(c *gin.Context)
+        +GenerateExam(c *gin.Context)
+        +GetExamDetails(c *gin.Context)
+        +GetExams(c *gin.Context)
+        +SubmitExam(c *gin.Context)
+        +StartExam(c *gin.Context)
+        +RequestAccess(c *gin.Context)
+        +ApproveAccess(c *gin.Context)
+        ...
+    }
+
+    class CourseHandler {
+        -CourseClient: CourseServiceClient
+        --
+        +NewCourseHandler(client): *CourseHandler
+        +CreateCourse(c *gin.Context)
+        +GetCourses(c *gin.Context)
+        +GetCourseDetails(c *gin.Context)
+        +UpdateCourse(c *gin.Context)
+        +DeleteCourse(c *gin.Context)
+        +PublishCourse(c *gin.Context)
+        +GetInstructorCourses(c *gin.Context)
+        +CreateSection(c *gin.Context)
+        +CreateLesson(c *gin.Context)
+        +EnrollCourse(c *gin.Context)
+        +GetMyCourses(c *gin.Context)
+        +MarkLessonCompleted(c *gin.Context)
+        ...
+    }
+
+    class ClassHandler {
+        -UserClient: UserServiceClient
+        -ExamClient: ExamServiceClient
+        --
+        +NewClassHandler(userClient, examClient): *ClassHandler
+        +CreateClass(c *gin.Context)
+        +UpdateClass(c *gin.Context)
+        +DeleteClass(c *gin.Context)
+        +GetClasses(c *gin.Context)
+        +GetClassDetails(c *gin.Context)
+        +AddMembers(c *gin.Context)
+        +RemoveMember(c *gin.Context)
+        +JoinClassByCode(c *gin.Context)
+        +GetClassExams(c *gin.Context)
+        +AssignExamToClass(c *gin.Context)
+        +RemoveExamFromClass(c *gin.Context)
+    }
+
+    class StatsHandler {
+        -UserClient: UserServiceClient
+        -CourseClient: CourseServiceClient
+        -ExamClient: ExamServiceClient
+        --
+        +NewStatsHandler(userClient, courseClient, examClient): *StatsHandler
+        +GetAdminStats(c *gin.Context)
+    }
+}
+
+package "gRPC Clients" {
+    class UserServiceClient {
+        +Client: pb.UserServiceClient
+        +conn: *grpc.ClientConn
+        --
+        +NewUserServiceClient(): (*UserServiceClient, error)
+        +Close()
+    }
+
+    class ExamServiceClient {
+        +Client: pb.ExamServiceClient
+        +conn: *grpc.ClientConn
+        --
+        +NewExamServiceClient(): (*ExamServiceClient, error)
+        +Close()
+    }
+
+    class CourseServiceClient {
+        +Client: pb.CourseServiceClient
+        +conn: *grpc.ClientConn
+        --
+        +NewCourseServiceClient(): (*CourseServiceClient, error)
+        +Close()
+    }
+}
+
+package "Middleware" {
+    class JWTMiddleware {
+        --
+        +NewJWTMiddleware(userClient): (*jwt.GinJWTMiddleware, error)
+        +MiddlewareFunc(): gin.HandlerFunc
+    }
+
+    class AuthorizeMiddleware <<function>> {
+        +Authorize(roles...): gin.HandlerFunc
+    }
+}
+
+package "Redis" {
+    class RedisClient <<singleton>> {
+        --
+        +InitRedis(addr)
+        +SetRefreshToken(userID, token, expiration): error
+        +GetRefreshToken(userID): (string, error)
+        +DeleteRefreshToken(userID): error
+    }
+}
+
+package "Converters" {
+    class UserConverter {
+        +ConvertRegisterJSONToProto(req): *pb.RegisterRequest
+    }
+
+    class RegisterRequest {
+        +FullName: string
+        +Email: string
+        +Password: string
+        +Role: string
+    }
+
+    class LoginRequest {
+        +Email: string
+        +Password: string
+    }
+}
+
+' Relationships
+AuthHandler --> UserServiceClient : uses
+AuthHandler --> JWTMiddleware : uses
+AuthHandler --> RedisClient : uses
+UserHandler --> UserServiceClient : uses
+ExamHandler --> ExamServiceClient : uses
+ExamHandler --> UserServiceClient : uses
+CourseHandler --> CourseServiceClient : uses
+ClassHandler --> UserServiceClient : uses
+ClassHandler --> ExamServiceClient : uses
+StatsHandler --> UserServiceClient : uses
+StatsHandler --> CourseServiceClient : uses
+StatsHandler --> ExamServiceClient : uses
+
+JWTMiddleware --> UserServiceClient : validates with
+
+@enduml

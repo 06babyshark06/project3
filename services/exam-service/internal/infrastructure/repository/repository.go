@@ -109,7 +109,7 @@ func (r *examRepository) DeleteQuestion(ctx context.Context, tx *gorm.DB, questi
 
 func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int) ([]int64, error) {
 	var questionIDs []int64
-	query := database.DB.WithContext(ctx).Table("question_models").Select("question_models.id")
+	query := database.DB.WithContext(ctx).Table("question_models").Select("DISTINCT question_models.id")
 	query = query.Where("section_id = ?", sectionID)
 	if difficulty != "" {
 		query = query.Joins("JOIN question_difficulty_models d ON question_models.difficulty_id = d.id").Where("d.difficulty = ?", difficulty)
@@ -129,11 +129,22 @@ func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, e
 	if len(questionIDs) == 0 {
 		return nil
 	}
+
+	// Loại bỏ duplicate question IDs
+	seen := make(map[int64]bool)
+	var uniqueIDs []int64
+	for _, qid := range questionIDs {
+		if !seen[qid] {
+			seen[qid] = true
+			uniqueIDs = append(uniqueIDs, qid)
+		}
+	}
+
 	var examQuestions []*domain.ExamQuestionModel
-	for i, qid := range questionIDs {
+	for i, qid := range uniqueIDs {
 		examQuestions = append(examQuestions, &domain.ExamQuestionModel{ExamID: examID, QuestionID: qid, Sequence: i})
 	}
-	return tx.WithContext(ctx).Create(&examQuestions).Error
+	return tx.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&examQuestions).Error
 }
 func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*domain.ExamModel, error) {
 	var exam domain.ExamModel
