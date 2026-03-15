@@ -17,11 +17,15 @@ import (
 	grpcserver "google.golang.org/grpc"
 )
 
-
 func main() {
 	addr := env.GetString("EXAM_GRPC_ADDR", ":9002")
-	
+
 	database.Connect()
+	database.ConnectRedis()
+	if database.RedisClient != nil {
+		defer database.RedisClient.Close()
+	}
+
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("Failed to listen on %s: %v", addr, err)
@@ -35,6 +39,15 @@ func main() {
 	defer kafkaProducer.Close()
 
 	service := service.NewExamService(repo, kafkaProducer)
+
+	kafkaConsumer, err := events.NewKafkaConsumer(service)
+	if err != nil {
+		log.Printf("Cảnh báo: Không thể khởi tạo Kafka Consumer: %v", err)
+	} else {
+		kafkaConsumer.Start()
+		defer kafkaConsumer.Close()
+	}
+
 	grpcServer := grpcserver.NewServer()
 	grpc.NewGRPCHandler(grpcServer, service)
 

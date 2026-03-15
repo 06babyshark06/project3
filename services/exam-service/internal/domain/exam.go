@@ -94,6 +94,9 @@ type ExamModel struct {
 	ShowResultImmediately bool `json:"show_result_immediately"`
 	RequiresApproval      bool `json:"requires_approval"`
 
+	IsDynamic     bool   `json:"is_dynamic"`
+	DynamicConfig string `gorm:"type:jsonb" json:"dynamic_config"`
+
 	TopicID   int64            `gorm:"not null;index" json:"topic_id"`
 	Topic     *TopicModel      `gorm:"foreignKey:TopicID" json:"topic"`
 	CreatorID int64            `gorm:"not null" json:"creator_id"`
@@ -111,6 +114,17 @@ type ExamQuestionModel struct {
 
 func (ExamQuestionModel) TableName() string {
 	return "exam_questions"
+}
+
+type StudentExamModel struct {
+	ExamID      int64     `gorm:"primaryKey"`
+	UserID      int64     `gorm:"primaryKey"`
+	QuestionIDs string    `gorm:"type:jsonb"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+func (StudentExamModel) TableName() string {
+	return "student_exams"
 }
 
 type ExamAccessRequestModel struct {
@@ -188,6 +202,7 @@ type ExamRepository interface {
 	GetQuestionType(ctx context.Context, typeName string) (*QuestionTypeModel, error)
 	GetDifficulty(ctx context.Context, level string) (*QuestionDifficultyModel, error)
 	GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int) ([]int64, error)
+	GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string) ([]int64, error)
 	UpdateQuestion(ctx context.Context, tx *gorm.DB, qID int64, updates map[string]interface{}) error
 	DeleteChoicesByQuestionID(ctx context.Context, tx *gorm.DB, qID int64) error
 	DeleteQuestion(ctx context.Context, tx *gorm.DB, questionID int64) error
@@ -227,6 +242,10 @@ type ExamRepository interface {
 	GetExamsByClass(ctx context.Context, classID int64) ([]*ExamModel, error)
 	GetExamsByTeacher(ctx context.Context, teacherID int64) ([]*ExamModel, error)
 	GetExamSubmissionsByExamID(ctx context.Context, examID int64, page, limit int, search string) ([]*ExamSubmissionModel, int64, error)
+
+	CreateStudentExam(ctx context.Context, tx *gorm.DB, sExam *StudentExamModel) error
+	GetStudentExam(ctx context.Context, examID, userID int64) (*StudentExamModel, error)
+	GetCorrectAnswersByQuestionIDs(ctx context.Context, questionIDs []int64) (map[int64][]int64, error)
 }
 
 type EventProducer interface {
@@ -283,4 +302,5 @@ type ExamService interface {
 	GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
 	UnassignExamFromClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
 	GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error)
+	GeneratePersonalizedExamForStudents(ctx context.Context, examID int64, studentIDs []int64) error
 }

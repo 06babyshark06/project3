@@ -3,10 +3,13 @@ package service
 import (
 	"bytes"
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 	"time"
@@ -15,6 +18,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/redis/go-redis/v9"
 	"github.com/xuri/excelize/v2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -463,6 +467,7 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
 			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
+			IsDynamic: req.Settings.IsDynamic, DynamicConfig: req.Settings.DynamicConfig,
 			TopicID: req.TopicId, CreatorID: req.CreatorId, Status: req.Status,
 		}
 		if req.Settings.StartTime != "" {
@@ -479,7 +484,10 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 		if err != nil {
 			return err
 		}
-		return s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, req.QuestionIds)
+		if !createdExam.IsDynamic {
+			return s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, req.QuestionIds)
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -570,6 +578,12 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 }
 
 func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
+	// --- ANTI CHEAT: Kiểm tra Session Lock ---
+	if err := s.validateSessionLock(ctx, req.ExamId, req.UserId, req.IpAddress, req.UserAgent); err != nil {
+		return nil, err
+	}
+	// ------------------------------------------
+
 	var submission domain.ExamSubmissionModel
 	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
 		First(&submission).Error
@@ -581,9 +595,26 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	var correctCount int32 = 0
 	var finalScore float64 = 0
 
-	correctMap, err := s.repo.GetCorrectAnswers(ctx, req.ExamId)
-	if err != nil {
-		return nil, errors.New("lỗi lấy đáp án: " + err.Error())
+	examModel, _ := s.repo.GetExamDetails(ctx, req.ExamId)
+	var correctMap map[int64][]int64
+
+	if examModel != nil && examModel.IsDynamic {
+		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
+		if err != nil {
+			return nil, errors.New("lỗi lấy đề thi cá nhân hóa")
+		}
+		var qIDs []int64
+		_ = json.Unmarshal([]byte(sExam.QuestionIDs), &qIDs)
+		correctMap, err = s.repo.GetCorrectAnswersByQuestionIDs(ctx, qIDs)
+		if err != nil {
+			return nil, errors.New("lỗi lấy đáp án: " + err.Error())
+		}
+	} else {
+		var err error
+		correctMap, err = s.repo.GetCorrectAnswers(ctx, req.ExamId)
+		if err != nil {
+			return nil, errors.New("lỗi lấy đáp án: " + err.Error())
+		}
 	}
 	totalQuestions := int32(len(correctMap))
 
@@ -988,6 +1019,12 @@ func (s *examService) GetUserExamStats(ctx context.Context, req *pb.GetUserExamS
 }
 
 func (s *examService) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest) (*pb.SaveAnswerResponse, error) {
+	// --- ANTI CHEAT: Kiểm tra Session Lock ---
+	if err := s.validateSessionLock(ctx, req.ExamId, req.UserId, req.IpAddress, req.UserAgent); err != nil {
+		return nil, err
+	}
+	// ------------------------------------------
+
 	var sub domain.ExamSubmissionModel
 	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).First(&sub).Error
 	if err != nil {
@@ -1411,6 +1448,29 @@ func (s *examService) ExportQuestions(ctx context.Context, req *pb.ExportQuestio
 	return &pb.ExportQuestionsResponse{FileUrl: finalURL}, nil
 }
 
+func generateSessionHash(ipAddress, userAgent string) string {
+	raw := fmt.Sprintf("%s|%s", ipAddress, userAgent)
+	hash := md5.Sum([]byte(raw))
+	return hex.EncodeToString(hash[:])
+}
+
+func (s *examService) validateSessionLock(ctx context.Context, examID, userID int64, ipAddress, userAgent string) error {
+	sessionKey := fmt.Sprintf("exam:%d:user:%d:session_lock", examID, userID)
+	expectedHash, err := database.RedisClient.Get(ctx, sessionKey).Result()
+	if err == redis.Nil {
+		// Chưa có session lock (có thể dev xoá cache hoặc lỗi luồng StartExam), ta cho qua hoặc cấp mới
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("lỗi kiểm tra phiên làm bài: %v", err)
+	}
+
+	currentHash := generateSessionHash(ipAddress, userAgent)
+	if currentHash != expectedHash {
+		return fmt.Errorf("tài khoản đang mở bài thi trên một thiết bị hoặc trình duyệt khác (IP/Browser không khớp). Phát hiện gian lận thi hộ!")
+	}
+	return nil
+}
+
 func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (*pb.StartExamResponse, error) {
 	examDetails, err := s.repo.GetExamDetails(ctx, req.ExamId)
 	if err != nil {
@@ -1419,6 +1479,20 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 
 	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
 
+	// --- ANTI CHEAT: Lưu Session Lock ---
+	sessionKey := fmt.Sprintf("exam:%d:user:%d:session_lock", req.ExamId, req.UserId)
+	sessionHash := generateSessionHash(req.IpAddress, req.UserAgent)
+	ttl := time.Duration(examDetails.DurationMinutes) * time.Minute
+	if ttl <= 0 {
+		ttl = 120 * time.Minute
+	}
+	
+	// Cẩn thận: Chỉ lock session khi Start. Nếu đã thi dở thì ta vẫn ghi đè Hash hiện tại để họ học tiếp trên máy này
+	if err := database.RedisClient.Set(ctx, sessionKey, sessionHash, ttl).Err(); err != nil {
+		fmt.Printf("Warning: Failed to set session lock for exam %d user %d: %v\n", req.ExamId, req.UserId, err)
+	}
+	// ------------------------------------
+
 	var submission domain.ExamSubmissionModel
 	err = database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
 		Preload("UserAnswers").
@@ -1426,20 +1500,10 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 
 	var submissionID int64
 	var startTime time.Time
-	var currentAnswers = make(map[int64]*pb.Int64List)
 
 	if err == nil {
 		submissionID = submission.Id
 		startTime = submission.StartedAt
-
-		for _, ans := range submission.UserAnswers {
-			if ans.ChosenChoiceID != nil {
-				if _, exists := currentAnswers[ans.QuestionID]; !exists {
-					currentAnswers[ans.QuestionID] = &pb.Int64List{Values: []int64{}}
-				}
-				currentAnswers[ans.QuestionID].Values = append(currentAnswers[ans.QuestionID].Values, *ans.ChosenChoiceID)
-			}
-		}
 	} else {
 		if !check.CanAccess {
 			return nil, fmt.Errorf("bạn không thể bắt đầu bài thi: %s", check.Message)
@@ -1482,10 +1546,149 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 		remaining = 0
 	}
 
+	var pbQuestions []*pb.QuestionDetails
+
+	var qIDsToFetch []int64
+	var orderMap map[int64]int
+
+	if examDetails.IsDynamic {
+		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
+		if err != nil {
+			return nil, fmt.Errorf("chưa có đề thi được sinh cho bạn (vui lòng chờ hệ thống xử lý)")
+		}
+		_ = json.Unmarshal([]byte(sExam.QuestionIDs), &qIDsToFetch)
+		orderMap = make(map[int64]int)
+		for i, id := range qIDsToFetch {
+			orderMap[id] = i
+		}
+	} else {
+		for _, q := range examDetails.Questions {
+			qIDsToFetch = append(qIDsToFetch, q.Id)
+		}
+		orderMap = make(map[int64]int)
+		for i, id := range qIDsToFetch {
+			orderMap[id] = i
+		}
+	}
+
+	if len(qIDsToFetch) > 0 {
+		pbQuestions = make([]*pb.QuestionDetails, len(qIDsToFetch))
+		var missingIDs []int64
+
+		if database.RedisClient != nil {
+			keys := make([]string, len(qIDsToFetch))
+			for i, id := range qIDsToFetch {
+				keys[i] = fmt.Sprintf("question:%d", id)
+			}
+
+			cachedVals, err := database.RedisClient.MGet(ctx, keys...).Result()
+			if err == nil {
+				for i, val := range cachedVals {
+					if val != nil {
+						var pbQ pb.QuestionDetails
+						if err := json.Unmarshal([]byte(val.(string)), &pbQ); err == nil {
+							pbQuestions[i] = &pbQ
+						} else {
+							missingIDs = append(missingIDs, qIDsToFetch[i])
+						}
+					} else {
+						missingIDs = append(missingIDs, qIDsToFetch[i])
+					}
+				}
+			} else {
+				log.Printf("Lỗi lấy Cache Redis: %v", err)
+				missingIDs = qIDsToFetch
+			}
+		} else {
+			missingIDs = qIDsToFetch
+		}
+
+		if len(missingIDs) > 0 {
+			var missingQuestions []*domain.QuestionModel
+			database.DB.WithContext(ctx).Where("id IN ?", missingIDs).Preload("Choices").Preload("Type").Preload("Difficulty").Preload("Section").Preload("Section.Topic").Find(&missingQuestions)
+
+			var pipe redis.Pipeliner
+			if database.RedisClient != nil {
+				pipe = database.RedisClient.Pipeline()
+			}
+
+			for _, q := range missingQuestions {
+				var pbChoices []*pb.ChoiceDetails
+				for _, c := range q.Choices {
+					pbChoices = append(pbChoices, &pb.ChoiceDetails{
+						Id:            c.Id,
+						Content:       c.Content,
+						AttachmentUrl: c.AttachmentURL,
+					})
+				}
+				qType, diff := "single_choice", "medium"
+				if q.Type.Type != "" {
+					qType = q.Type.Type
+				}
+				if q.Difficulty.Difficulty != "" {
+					diff = q.Difficulty.Difficulty
+				}
+
+				secName, topicName := "", ""
+				var secID, topicID int64
+				if q.Section != nil {
+					secName = q.Section.Name
+					secID = q.SectionID
+					if q.Section.Topic != nil {
+						topicName = q.Section.Topic.Name
+						topicID = q.Section.TopicID
+					}
+				}
+
+				pbQ := &pb.QuestionDetails{
+					Id:            q.Id,
+					Content:       q.Content,
+					Choices:       pbChoices,
+					QuestionType:  qType,
+					AttachmentUrl: q.AttachmentURL,
+					Difficulty:    diff,
+					Explanation:   q.Explanation,
+					SectionName:   secName,
+					TopicName:     topicName,
+					SectionId:     secID,
+					TopicId:       topicID,
+				}
+
+				idx := orderMap[q.Id]
+				pbQuestions[idx] = pbQ
+
+				if pipe != nil {
+					b, _ := json.Marshal(pbQ)
+					pipe.Set(ctx, fmt.Sprintf("question:%d", q.Id), b, 24*time.Hour)
+				}
+			}
+
+			if pipe != nil {
+				_, _ = pipe.Exec(ctx)
+			}
+		}
+
+		// Lọc lại phòng trường hợp missing DB và Xáo trộn đáp án nếu được cấu hình
+		var finalPbQs []*pb.QuestionDetails
+		for _, q := range pbQuestions {
+			if q != nil {
+				// --- ANTI CHEAT: Shuffle Choices (Đảo vị trí ABCD) ---
+				if examDetails.ShuffleQuestions && len(q.Choices) > 0 {
+					rand.Shuffle(len(q.Choices), func(i, j int) {
+						q.Choices[i], q.Choices[j] = q.Choices[j], q.Choices[i]
+					})
+				}
+				// -----------------------------------------------------
+				finalPbQs = append(finalPbQs, q)
+			}
+		}
+		pbQuestions = finalPbQs
+	}
+
 	return &pb.StartExamResponse{
 		SubmissionId:     submissionID,
 		RemainingSeconds: remaining,
-		CurrentAnswers:   currentAnswers,
+		Questions:        pbQuestions,
 	}, nil
 }
 
@@ -1562,6 +1765,14 @@ func (s *examService) AssignExamToClass(ctx context.Context, req *pb.AssignExamT
 	if err != nil {
 		return nil, err
 	}
+
+	exam, _ := s.repo.GetExamDetails(ctx, req.ExamId)
+	if exam != nil && exam.IsDynamic {
+		event := contracts.ExamAssignedEvent{ExamID: req.ExamId, ClassID: req.ClassId}
+		eventBytes, _ := json.Marshal(event)
+		s.producer.Produce("exam_assigned", []byte(fmt.Sprintf("%d-%d", req.ExamId, req.ClassId)), eventBytes)
+	}
+
 	return &pb.AssignExamToClassResponse{Success: true}, nil
 }
 
@@ -1713,4 +1924,98 @@ func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {
 		EndTime:         endTime,
 		MaxAttempts:     int32(e.MaxAttempts),
 	}
+}
+
+func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, examID int64, studentIDs []int64) error {
+	examDetails, err := s.repo.GetExamDetails(ctx, examID)
+	if err != nil {
+		return err
+	}
+	if !examDetails.IsDynamic || examDetails.DynamicConfig == "" {
+		return errors.New("đề thi không phải là dạng sinh động")
+	}
+
+	// Parse JSON config
+	var configs []struct {
+		SectionId  int64  `json:"section_id"`
+		Count      int    `json:"count"`
+		Difficulty string `json:"difficulty"`
+	}
+	err = json.Unmarshal([]byte(examDetails.DynamicConfig), &configs)
+	if err != nil {
+		return errors.New("cấu hình sinh đề không hợp lệ")
+	}
+
+	// BƯỚC 1: LẤY SẴN TẤT CẢ CÁC QUESTION IDs THEO TỪNG CẤU HÌNH ĐỂ TRÊN RAM (IN-MEMORY)
+	// Map key là Index của config để phân biệt (phòng khi 1 exam có nhiều rules trùng SectionId)
+	configPools := make(map[int][]int64)
+	for i, cfg := range configs {
+		ids, err := s.repo.GetQuestionIDsForSection(ctx, cfg.SectionId, cfg.Difficulty)
+		if err != nil {
+			log.Printf("Lỗi lấy danh sách câu hỏi cho section %d: %v", cfg.SectionId, err)
+			ids = []int64{}
+		}
+		configPools[i] = ids
+	}
+
+	// BƯỚC 2: SINH ĐỀ TRÊN RAM CHO TỪNG HỌC SINH VÀ GOM VÀO BATCH
+	var batchInserts []*domain.StudentExamModel
+
+	for _, studentID := range studentIDs {
+		allQuestionIDs := []int64{}
+		uniqueMap := make(map[int64]bool)
+
+		for i, cfg := range configs {
+			pool := configPools[i]
+			if len(pool) == 0 {
+				continue
+			}
+
+			// Tạo 1 bản sao của pool để shuffle
+			shuffledPool := make([]int64, len(pool))
+			copy(shuffledPool, pool)
+
+			// Shuffle (Fisher-Yates)
+			for idx := len(shuffledPool) - 1; idx > 0; idx-- {
+				j := rand.Intn(idx + 1)
+				shuffledPool[idx], shuffledPool[j] = shuffledPool[j], shuffledPool[idx]
+			}
+
+			// Bốc đủ số lượng Count
+			collectedCount := 0
+			for _, id := range shuffledPool {
+				if !uniqueMap[id] {
+					uniqueMap[id] = true
+					allQuestionIDs = append(allQuestionIDs, id)
+					collectedCount++
+					if collectedCount >= cfg.Count {
+						break
+					}
+				}
+			}
+		}
+
+		if len(allQuestionIDs) > 0 {
+			qBytes, _ := json.Marshal(allQuestionIDs)
+			sExam := &domain.StudentExamModel{
+				ExamID:      examID,
+				UserID:      studentID,
+				QuestionIDs: string(qBytes),
+			}
+			batchInserts = append(batchInserts, sExam)
+		}
+	}
+
+	// BƯỚC 3: BULK INSERT VÀO DATABASE
+	if len(batchInserts) > 0 {
+		err := database.DB.Transaction(func(tx *gorm.DB) error {
+			return tx.WithContext(ctx).CreateInBatches(batchInserts, 200).Error
+		})
+		if err != nil {
+			log.Printf("Lỗi Bulk Insert StudentExams cho exam %d: %v", examID, err)
+			return err
+		}
+	}
+
+	return nil
 }

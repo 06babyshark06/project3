@@ -119,6 +119,18 @@ func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectio
 	return questionIDs, err
 }
 
+func (r *examRepository) GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string) ([]int64, error) {
+	var questionIDs []int64
+	query := database.DB.WithContext(ctx).Table("question_models").Select("DISTINCT question_models.id")
+	query = query.Where("section_id = ?", sectionID)
+	if difficulty != "" && difficulty != "all" {
+		query = query.Joins("JOIN question_difficulty_models d ON question_models.difficulty_id = d.id").Where("d.difficulty = ?", difficulty)
+	}
+
+	err := query.Pluck("id", &questionIDs).Error
+	return questionIDs, err
+}
+
 func (r *examRepository) CreateExam(ctx context.Context, tx *gorm.DB, exam *domain.ExamModel) (*domain.ExamModel, error) {
 	if err := tx.WithContext(ctx).Create(exam).Error; err != nil {
 		return nil, err
@@ -534,4 +546,39 @@ func (r *examRepository) GetExamsByTeacher(ctx context.Context, teacherID int64)
 		Find(&exams).Error
 
 	return exams, err
+}
+
+func (r *examRepository) CreateStudentExam(ctx context.Context, tx *gorm.DB, sExam *domain.StudentExamModel) error {
+	return tx.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "exam_id"}, {Name: "user_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"question_ids", "created_at"}),
+	}).Create(sExam).Error
+}
+
+func (r *examRepository) GetStudentExam(ctx context.Context, examID, userID int64) (*domain.StudentExamModel, error) {
+	var sExam domain.StudentExamModel
+	err := database.DB.WithContext(ctx).Where("exam_id = ? AND user_id = ?", examID, userID).First(&sExam).Error
+	if err != nil {
+		return nil, err
+	}
+	return &sExam, nil
+}
+
+func (r *examRepository) GetCorrectAnswersByQuestionIDs(ctx context.Context, questionIDs []int64) (map[int64][]int64, error) {
+	type CorrectAnswer struct {
+		QuestionID int64
+		ChoiceID   int64
+	}
+	var results []CorrectAnswer
+	err := database.DB.WithContext(ctx).Table("choice_models").
+		Select("choice_models.question_id, choice_models.id as choice_id").
+		Where("choice_models.question_id IN ? AND choice_models.is_correct = ?", questionIDs, true).Scan(&results).Error
+	if err != nil {
+		return nil, err
+	}
+	answerMap := make(map[int64][]int64)
+	for _, res := range results {
+		answerMap[res.QuestionID] = append(answerMap[res.QuestionID], res.ChoiceID)
+	}
+	return answerMap, nil
 }

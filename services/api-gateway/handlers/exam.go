@@ -367,7 +367,13 @@ func (h *ExamHandler) SubmitExam(c *gin.Context) {
 	}
 	req.UserId = userID
 
-	resp, err := h.examClient.SubmitExam(c.Request.Context(), &req)
+	resp, err := h.examClient.SubmitExam(c.Request.Context(), &pb.SubmitExamRequest{
+		ExamId:    req.ExamId,
+		UserId:    userID,
+		Answers:   req.Answers,
+		IpAddress: c.ClientIP(),
+		UserAgent: c.GetHeader("User-Agent"),
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -696,6 +702,8 @@ func (h *ExamHandler) SaveAnswer(c *gin.Context) {
 		ExamId:         req.ExamId,
 		QuestionId:     req.QuestionId,
 		ChosenChoiceId: req.ChosenChoiceId,
+		IpAddress:      c.ClientIP(),
+		UserAgent:      c.GetHeader("User-Agent"),
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -905,8 +913,10 @@ func (h *ExamHandler) StartExam(c *gin.Context) {
 	}
 
 	resp, err := h.examClient.StartExam(c.Request.Context(), &pb.StartExamRequest{
-		ExamId: examID,
-		UserId: userID,
+		ExamId:    examID,
+		UserId:    userID,
+		IpAddress: c.ClientIP(),
+		UserAgent: c.GetHeader("User-Agent"),
 	})
 
 	if err != nil {

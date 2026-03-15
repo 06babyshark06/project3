@@ -43,6 +43,7 @@ func Connect() {
 		&domain.ChoiceModel{},
 		&domain.ExamQuestionModel{},
 		&domain.ExamSubmissionModel{},
+		&domain.StudentExamModel{},
 
 		&domain.UserAnswerModel{},
 		&domain.ExamViolationModel{},

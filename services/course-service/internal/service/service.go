@@ -241,7 +241,6 @@ func (s *courseService) EnrollCourse(ctx context.Context, req *pb.EnrollCourseRe
 		CourseID:    req.CourseId,
 		CourseTitle: course.Title,
 		Email:       req.Email,
-		FullName:    req.FullName,
 	}
 	eventBytes, err := json.Marshal(eventPayload)
 

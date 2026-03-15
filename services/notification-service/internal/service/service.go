@@ -182,7 +182,7 @@ func (s *notificationService) HandleCourseEnrolledEvent(ctx context.Context, eve
 		return err
 	}
 
-	body := fmt.Sprintf(template.Body, event.FullName, event.CourseTitle)
+	body := fmt.Sprintf(template.Body, event.CourseTitle)
 	subject := fmt.Sprintf(template.Subject, event.CourseTitle)
 
 	pendingStatus, _ := s.repo.GetStatusByName(ctx, "pending")

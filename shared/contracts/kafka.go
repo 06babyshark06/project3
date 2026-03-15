@@ -21,5 +21,9 @@ type CourseEnrolledEvent struct {
 	CourseID    int64  `json:"course_id"`
 	CourseTitle string `json:"course_title"`
 	Email       string `json:"email"`
-	FullName    string `json:"full_name"`
+}
+
+type ExamAssignedEvent struct {
+	ExamID  int64 `json:"exam_id"`
+	ClassID int64 `json:"class_id"`
 }
