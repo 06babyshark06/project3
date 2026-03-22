@@ -4,7 +4,6 @@ import (
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/user"
 )
 
-
 type RegisterRequest struct {
 	FullName string `json:"full_name" validate:"required,min=3"`
 	Email    string `json:"email" validate:"required,email"`
@@ -29,6 +28,7 @@ type ChangePasswordRequest struct {
 type ChangeUserRoleRequest struct {
 	RoleName string `json:"role_name" validate:"required,min=3"`
 }
+
 func ConvertRegisterJSONToProto(req *RegisterRequest) *pb.RegisterRequest {
 	return &pb.RegisterRequest{
 		FullName: req.FullName,

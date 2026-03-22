@@ -20,29 +20,29 @@ func NewCourseHandler(client *grpcclients.CourseServiceClient) *CourseHandler {
 }
 
 func (h *CourseHandler) GetCourses(c *gin.Context) {
-    search := c.Query("search")
-    sortBy := c.Query("sort")
-    minPrice, _ := strconv.ParseFloat(c.Query("min_price"), 64)
-    maxPrice, _ := strconv.ParseFloat(c.Query("max_price"), 64)
-    page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-    limit, _ := strconv.Atoi(c.DefaultQuery("limit", "9"))
+	search := c.Query("search")
+	sortBy := c.Query("sort")
+	minPrice, _ := strconv.ParseFloat(c.Query("min_price"), 64)
+	maxPrice, _ := strconv.ParseFloat(c.Query("max_price"), 64)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "9"))
 
-    req := &pb.GetCoursesRequest{
-        Page:     int32(page),
-        Limit:    int32(limit),
-        Search:   search,
-        SortBy:   sortBy,
-        MinPrice: minPrice,
-        MaxPrice: maxPrice,
-    }
+	req := &pb.GetCoursesRequest{
+		Page:     int32(page),
+		Limit:    int32(limit),
+		Search:   search,
+		SortBy:   sortBy,
+		MinPrice: minPrice,
+		MaxPrice: maxPrice,
+	}
 
-    resp, err := h.courseClient.GetCourses(c.Request.Context(), req)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	resp, err := h.courseClient.GetCourses(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) CreateCourse(c *gin.Context) {
@@ -110,7 +110,7 @@ func (h *CourseHandler) EnrollCourse(c *gin.Context) {
 	if email, ok := claims["email"].(string); ok {
 		req.Email = email
 	}
-    if fullName, ok := claims["full_name"].(string); ok {
+	if fullName, ok := claims["full_name"].(string); ok {
 		req.FullName = fullName
 	} else {
 		req.FullName = "Unknown User"
@@ -208,67 +208,69 @@ func (h *CourseHandler) MarkLessonCompleted(c *gin.Context) {
 }
 
 func (h *CourseHandler) UpdateCourse(c *gin.Context) {
-    idStr := c.Param("id")
-    courseID, _ := strconv.ParseInt(idStr, 10, 64)
+	idStr := c.Param("id")
+	courseID, _ := strconv.ParseInt(idStr, 10, 64)
 
-    var req pb.UpdateCourseRequest
-    if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
-    req.CourseId = courseID
+	var req pb.UpdateCourseRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	req.CourseId = courseID
 
-    resp, err := h.courseClient.UpdateCourse(c.Request.Context(), &req)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	resp, err := h.courseClient.UpdateCourse(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) UpdateSection(c *gin.Context) {
-    idStr := c.Param("id")
-    sectionID, _ := strconv.ParseInt(idStr, 10, 64)
-    
-    var req struct { Title string `json:"title"` }
-    if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	idStr := c.Param("id")
+	sectionID, _ := strconv.ParseInt(idStr, 10, 64)
 
-    resp, err := h.courseClient.UpdateSection(c.Request.Context(), &pb.UpdateSectionRequest{
-        SectionId: sectionID,
-        Title:     req.Title,
-    })
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	var req struct {
+		Title string `json:"title"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.courseClient.UpdateSection(c.Request.Context(), &pb.UpdateSectionRequest{
+		SectionId: sectionID,
+		Title:     req.Title,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) DeleteSection(c *gin.Context) {
-    idStr := c.Param("id")
-    sectionID, _ := strconv.ParseInt(idStr, 10, 64)
+	idStr := c.Param("id")
+	sectionID, _ := strconv.ParseInt(idStr, 10, 64)
 
-    resp, err := h.courseClient.DeleteSection(c.Request.Context(), &pb.DeleteSectionRequest{SectionId: sectionID})
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	resp, err := h.courseClient.DeleteSection(c.Request.Context(), &pb.DeleteSectionRequest{SectionId: sectionID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) DeleteLesson(c *gin.Context) {
-    idStr := c.Param("id")
-    lessonID, _ := strconv.ParseInt(idStr, 10, 64)
+	idStr := c.Param("id")
+	lessonID, _ := strconv.ParseInt(idStr, 10, 64)
 
-    resp, err := h.courseClient.DeleteLesson(c.Request.Context(), &pb.DeleteLessonRequest{LessonId: lessonID})
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	resp, err := h.courseClient.DeleteLesson(c.Request.Context(), &pb.DeleteLessonRequest{LessonId: lessonID})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) UpdateLesson(c *gin.Context) {
@@ -291,55 +293,57 @@ func (h *CourseHandler) UpdateLesson(c *gin.Context) {
 }
 
 func (h *CourseHandler) GetInstructorCourses(c *gin.Context) {
-    userID, err := getUserIDFromContext(c)
-    if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-        return
-    }
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
-    page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-    limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "100"))
 
-    req := &pb.GetCoursesRequest{
-        Page:         int32(page),
-        Limit:        int32(limit),
-        InstructorId: userID, 
-    }
+	req := &pb.GetCoursesRequest{
+		Page:         int32(page),
+		Limit:        int32(limit),
+		InstructorId: userID,
+	}
 
-    resp, err := h.courseClient.GetCourses(c.Request.Context(), req)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	resp, err := h.courseClient.GetCourses(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) PublishCourse(c *gin.Context) {
-    idStr := c.Param("id")
-    courseID, _ := strconv.ParseInt(idStr, 10, 64)
-    
-    var req struct { IsPublished bool `json:"is_published"` }
-    if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	idStr := c.Param("id")
+	courseID, _ := strconv.ParseInt(idStr, 10, 64)
 
-    resp, err := h.courseClient.PublishCourse(c.Request.Context(), &pb.PublishCourseRequest{
-        CourseId:    courseID,
-        IsPublished: req.IsPublished,
-    })
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	var req struct {
+		IsPublished bool `json:"is_published"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	resp, err := h.courseClient.PublishCourse(c.Request.Context(), &pb.PublishCourseRequest{
+		CourseId:    courseID,
+		IsPublished: req.IsPublished,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
 func (h *CourseHandler) DeleteCourse(c *gin.Context) {
 	idStr := c.Param("id")
 	courseID, _ := strconv.ParseInt(idStr, 10, 64)
-	
+
 	_, err := h.courseClient.DeleteCourse(c.Request.Context(), &pb.DeleteCourseRequest{CourseId: courseID})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

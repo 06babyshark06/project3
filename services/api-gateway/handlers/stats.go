@@ -36,19 +36,31 @@ func (h *StatsHandler) GetAdminStats(c *gin.Context) {
 	go func() {
 		defer wg.Done()
 		resp, err := h.userClient.GetUserCount(c.Request.Context(), &userpb.GetUserCountRequest{})
-		if err == nil { userCount = resp.Count } else { errUser = err }
+		if err == nil {
+			userCount = resp.Count
+		} else {
+			errUser = err
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
 		resp, err := h.courseClient.GetCourseCount(c.Request.Context(), &coursepb.GetCourseCountRequest{})
-		if err == nil { courseCount = resp.Count } else { errCourse = err }
+		if err == nil {
+			courseCount = resp.Count
+		} else {
+			errCourse = err
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
 		resp, err := h.examClient.GetExamCount(c.Request.Context(), &exampb.GetExamCountRequest{})
-		if err == nil { examCount = resp.Count } else { errExam = err }
+		if err == nil {
+			examCount = resp.Count
+		} else {
+			errExam = err
+		}
 	}()
 
 	wg.Wait()

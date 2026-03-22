@@ -51,6 +51,9 @@ func (h *gRPCHandler) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 func (h *gRPCHandler) ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error) {
 	return h.service.ImportQuestions(ctx, req)
 }
+func (h *gRPCHandler) CreateBulkQuestions(ctx context.Context, req *pb.CreateBulkQuestionsRequest) (*pb.CreateBulkQuestionsResponse, error) {
+	return h.service.CreateBulkQuestions(ctx, req)
+}
 func (h *gRPCHandler) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error) {
 	return h.service.UpdateQuestion(ctx, req)
 }

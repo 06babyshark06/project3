@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+    spec:
+      containers:
+        - name: ai-service
+          image: JQKStudy/ai-service
+          ports:
+            - containerPort: 9005
+          envFrom:
+            - configMapRef:
+                name: app-config
+          env:
+            - name: AI_GRPC_ADDR
+              value: ":9005"
+            - name: GEMINI_API_KEY
+              value: "AIzaSyBzG1zFxIfoEBaCkNZ0Q0Z8feODqE-q60Q"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-service
+spec:
+  selector:
+    app: ai-service
+  ports:
+    - port: 9005
+      protocol: TCP
+      name: grpc
+      targetPort: 9005
+  type: ClusterIP

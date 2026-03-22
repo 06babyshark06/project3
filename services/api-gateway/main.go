@@ -42,6 +42,12 @@ func main() {
 	}
 	defer courseClient.Close()
 
+	aiClient, err := grpcclients.NewAIServiceClient()
+	if err != nil {
+		log.Fatalf("failed to connect to ai service: %v", err)
+	}
+	defer aiClient.Close()
+
 	jwtMiddleware, err := middlewares.NewJWTMiddleware(userClient)
 
 	userHandler := handlers.NewUserHandler(userClient)
@@ -50,6 +56,7 @@ func main() {
 	courseHandler := handlers.NewCourseHandler(courseClient)
 	statsHandler := handlers.NewStatsHandler(userClient, courseClient, examClient)
 	classHandler := handlers.NewClassHandler(userClient, examClient)
+	aiHandler := handlers.NewAIHandler(aiClient)
 
 	// Tạo router
 	r := gin.Default()
@@ -136,6 +143,7 @@ func main() {
 				instructorOnly.POST("/questions/import", examHandler.ImportQuestions)
 				instructorOnly.POST("/questions/upload-url", examHandler.GetUploadURL)
 				instructorOnly.POST("/questions", examHandler.CreateQuestion)
+				instructorOnly.POST("/questions/bulk", examHandler.CreateBulkQuestions)
 				instructorOnly.PUT("/questions/:id", examHandler.UpdateQuestion)
 				instructorOnly.DELETE("/questions/:id", examHandler.DeleteQuestion)
 				instructorOnly.GET("/questions/export", examHandler.ExportQuestions)
@@ -163,6 +171,8 @@ func main() {
 				instructorOnly.GET("/instructor/all-exams", examHandler.GetInstructorAllExams)
 				instructorOnly.POST("/classes/:id/exams", classHandler.AssignExamToClass)
 				instructorOnly.DELETE("/classes/:id/exams/:exam_id", classHandler.RemoveExamFromClass)
+
+				instructorOnly.POST("/ai/generate-questions", aiHandler.GenerateQuestions)
 			}
 
 			studentOnly := auth.Group("/")

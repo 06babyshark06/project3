@@ -16,6 +16,7 @@ service ExamService {
 
   rpc GetQuestions(GetQuestionsRequest) returns (GetQuestionsResponse);
   rpc CreateQuestion(CreateQuestionRequest) returns (CreateQuestionResponse);
+  rpc CreateBulkQuestions(CreateBulkQuestionsRequest) returns (CreateBulkQuestionsResponse);
   rpc GetQuestion(GetQuestionRequest) returns (GetQuestionResponse);
   rpc ImportQuestions(ImportQuestionsRequest) returns (ImportQuestionsResponse);
   rpc UpdateQuestion(UpdateQuestionRequest) returns (UpdateQuestionResponse);
@@ -90,6 +91,15 @@ message CreateQuestionRequest {
   string attachment_url = 8;
 }
 message CreateQuestionResponse { int64 id = 1; string content = 2; }
+
+message CreateBulkQuestionsRequest {
+  repeated CreateQuestionRequest questions = 1;
+}
+
+message CreateBulkQuestionsResponse { 
+  int32 success_count = 1; 
+  string message = 2;
+}
 
 message GetUploadURLRequest {
   string file_name = 1;
@@ -207,6 +217,8 @@ message SubmitExamRequest {
   repeated UserAnswer answers = 3;
   string ip_address = 4;
   string user_agent = 5;
+  string email = 6;
+  string full_name = 7;
 }
 message SubmitExamResponse { int64 submission_id = 1; float score = 2; int32 correct_count = 3; int32 total_questions = 4; }
 

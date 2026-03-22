@@ -160,6 +160,52 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 	return &pb.CreateQuestionResponse{Id: qID, Content: req.Content}, nil
 }
 
+func (s *examService) CreateBulkQuestions(ctx context.Context, req *pb.CreateBulkQuestionsRequest) (*pb.CreateBulkQuestionsResponse, error) {
+	if len(req.Questions) == 0 {
+		return &pb.CreateBulkQuestionsResponse{SuccessCount: 0, Message: "Không có câu hỏi nào để lưu"}, nil
+	}
+
+	var successCount int32
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		for _, qReq := range req.Questions {
+			section, err := s.repo.GetSectionByID(ctx, qReq.SectionId)
+			if err != nil {
+				return fmt.Errorf("section not found for question: %s", qReq.Content)
+			}
+			diff, _ := s.repo.GetDifficulty(ctx, qReq.Difficulty)
+			qType, _ := s.repo.GetQuestionType(ctx, qReq.QuestionType)
+
+			question := &domain.QuestionModel{
+				SectionID: qReq.SectionId, TopicID: section.TopicID, CreatorID: qReq.CreatorId,
+				Content: qReq.Content, TypeID: qType.Id, DifficultyID: diff.Id,
+				Explanation: qReq.Explanation, AttachmentURL: qReq.AttachmentUrl,
+			}
+			createdQ, err := s.repo.CreateQuestion(ctx, tx, question)
+			if err != nil {
+				return err
+			}
+
+			var choices []*domain.ChoiceModel
+			for _, c := range qReq.Choices {
+				choices = append(choices, &domain.ChoiceModel{
+					QuestionID: createdQ.Id, Content: c.Content, IsCorrect: c.IsCorrect, AttachmentURL: c.AttachmentUrl,
+				})
+			}
+			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil {
+				return err
+			}
+			successCount++
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.CreateBulkQuestionsResponse{SuccessCount: successCount, Message: "Lưu hàng loạt câu hỏi thành công"}, nil
+}
+
 func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error) {
 	if len(req.FileContent) == 0 {
 		return nil, errors.New("file excel rỗng")
@@ -685,6 +731,9 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	}
 
 	var examTitle string
+	if examModel != nil {
+		examTitle = examModel.Title
+	}
 
 	eventPayload := contracts.ExamSubmittedEvent{
 		UserID:       req.UserId,
@@ -692,6 +741,8 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		SubmissionID: submission.Id,
 		ExamTitle:    examTitle,
 		Score:        finalScore,
+		FullName:     req.FullName,
+		Email:        req.Email,
 	}
 	eventBytes, _ := json.Marshal(eventPayload)
 	key := []byte(strconv.FormatInt(submission.Id, 10))

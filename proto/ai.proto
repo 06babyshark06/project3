@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package ai;
+
+option go_package = "shared/proto/ai;ai";
+
+service AIService {
+  rpc GenerateQuestionsFromAI(GenerateQuestionsFromAIRequest) returns (GenerateQuestionsFromAIResponse);
+}
+
+message GenerateQuestionsFromAIRequest {
+  string title = 1;
+  string content_text = 2; // Nội dung bóc tách được từ docx/pptx
+  string file_url = 3;     // URL file PDF trên cloud nếu muốn dùng Gemini File API (tuỳ chọn)
+  int32 question_count = 4;
+  string difficulty = 5;
+  string question_type = 6;
+  bytes file_bytes = 7;    // Truyền trực tiếp PDF hoặc DOCX qua RPC
+  string file_name = 8;
+  string mime_type = 9;    // application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  
+  string focus_topic = 10; // Trọng tâm yêu cầu đặc biệt
+  string language = 11;    // Ngôn ngữ mong muốn (VD: "Tiếng Việt")
+  int32 max_options = 12;  // Số lượng đáp án tối đa cho mỗi câu hỏi
+}
+
+message GeneratedChoice {
+  string content = 1;
+  bool is_correct = 2;
+}
+
+message GeneratedAIQuestion {
+  string question_text = 1;
+  repeated string options = 2 [deprecated = true]; 
+  string correct_answer = 3 [deprecated = true];   
+  string explanation = 4;
+  string difficulty = 5;
+  repeated GeneratedChoice choices = 6;
+}
+
+message GenerateQuestionsFromAIResponse {
+  bool success = 1;
+  string message = 2;
+  repeated GeneratedAIQuestion questions = 3;
+}

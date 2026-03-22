@@ -13,7 +13,7 @@ var ctx = context.Background()
 func InitRedis(addr string) {
 	Rdb = redis.NewClient(&redis.Options{
 		Addr:     addr,
-		Password: "", 
+		Password: "",
 		DB:       0,
 	})
 }

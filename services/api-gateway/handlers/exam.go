@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
@@ -285,6 +286,31 @@ func (h *ExamHandler) CreateQuestion(c *gin.Context) {
 	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
 }
 
+func (h *ExamHandler) CreateBulkQuestions(c *gin.Context) {
+	var req pb.CreateBulkQuestionsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, q := range req.Questions {
+		q.CreatorId = userID
+	}
+
+	resp, err := h.examClient.CreateBulkQuestions(c.Request.Context(), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, contracts.APIResponse{Data: resp})
+}
+
 func (h *ExamHandler) CreateExam(c *gin.Context) {
 	var req struct {
 		Title       string  `json:"title" binding:"required"`
@@ -367,12 +393,18 @@ func (h *ExamHandler) SubmitExam(c *gin.Context) {
 	}
 	req.UserId = userID
 
+	claims := jwt.ExtractClaims(c)
+	fullName := fmt.Sprintf("%v", claims["full_name"])
+	email := fmt.Sprintf("%v", claims["email"])
+
 	resp, err := h.examClient.SubmitExam(c.Request.Context(), &pb.SubmitExamRequest{
 		ExamId:    req.ExamId,
 		UserId:    userID,
 		Answers:   req.Answers,
 		IpAddress: c.ClientIP(),
 		UserAgent: c.GetHeader("User-Agent"),
+		FullName:  fullName,
+		Email:     email,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -432,14 +464,25 @@ func (h *ExamHandler) GetExams(c *gin.Context) {
 	}
 
 	userMap := make(map[int64]string)
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
 	for _, uid := range creatorIDs {
-		profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: uid})
-		if err == nil && profile != nil {
-			userMap[uid] = profile.FullName
-		} else {
-			userMap[uid] = fmt.Sprintf("User #%d", uid)
-		}
+		wg.Add(1)
+		go func(id int64) {
+			defer wg.Done()
+			profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: id})
+
+			mu.Lock()
+			defer mu.Unlock()
+			if err == nil && profile != nil {
+				userMap[id] = profile.FullName
+			} else {
+				userMap[id] = fmt.Sprintf("User #%d", id)
+			}
+		}(uid)
 	}
+	wg.Wait()
 
 	type ExamWithCreator struct {
 		*pb.ExamListItem
@@ -1096,14 +1139,25 @@ func (h *ExamHandler) GetExamSubmissions(c *gin.Context) {
 	}
 
 	userMap := make(map[int64]string)
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+
 	for _, uid := range userIDs {
-		profile, _ := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: uid})
-		if profile != nil {
-			userMap[uid] = profile.FullName
-		} else {
-			userMap[uid] = fmt.Sprintf("User #%d", uid)
-		}
+		wg.Add(1)
+		go func(id int64) {
+			defer wg.Done()
+			profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: id})
+
+			mu.Lock()
+			defer mu.Unlock()
+			if err == nil && profile != nil {
+				userMap[id] = profile.FullName
+			} else {
+				userMap[id] = fmt.Sprintf("User #%d", id)
+			}
+		}(uid)
 	}
+	wg.Wait()
 
 	for _, sub := range resp.Submissions {
 		if name, ok := userMap[sub.UserId]; ok {

@@ -164,6 +164,36 @@ k8s_yaml('./infra/development/k8s/notification-service-deployment.yaml')
 k8s_resource('notification-service', resource_deps=['notification-service-compile', 'postgres'], labels="services")
 
 ### End of Course Service ###
+### AI Service ###
+
+ai_compile_cmd = 'CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build/ai-service ./services/ai-service/cmd/main.go'
+if os.name == 'nt':
+ ai_compile_cmd = './infra/development/docker/ai-build.bat'
+
+local_resource(
+  'ai-service-compile',
+  ai_compile_cmd,
+  deps=['./services/ai-service', './shared'], labels="compiles")
+
+docker_build_with_restart(
+  'JQKStudy/ai-service',
+  '.',
+  entrypoint=['/app/build/ai-service'],
+  dockerfile='./infra/development/docker/ai-service.Dockerfile',
+  only=[
+    './build/ai-service',
+    './shared',
+  ],
+  live_update=[
+    sync('./build', '/app/build'),
+    sync('./shared', '/app/shared'),
+  ],
+)
+
+k8s_yaml('./infra/development/k8s/ai-service-deployment.yaml')
+k8s_resource('ai-service', resource_deps=['ai-service-compile'], labels="services")
+
+### End of AI Service ###
 ### Web Frontend ###
 
 # docker_build(
