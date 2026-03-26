@@ -229,3 +229,7 @@ k8s_yaml('./infra/development/k8s/redis-deployment.yaml')
 
 k8s_resource('redis', port_forwards=6379, labels="redis")
 ### End of Redis ###
+
+### PgBouncer ###
+k8s_yaml('./infra/development/k8s/pgbouncer-deployment.yaml')
+k8s_resource('pgbouncer', port_forwards=6432, labels="postgres")

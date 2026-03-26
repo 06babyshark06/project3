@@ -44,3 +44,16 @@ func GetCache(key string) (string, error) {
 func DeleteCache(key string) error {
 	return Rdb.Del(ctx, "cache:"+key).Err()
 }
+
+// Rate Limiting
+func CheckRateLimit(key string, limit int, window time.Duration) (int, bool, error) {
+	fullKey := "ratelimit:" + key
+	count, err := Rdb.Incr(ctx, fullKey).Result()
+	if err != nil {
+		return 0, false, err
+	}
+	if count == 1 {
+		Rdb.Expire(ctx, fullKey, window)
+	}
+	return int(count), int(count) <= limit, nil
+}

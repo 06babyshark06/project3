@@ -73,13 +73,14 @@ func main() {
 	})
 
 	api := r.Group("/api/v1")
+	api.Use(middlewares.RateLimiter())
 	{
 		api.POST("/login", authHandler.Login)
 		api.POST("/register", authHandler.Register)
 		api.POST("/refresh", authHandler.Refresh)
 		api.GET("/courses", courseHandler.GetCourses)
 		api.GET("/health", healthHandler.Check)
-		api.GET("/stats", statsHandler.GetAdminStats) // Di chuyển ra ngoài nếu muốn public hoặc để trong auth tùy ý, ở đây tôi để public mẫu
+		api.GET("/stats", statsHandler.GetAdminStats)
 
 		auth := api.Group("/")
 		auth.Use(jwtMiddleware.MiddlewareFunc())
