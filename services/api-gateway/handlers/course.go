@@ -1,22 +1,32 @@
 package handlers
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"sync"
+	"time"
 
+	"github.com/06babyshark06/JQKStudy/services/api-gateway/redis"
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/course"
+	userpb "github.com/06babyshark06/JQKStudy/shared/proto/user"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
 type CourseHandler struct {
 	courseClient pb.CourseServiceClient
+	userClient   userpb.UserServiceClient
 }
 
-func NewCourseHandler(client *grpcclients.CourseServiceClient) *CourseHandler {
-	return &CourseHandler{courseClient: client.Client}
+func NewCourseHandler(client *grpcclients.CourseServiceClient, userClient *grpcclients.UserServiceClient) *CourseHandler {
+	return &CourseHandler{
+		courseClient: client.Client,
+		userClient:   userClient.Client,
+	}
 }
 
 func (h *CourseHandler) GetCourses(c *gin.Context) {
@@ -26,6 +36,20 @@ func (h *CourseHandler) GetCourses(c *gin.Context) {
 	maxPrice, _ := strconv.ParseFloat(c.Query("max_price"), 64)
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "9"))
+
+	// 1. Chỉ Cache trang 1 mặc định (Public home)
+	isCacheable := page == 1 && search == "" && minPrice == 0 && maxPrice == 0
+	cacheKey := "public_courses_page1"
+
+	if isCacheable {
+		if cachedData, err := redis.GetCache(cacheKey); err == nil {
+			var data gin.H
+			if err := json.Unmarshal([]byte(cachedData), &data); err == nil {
+				c.JSON(http.StatusOK, contracts.APIResponse{Data: data})
+				return
+			}
+		}
+	}
 
 	req := &pb.GetCoursesRequest{
 		Page:     int32(page),
@@ -42,7 +66,65 @@ func (h *CourseHandler) GetCourses(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+	// Tối ưu hóa: Lấy thông tin Instructor đồng thời dùng WaitGroup
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	instructorNames := make(map[int64]string)
+
+	uniqueInstructorIDs := make(map[int64]bool)
+	for _, course := range resp.Courses {
+		if course.InstructorId != 0 {
+			uniqueInstructorIDs[course.InstructorId] = true
+		}
+	}
+
+	for id := range uniqueInstructorIDs {
+		wg.Add(1)
+		go func(instructorID int64) {
+			defer wg.Done()
+			profile, err := h.userClient.GetProfile(context.Background(), &userpb.GetProfileRequest{UserId: instructorID})
+			if err == nil {
+				mu.Lock()
+				instructorNames[instructorID] = profile.FullName
+				mu.Unlock()
+			}
+		}(id)
+	}
+	wg.Wait()
+
+	// Gắn tên Instructor vào response
+	type CourseWithInstructor struct {
+		*pb.Course
+		InstructorName string `json:"instructor_name"`
+	}
+
+	enrichedCourses := make([]CourseWithInstructor, len(resp.Courses))
+	for i, course := range resp.Courses {
+		name := "Unknown"
+		if n, ok := instructorNames[course.InstructorId]; ok {
+			name = n
+		}
+		enrichedCourses[i] = CourseWithInstructor{
+			Course:         course,
+			InstructorName: name,
+		}
+	}
+
+	responseData := gin.H{
+		"courses":     enrichedCourses,
+		"total":       resp.Total,
+		"page":        resp.Page,
+		"total_pages": resp.TotalPages,
+	}
+
+	// 3. Cache kết quả
+	if isCacheable {
+		if jsonData, err := json.Marshal(responseData); err == nil {
+			redis.SetCache(cacheKey, string(jsonData), 5*time.Minute)
+		}
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: responseData})
 }
 
 func (h *CourseHandler) CreateCourse(c *gin.Context) {

@@ -348,7 +348,7 @@ npm run dev
 | Frontend | http://localhost:4001 |
 | API Gateway | http://localhost:8081 |
 | PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
+| Redis | redis:6379 |
 
 ---
 

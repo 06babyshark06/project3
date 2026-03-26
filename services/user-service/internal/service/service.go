@@ -4,13 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"time"
 
+	database "github.com/06babyshark06/JQKStudy/services/user-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/user-service/internal/domain"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/user"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,18 +26,61 @@ func NewUserService(repo domain.UserRepository, producer domain.EventProducer) d
 	return &userService{repo: repo, producer: producer}
 }
 
-func (s *userService) GetProfile(ctx context.Context, userId *pb.GetProfileRequest) (*pb.GetProfileResponse, error) {
-	user, err := s.repo.GetUserById(ctx, userId.UserId)
+func (s *userService) getUserVersion(ctx context.Context, userID int64) string {
+	if database.RedisClient == nil {
+		return "0"
+	}
+	v, err := database.RedisClient.Get(ctx, fmt.Sprintf("user:version:%d", userID)).Result()
+	if err == redis.Nil {
+		database.RedisClient.Set(ctx, fmt.Sprintf("user:version:%d", userID), "1", 24*time.Hour)
+		return "1"
+	}
+	return v
+}
+
+func (s *userService) invalidateUserCache(ctx context.Context, userID int64) {
+	if database.RedisClient == nil {
+		return
+	}
+	database.RedisClient.Incr(ctx, fmt.Sprintf("user:version:%d", userID))
+	log.Printf("♻️ Invalidated cache for user %d", userID)
+}
+
+func (s *userService) GetProfile(ctx context.Context, req *pb.GetProfileRequest) (*pb.GetProfileResponse, error) {
+	// Try to get from cache
+	version := s.getUserVersion(ctx, req.UserId)
+	cacheKey := fmt.Sprintf("user:profile:%d:v:%s", req.UserId, version)
+
+	if database.RedisClient != nil {
+		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
+		if err == nil {
+			var resp pb.GetProfileResponse
+			if err := json.Unmarshal([]byte(cachedData), &resp); err == nil {
+				log.Printf("🔹 Cache Hit: %s", cacheKey)
+				return &resp, nil
+			}
+		}
+	}
+
+	user, err := s.repo.GetUserById(ctx, req.UserId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.GetProfileResponse{
+	resp := &pb.GetProfileResponse{
 		Id:       user.Id,
 		FullName: user.FullName,
 		Email:    user.Email,
 		Role:     user.Role.Name,
-	}, nil
+	}
+
+	// Save to cache
+	if database.RedisClient != nil {
+		data, _ := json.Marshal(resp)
+		database.RedisClient.Set(ctx, cacheKey, data, 1*time.Hour)
+	}
+
+	return resp, nil
 }
 
 func (s *userService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -151,9 +197,11 @@ func (s *userService) GetUserCount(ctx context.Context, req *pb.GetUserCountRequ
 }
 
 func (s *userService) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*pb.DeleteUserResponse, error) {
-
 	if err := s.repo.DeleteUser(ctx, req.Id); err != nil {
 		return nil, err
+	}
+	if database.RedisClient != nil {
+		database.RedisClient.Del(ctx, fmt.Sprintf("user:version:%d", req.Id))
 	}
 	return &pb.DeleteUserResponse{Success: true}, nil
 }
@@ -176,7 +224,7 @@ func (s *userService) UpdateUserRole(ctx context.Context, req *pb.UpdateUserRole
 	if _, err := s.repo.UpdateUser(ctx, user); err != nil {
 		return nil, err
 	}
-
+	s.invalidateUserCache(ctx, req.Id)
 	return &pb.UpdateUserRoleResponse{Success: true}, nil
 }
 
@@ -198,7 +246,7 @@ func (s *userService) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest)
 	if err != nil {
 		return nil, err
 	}
-
+	s.invalidateUserCache(ctx, req.Id)
 	return &pb.UpdateUserResponse{
 		Id:       updatedUser.Id,
 		FullName: updatedUser.FullName,
@@ -228,7 +276,7 @@ func (s *userService) UpdatePassword(ctx context.Context, req *pb.UpdatePassword
 	if _, err := s.repo.UpdateUser(ctx, user); err != nil {
 		return nil, err
 	}
-
+	s.invalidateUserCache(ctx, req.Id)
 	return &pb.UpdatePasswordResponse{Success: true}, nil
 }
 
@@ -359,6 +407,66 @@ func (s *userService) AddMembers(ctx context.Context, req *pb.AddMembersRequest)
 		}
 	}
 	return &pb.AddMembersResponse{SuccessCount: int32(success), FailedEmails: failed}, nil
+}
+
+func (s *userService) AddMembersBulk(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error) {
+	class, err := s.repo.GetClassByID(ctx, req.ClassId)
+	if err != nil {
+		return nil, errors.New("class not found")
+	}
+
+	// Check requester permission
+	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
+	if err != nil {
+		return nil, errors.New("requester not found")
+	}
+
+	// Validate: must be Owner OR Admin
+	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
+		return nil, errors.New("unauthorized")
+	}
+
+	// 1. Lấy tất cả user có email trong danh sách (Bulk fetch)
+	users, err := s.repo.GetUsersByEmails(ctx, req.Emails)
+	if err != nil {
+		return nil, err
+	}
+
+	foundEmails := make(map[string]int64)
+	for _, u := range users {
+		foundEmails[u.Email] = u.Id
+	}
+
+	failed := []string{}
+	membersToAdd := []*domain.ClassMemberModel{}
+	now := time.Now().UTC()
+
+	// 2. Phân loại email tìm thấy và không tìm thấy
+	for _, email := range req.Emails {
+		if id, ok := foundEmails[email]; ok {
+			membersToAdd = append(membersToAdd, &domain.ClassMemberModel{
+				ClassID:  req.ClassId,
+				UserID:   id,
+				Role:     "student",
+				JoinedAt: now,
+			})
+		} else {
+			failed = append(failed, email)
+		}
+	}
+
+	// 3. Thực hiện Bulk Insert vào Class Members
+	if len(membersToAdd) > 0 {
+		err = s.repo.AddClassMembersBulk(ctx, membersToAdd)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &pb.AddMembersResponse{
+		SuccessCount: int32(len(membersToAdd)),
+		FailedEmails: failed,
+	}, nil
 }
 
 func (s *userService) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {

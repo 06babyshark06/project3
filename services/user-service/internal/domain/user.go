@@ -33,6 +33,7 @@ type UserPayload struct {
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *UserModel) (*UserModel, error)
 	GetUserByEmail(ctx context.Context, email string) (*UserModel, error)
+	GetUsersByEmails(ctx context.Context, emails []string) ([]*UserModel, error)
 	GetUserById(ctx context.Context, id int64) (*UserModel, error)
 	UpdateUser(ctx context.Context, user *UserModel) (*UserModel, error)
 	DeleteUser(ctx context.Context, id int64) error
@@ -47,6 +48,7 @@ type UserRepository interface {
 	GetClasses(ctx context.Context, teacherID, studentID int64, limit, offset int) ([]*ClassModel, int64, error)
 
 	AddClassMember(ctx context.Context, member *ClassMemberModel) error
+	AddClassMembersBulk(ctx context.Context, members []*ClassMemberModel) error
 	RemoveClassMember(ctx context.Context, classID, userID int64) error
 	GetClassMember(ctx context.Context, classID, userID int64) (*ClassMemberModel, error)
 	GetClassByCode(ctx context.Context, code string) (*ClassModel, error)
@@ -75,6 +77,7 @@ type UserService interface {
 	GetClasses(ctx context.Context, req *pb.GetClassesRequest) (*pb.GetClassesResponse, error)
 	GetClassDetails(ctx context.Context, req *pb.GetClassDetailsRequest) (*pb.GetClassDetailsResponse, error)
 	AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error)
+	AddMembersBulk(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error)
 	RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error)
 	CheckUserInClass(ctx context.Context, req *pb.CheckUserInClassRequest) (*pb.CheckUserInClassResponse, error)
 	JoinClassByCode(ctx context.Context, req *pb.JoinClassByCodeRequest) (*pb.JoinClassByCodeResponse, error)

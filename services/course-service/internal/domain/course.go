@@ -81,6 +81,7 @@ type CourseRepository interface {
 	CreateLessonProgress(ctx context.Context, tx *gorm.DB, progress *LessonProgressModel) error
 	GetLessonProgress(ctx context.Context, userID int64, lessonID int64) (*LessonProgressModel, error)
 	GetCompletedLessonIDs(ctx context.Context, userID int64, courseID int64) (map[int64]bool, error)
+	GetCoursesProgress(ctx context.Context, userID int64, courseIDs []int64) (map[int64]int32, error)
 
 	UpdateCourse(ctx context.Context, tx *gorm.DB, courseID int64, updates map[string]interface{}) error
     UpdateSection(ctx context.Context, tx *gorm.DB, sectionID int64, title string) error
@@ -90,6 +91,9 @@ type CourseRepository interface {
 	UpdateCourseStatus(ctx context.Context, tx *gorm.DB, courseID int64, isPublished bool) error
 	CountCourses(ctx context.Context) (int64, error)
 	DeleteCourse(ctx context.Context, tx *gorm.DB, courseID int64) error
+
+	GetCourseIDBySectionID(ctx context.Context, sectionID int64) (int64, error)
+	GetCourseIDByLessonID(ctx context.Context, lessonID int64) (int64, error)
 }
 
 type EventProducer interface {

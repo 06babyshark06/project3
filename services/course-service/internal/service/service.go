@@ -19,6 +19,7 @@ import (
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	"github.com/06babyshark06/JQKStudy/shared/env"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/course"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -156,7 +157,42 @@ func (s *courseService) GetCourses(ctx context.Context, req *pb.GetCoursesReques
 	return &pb.GetCoursesResponse{Courses: pbCourses, Total: total, Page: int32(req.Page), TotalPages: int32(int32(total)/int32(req.Limit))}, nil
 }
 
+func (s *courseService) getCourseVersion(ctx context.Context, courseID int64) string {
+	if database.RedisClient == nil {
+		return "0"
+	}
+	v, err := database.RedisClient.Get(ctx, fmt.Sprintf("course:version:%d", courseID)).Result()
+	if err == redis.Nil {
+		database.RedisClient.Set(ctx, fmt.Sprintf("course:version:%d", courseID), "1", 24*time.Hour)
+		return "1"
+	}
+	return v
+}
+
+func (s *courseService) invalidateCourseCache(ctx context.Context, courseID int64) {
+	if database.RedisClient == nil {
+		return
+	}
+	database.RedisClient.Incr(ctx, fmt.Sprintf("course:version:%d", courseID))
+	log.Printf("♻️ Invalidated cache for course %d", courseID)
+}
+
 func (s *courseService) GetCourseDetails(ctx context.Context, req *pb.GetCourseDetailsRequest) (*pb.GetCourseDetailsResponse, error) {
+	// Try to get from cache
+	version := s.getCourseVersion(ctx, req.CourseId)
+	cacheKey := fmt.Sprintf("course:details:%d:v:%s:user:%d", req.CourseId, version, req.UserId)
+	
+	if database.RedisClient != nil {
+		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
+		if err == nil {
+			var resp pb.GetCourseDetailsResponse
+			if err := json.Unmarshal([]byte(cachedData), &resp); err == nil {
+				log.Printf("🔹 Cache Hit: %s", cacheKey)
+				return &resp, nil
+			}
+		}
+	}
+
 	courseModel, err := s.repo.GetCourseDetails(ctx, req.CourseId)
 	if err != nil {
 		return nil, err
@@ -172,6 +208,12 @@ func (s *courseService) GetCourseDetails(ctx context.Context, req *pb.GetCourseD
 		}
 
 		completedMap, _ = s.repo.GetCompletedLessonIDs(ctx, req.UserId, req.CourseId)
+	}
+
+	totalProgress := int32(0)
+	if req.UserId != 0 {
+		pMap, _ := s.repo.GetCoursesProgress(ctx, req.UserId, []int64{req.CourseId})
+		totalProgress = pMap[req.CourseId]
 	}
 
 	pbSections := []*pb.Section{}
@@ -197,7 +239,7 @@ func (s *courseService) GetCourseDetails(ctx context.Context, req *pb.GetCourseD
 		})
 	}
 
-	return &pb.GetCourseDetailsResponse{
+	resp := &pb.GetCourseDetailsResponse{
 		Course: &pb.Course{
 			Id:           courseModel.Id,
 			Title:        courseModel.Title,
@@ -206,10 +248,19 @@ func (s *courseService) GetCourseDetails(ctx context.Context, req *pb.GetCourseD
 			ThumbnailUrl: courseModel.ThumbnailURL,
 			Price:        courseModel.Price,
 			IsPublished:  courseModel.IsPublished,
+			Progress:     totalProgress,
 		},
 		Sections:   pbSections,
 		IsEnrolled: isEnrolled,
-	}, nil
+	}
+
+	// Save to cache
+	if database.RedisClient != nil {
+		data, _ := json.Marshal(resp)
+		database.RedisClient.Set(ctx, cacheKey, data, 1*time.Hour) // Longer TTL since we have versioning
+	}
+
+	return resp, nil
 }
 
 func (s *courseService) EnrollCourse(ctx context.Context, req *pb.EnrollCourseRequest) (*pb.EnrollCourseResponse, error) {
@@ -263,6 +314,14 @@ func (s *courseService) GetMyCourses(ctx context.Context, req *pb.GetMyCoursesRe
 		return nil, err
 	}
 
+	courseIDs := make([]int64, len(courses))
+	for i, c := range courses {
+		courseIDs[i] = c.Id
+	}
+
+	// Tối ưu: Lấy tiến độ hàng loạt cho tất cả khóa học đã đăng ký
+	progressMap, _ := s.repo.GetCoursesProgress(ctx, req.UserId, courseIDs)
+
 	var pbCourses []*pb.Course
 	for _, c := range courses {
 		pbCourses = append(pbCourses, &pb.Course{
@@ -273,6 +332,7 @@ func (s *courseService) GetMyCourses(ctx context.Context, req *pb.GetMyCoursesRe
 			ThumbnailUrl: c.ThumbnailURL,
 			Price:        c.Price,
 			IsPublished:  c.IsPublished,
+			Progress:     progressMap[c.Id],
 		})
 	}
 
@@ -371,36 +431,54 @@ func (s *courseService) UpdateCourse(ctx context.Context, req *pb.UpdateCourseRe
     if err != nil {
         return nil, err
     }
+	s.invalidateCourseCache(ctx, req.CourseId)
     return &pb.UpdateCourseResponse{Success: true}, nil
 }
 
 func (s *courseService) UpdateSection(ctx context.Context, req *pb.UpdateSectionRequest) (*pb.UpdateSectionResponse, error) {
+	courseID, _ := s.repo.GetCourseIDBySectionID(ctx, req.SectionId)
+
     err := database.DB.Transaction(func(tx *gorm.DB) error {
         return s.repo.UpdateSection(ctx, tx, req.SectionId, req.Title)
     })
     if err != nil {
         return nil, err
     }
+	if courseID != 0 {
+		s.invalidateCourseCache(ctx, courseID)
+	}
     return &pb.UpdateSectionResponse{Success: true}, nil
 }
 
 func (s *courseService) DeleteSection(ctx context.Context, req *pb.DeleteSectionRequest) (*pb.DeleteSectionResponse, error) {
+	// Get courseID before deleting for cache invalidation
+	courseID, _ := s.repo.GetCourseIDBySectionID(ctx, req.SectionId)
+
     err := database.DB.Transaction(func(tx *gorm.DB) error {
         return s.repo.DeleteSection(ctx, tx, req.SectionId)
     })
     if err != nil {
         return nil, err
     }
+	if courseID != 0 {
+		s.invalidateCourseCache(ctx, courseID)
+	}
     return &pb.DeleteSectionResponse{Success: true}, nil
 }
 
 func (s *courseService) DeleteLesson(ctx context.Context, req *pb.DeleteLessonRequest) (*pb.DeleteLessonResponse, error) {
+	// Get courseID before deleting
+	courseID, _ := s.repo.GetCourseIDByLessonID(ctx, req.LessonId)
+
     err := database.DB.Transaction(func(tx *gorm.DB) error {
         return s.repo.DeleteLesson(ctx, tx, req.LessonId)
     })
     if err != nil {
         return nil, err
     }
+	if courseID != 0 {
+		s.invalidateCourseCache(ctx, courseID)
+	}
     return &pb.DeleteLessonResponse{Success: true}, nil
 }
 
@@ -413,6 +491,10 @@ func (s *courseService) UpdateLesson(ctx context.Context, req *pb.UpdateLessonRe
         return s.repo.UpdateLesson(ctx, tx, req.LessonId, updates)
     })
     if err != nil { return nil, err }
+	
+	if courseID, err := s.repo.GetCourseIDByLessonID(ctx, req.LessonId); err == nil {
+		s.invalidateCourseCache(ctx, courseID)
+	}
     return &pb.UpdateLessonResponse{Success: true}, nil
 }
 
@@ -421,6 +503,7 @@ func (s *courseService) PublishCourse(ctx context.Context, req *pb.PublishCourse
         return s.repo.UpdateCourseStatus(ctx, tx, req.CourseId, req.IsPublished)
     })
     if err != nil { return nil, err }
+	s.invalidateCourseCache(ctx, req.CourseId)
     return &pb.PublishCourseResponse{Success: true}, nil
 }
 
@@ -435,5 +518,9 @@ func (s *courseService) DeleteCourse(ctx context.Context, req *pb.DeleteCourseRe
 		return s.repo.DeleteCourse(ctx, tx, req.CourseId)
 	})
 	if err != nil { return nil, err }
+
+	if database.RedisClient != nil {
+		database.RedisClient.Del(ctx, fmt.Sprintf("course:version:%d", req.CourseId))
+	}
 	return &pb.DeleteCourseResponse{Success: true}, nil
-}
+}

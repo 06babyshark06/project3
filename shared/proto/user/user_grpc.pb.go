@@ -34,6 +34,7 @@ const (
 	UserService_GetClasses_FullMethodName       = "/user.UserService/GetClasses"
 	UserService_GetClassDetails_FullMethodName  = "/user.UserService/GetClassDetails"
 	UserService_AddMembers_FullMethodName       = "/user.UserService/AddMembers"
+	UserService_AddMembersBulk_FullMethodName   = "/user.UserService/AddMembersBulk"
 	UserService_RemoveMember_FullMethodName     = "/user.UserService/RemoveMember"
 	UserService_CheckUserInClass_FullMethodName = "/user.UserService/CheckUserInClass"
 	UserService_JoinClassByCode_FullMethodName  = "/user.UserService/JoinClassByCode"
@@ -58,6 +59,7 @@ type UserServiceClient interface {
 	GetClasses(ctx context.Context, in *GetClassesRequest, opts ...grpc.CallOption) (*GetClassesResponse, error)
 	GetClassDetails(ctx context.Context, in *GetClassDetailsRequest, opts ...grpc.CallOption) (*GetClassDetailsResponse, error)
 	AddMembers(ctx context.Context, in *AddMembersRequest, opts ...grpc.CallOption) (*AddMembersResponse, error)
+	AddMembersBulk(ctx context.Context, in *AddMembersRequest, opts ...grpc.CallOption) (*AddMembersResponse, error)
 	RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error)
 	CheckUserInClass(ctx context.Context, in *CheckUserInClassRequest, opts ...grpc.CallOption) (*CheckUserInClassResponse, error)
 	JoinClassByCode(ctx context.Context, in *JoinClassByCodeRequest, opts ...grpc.CallOption) (*JoinClassByCodeResponse, error)
@@ -221,6 +223,16 @@ func (c *userServiceClient) AddMembers(ctx context.Context, in *AddMembersReques
 	return out, nil
 }
 
+func (c *userServiceClient) AddMembersBulk(ctx context.Context, in *AddMembersRequest, opts ...grpc.CallOption) (*AddMembersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddMembersResponse)
+	err := c.cc.Invoke(ctx, UserService_AddMembersBulk_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RemoveMemberResponse)
@@ -270,6 +282,7 @@ type UserServiceServer interface {
 	GetClasses(context.Context, *GetClassesRequest) (*GetClassesResponse, error)
 	GetClassDetails(context.Context, *GetClassDetailsRequest) (*GetClassDetailsResponse, error)
 	AddMembers(context.Context, *AddMembersRequest) (*AddMembersResponse, error)
+	AddMembersBulk(context.Context, *AddMembersRequest) (*AddMembersResponse, error)
 	RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error)
 	CheckUserInClass(context.Context, *CheckUserInClassRequest) (*CheckUserInClassResponse, error)
 	JoinClassByCode(context.Context, *JoinClassByCodeRequest) (*JoinClassByCodeResponse, error)
@@ -327,6 +340,9 @@ func (UnimplementedUserServiceServer) GetClassDetails(context.Context, *GetClass
 }
 func (UnimplementedUserServiceServer) AddMembers(context.Context, *AddMembersRequest) (*AddMembersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddMembers not implemented")
+}
+func (UnimplementedUserServiceServer) AddMembersBulk(context.Context, *AddMembersRequest) (*AddMembersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddMembersBulk not implemented")
 }
 func (UnimplementedUserServiceServer) RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveMember not implemented")
@@ -628,6 +644,24 @@ func _UserService_AddMembers_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_AddMembersBulk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddMembersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).AddMembersBulk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_AddMembersBulk_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).AddMembersBulk(ctx, req.(*AddMembersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_RemoveMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveMemberRequest)
 	if err := dec(in); err != nil {
@@ -748,6 +782,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddMembers",
 			Handler:    _UserService_AddMembers_Handler,
+		},
+		{
+			MethodName: "AddMembersBulk",
+			Handler:    _UserService_AddMembersBulk_Handler,
 		},
 		{
 			MethodName: "RemoveMember",

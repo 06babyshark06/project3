@@ -30,6 +30,7 @@ type Course struct {
 	ThumbnailUrl  string                 `protobuf:"bytes,5,opt,name=thumbnail_url,json=thumbnailUrl,proto3" json:"thumbnail_url,omitempty"`
 	Price         float64                `protobuf:"fixed64,6,opt,name=price,proto3" json:"price,omitempty"`
 	IsPublished   bool                   `protobuf:"varint,7,opt,name=is_published,json=isPublished,proto3" json:"is_published,omitempty"`
+	Progress      int32                  `protobuf:"varint,8,opt,name=progress,proto3" json:"progress,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -111,6 +112,13 @@ func (x *Course) GetIsPublished() bool {
 		return x.IsPublished
 	}
 	return false
+}
+
+func (x *Course) GetProgress() int32 {
+	if x != nil {
+		return x.Progress
+	}
+	return 0
 }
 
 type Section struct {
@@ -2085,7 +2093,7 @@ var File_course_proto protoreflect.FileDescriptor
 
 const file_course_proto_rawDesc = "" +
 	"\n" +
-	"\fcourse.proto\x12\x06course\"\xd3\x01\n" +
+	"\fcourse.proto\x12\x06course\"\xef\x01\n" +
 	"\x06Course\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -2093,7 +2101,8 @@ const file_course_proto_rawDesc = "" +
 	"\rinstructor_id\x18\x04 \x01(\x03R\finstructorId\x12#\n" +
 	"\rthumbnail_url\x18\x05 \x01(\tR\fthumbnailUrl\x12\x14\n" +
 	"\x05price\x18\x06 \x01(\x01R\x05price\x12!\n" +
-	"\fis_published\x18\a \x01(\bR\visPublished\"\x97\x01\n" +
+	"\fis_published\x18\a \x01(\bR\visPublished\x12\x1a\n" +
+	"\bprogress\x18\b \x01(\x05R\bprogress\"\x97\x01\n" +
 	"\aSection\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
 	"\tcourse_id\x18\x02 \x01(\x03R\bcourseId\x12\x14\n" +

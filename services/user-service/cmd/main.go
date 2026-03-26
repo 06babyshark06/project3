@@ -22,6 +22,7 @@ func main() {
 	addr := env.GetString("USER_GRPC_ADDR", ":9001")
 	
 	database.Connect()
+	database.InitRedis()
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("Failed to listen on %s: %v", addr, err)

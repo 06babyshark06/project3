@@ -33,6 +33,7 @@ message Course {
   string thumbnail_url = 5;
   double price = 6;
   bool is_published = 7;
+  int32 progress = 8;
 }
 
 message Section {

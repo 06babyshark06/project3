@@ -187,6 +187,44 @@ func (r *courseRepository) GetCompletedLessonIDs(ctx context.Context, userID int
 	return completedMap, nil
 }
 
+func (r *courseRepository) GetCoursesProgress(ctx context.Context, userID int64, courseIDs []int64) (map[int64]int32, error) {
+	if len(courseIDs) == 0 {
+		return make(map[int64]int32), nil
+	}
+
+	type ProgressResult struct {
+		CourseID  int64
+		Total     int64
+		Completed int64
+	}
+	var results []ProgressResult
+
+	// Query tính toán total lessons và completed lessons cho danh sách courseIDs
+	err := database.DB.WithContext(ctx).
+		Table("course_models c").
+		Select("c.id as course_id, COUNT(DISTINCT l.id) as total, COUNT(DISTINCT lp.lesson_id) as completed").
+		Joins("LEFT JOIN section_models s ON s.course_id = c.id").
+		Joins("LEFT JOIN lesson_models l ON l.section_id = s.id").
+		Joins("LEFT JOIN lesson_progress_models lp ON lp.lesson_id = l.id AND lp.user_id = ?", userID).
+		Where("c.id IN ?", courseIDs).
+		Group("c.id").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	progressMap := make(map[int64]int32)
+	for _, res := range results {
+		if res.Total == 0 {
+			progressMap[res.CourseID] = 0
+		} else {
+			progressMap[res.CourseID] = int32((float64(res.Completed) / float64(res.Total)) * 100)
+		}
+	}
+	return progressMap, nil
+}
+
 func (r *courseRepository) UpdateCourse(ctx context.Context, tx *gorm.DB, courseID int64, updates map[string]interface{}) error {
     if err := tx.WithContext(ctx).Model(&domain.CourseModel{}).Where("id = ?", courseID).Updates(updates).Error; err != nil {
         return err
@@ -279,4 +317,23 @@ func (r *courseRepository) DeleteCourse(ctx context.Context, tx *gorm.DB, course
 		return err
 	}
 	return nil
+}
+
+func (r *courseRepository) GetCourseIDBySectionID(ctx context.Context, sectionID int64) (int64, error) {
+	var section domain.SectionModel
+	if err := database.DB.WithContext(ctx).Select("course_id").First(&section, sectionID).Error; err != nil {
+		return 0, err
+	}
+	return section.CourseID, nil
+}
+
+func (r *courseRepository) GetCourseIDByLessonID(ctx context.Context, lessonID int64) (int64, error) {
+	var lesson domain.LessonModel
+	if err := database.DB.WithContext(ctx).
+		Select("section_models.course_id").
+		Joins("JOIN section_models ON section_models.id = lesson_models.section_id").
+		First(&lesson, lessonID).Error; err != nil {
+		return 0, err
+	}
+	return lesson.Section.CourseID, nil
 }

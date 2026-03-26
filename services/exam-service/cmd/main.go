@@ -21,7 +21,7 @@ func main() {
 	addr := env.GetString("EXAM_GRPC_ADDR", ":9002")
 
 	database.Connect()
-	database.ConnectRedis()
+	database.InitRedis()
 	if database.RedisClient != nil {
 		defer database.RedisClient.Close()
 	}

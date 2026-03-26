@@ -2,20 +2,22 @@ package redis
 
 import (
 	"context"
+	"log"
 	"time"
 
+	"github.com/06babyshark06/JQKStudy/shared/util"
 	"github.com/redis/go-redis/v9"
 )
 
 var Rdb *redis.Client
 var ctx = context.Background()
 
-func InitRedis(addr string) {
-	Rdb = redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: "",
-		DB:       0,
-	})
+func InitRedis() {
+	var err error
+	Rdb, err = util.InitRedis()
+	if err != nil {
+		log.Fatalf("LỖI: %v", err)
+	}
 }
 
 func SetRefreshToken(userID string, token string, ttl time.Duration) error {
@@ -28,4 +30,17 @@ func GetRefreshToken(userID string) (string, error) {
 
 func DeleteRefreshToken(userID string) error {
 	return Rdb.Del(ctx, "refresh:"+userID).Err()
+}
+
+// Caching Helpers
+func SetCache(key string, value interface{}, ttl time.Duration) error {
+	return Rdb.Set(ctx, "cache:"+key, value, ttl).Err()
+}
+
+func GetCache(key string) (string, error) {
+	return Rdb.Get(ctx, "cache:"+key).Result()
+}
+
+func DeleteCache(key string) error {
+	return Rdb.Del(ctx, "cache:"+key).Err()
 }

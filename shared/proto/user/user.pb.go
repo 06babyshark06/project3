@@ -2297,7 +2297,8 @@ const file_user_proto_rawDesc = "" +
 	"\x17JoinClassByCodeResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x12\x19\n" +
-	"\bclass_id\x18\x03 \x01(\x03R\aclassId2\xea\t\n" +
+	"\bclass_id\x18\x03 \x01(\x03R\aclassId2\xaf\n" +
+	"\n" +
 	"\vUserService\x129\n" +
 	"\bRegister\x12\x15.user.RegisterRequest\x1a\x16.user.RegisterResponse\x120\n" +
 	"\x05Login\x12\x12.user.LoginRequest\x1a\x13.user.LoginResponse\x12?\n" +
@@ -2318,7 +2319,8 @@ const file_user_proto_rawDesc = "" +
 	"GetClasses\x12\x17.user.GetClassesRequest\x1a\x18.user.GetClassesResponse\x12N\n" +
 	"\x0fGetClassDetails\x12\x1c.user.GetClassDetailsRequest\x1a\x1d.user.GetClassDetailsResponse\x12?\n" +
 	"\n" +
-	"AddMembers\x12\x17.user.AddMembersRequest\x1a\x18.user.AddMembersResponse\x12E\n" +
+	"AddMembers\x12\x17.user.AddMembersRequest\x1a\x18.user.AddMembersResponse\x12C\n" +
+	"\x0eAddMembersBulk\x12\x17.user.AddMembersRequest\x1a\x18.user.AddMembersResponse\x12E\n" +
 	"\fRemoveMember\x12\x19.user.RemoveMemberRequest\x1a\x1a.user.RemoveMemberResponse\x12Q\n" +
 	"\x10CheckUserInClass\x12\x1d.user.CheckUserInClassRequest\x1a\x1e.user.CheckUserInClassResponse\x12N\n" +
 	"\x0fJoinClassByCode\x12\x1c.user.JoinClassByCodeRequest\x1a\x1d.user.JoinClassByCodeResponseB\x18Z\x16shared/proto/user;userb\x06proto3"
@@ -2397,29 +2399,31 @@ var file_user_proto_depIdxs = []int32{
 	25, // 17: user.UserService.GetClasses:input_type -> user.GetClassesRequest
 	27, // 18: user.UserService.GetClassDetails:input_type -> user.GetClassDetailsRequest
 	30, // 19: user.UserService.AddMembers:input_type -> user.AddMembersRequest
-	32, // 20: user.UserService.RemoveMember:input_type -> user.RemoveMemberRequest
-	34, // 21: user.UserService.CheckUserInClass:input_type -> user.CheckUserInClassRequest
-	36, // 22: user.UserService.JoinClassByCode:input_type -> user.JoinClassByCodeRequest
-	1,  // 23: user.UserService.Register:output_type -> user.RegisterResponse
-	3,  // 24: user.UserService.Login:output_type -> user.LoginResponse
-	5,  // 25: user.UserService.GetProfile:output_type -> user.GetProfileResponse
-	7,  // 26: user.UserService.GetAllUsers:output_type -> user.GetAllUsersResponse
-	9,  // 27: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse
-	11, // 28: user.UserService.UpdateUserRole:output_type -> user.UpdateUserRoleResponse
-	13, // 29: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
-	15, // 30: user.UserService.UpdatePassword:output_type -> user.UpdatePasswordResponse
-	17, // 31: user.UserService.GetUserCount:output_type -> user.GetUserCountResponse
-	20, // 32: user.UserService.CreateClass:output_type -> user.CreateClassResponse
-	22, // 33: user.UserService.UpdateClass:output_type -> user.UpdateClassResponse
-	24, // 34: user.UserService.DeleteClass:output_type -> user.DeleteClassResponse
-	26, // 35: user.UserService.GetClasses:output_type -> user.GetClassesResponse
-	28, // 36: user.UserService.GetClassDetails:output_type -> user.GetClassDetailsResponse
-	31, // 37: user.UserService.AddMembers:output_type -> user.AddMembersResponse
-	33, // 38: user.UserService.RemoveMember:output_type -> user.RemoveMemberResponse
-	35, // 39: user.UserService.CheckUserInClass:output_type -> user.CheckUserInClassResponse
-	37, // 40: user.UserService.JoinClassByCode:output_type -> user.JoinClassByCodeResponse
-	23, // [23:41] is the sub-list for method output_type
-	5,  // [5:23] is the sub-list for method input_type
+	30, // 20: user.UserService.AddMembersBulk:input_type -> user.AddMembersRequest
+	32, // 21: user.UserService.RemoveMember:input_type -> user.RemoveMemberRequest
+	34, // 22: user.UserService.CheckUserInClass:input_type -> user.CheckUserInClassRequest
+	36, // 23: user.UserService.JoinClassByCode:input_type -> user.JoinClassByCodeRequest
+	1,  // 24: user.UserService.Register:output_type -> user.RegisterResponse
+	3,  // 25: user.UserService.Login:output_type -> user.LoginResponse
+	5,  // 26: user.UserService.GetProfile:output_type -> user.GetProfileResponse
+	7,  // 27: user.UserService.GetAllUsers:output_type -> user.GetAllUsersResponse
+	9,  // 28: user.UserService.DeleteUser:output_type -> user.DeleteUserResponse
+	11, // 29: user.UserService.UpdateUserRole:output_type -> user.UpdateUserRoleResponse
+	13, // 30: user.UserService.UpdateUser:output_type -> user.UpdateUserResponse
+	15, // 31: user.UserService.UpdatePassword:output_type -> user.UpdatePasswordResponse
+	17, // 32: user.UserService.GetUserCount:output_type -> user.GetUserCountResponse
+	20, // 33: user.UserService.CreateClass:output_type -> user.CreateClassResponse
+	22, // 34: user.UserService.UpdateClass:output_type -> user.UpdateClassResponse
+	24, // 35: user.UserService.DeleteClass:output_type -> user.DeleteClassResponse
+	26, // 36: user.UserService.GetClasses:output_type -> user.GetClassesResponse
+	28, // 37: user.UserService.GetClassDetails:output_type -> user.GetClassDetailsResponse
+	31, // 38: user.UserService.AddMembers:output_type -> user.AddMembersResponse
+	31, // 39: user.UserService.AddMembersBulk:output_type -> user.AddMembersResponse
+	33, // 40: user.UserService.RemoveMember:output_type -> user.RemoveMemberResponse
+	35, // 41: user.UserService.CheckUserInClass:output_type -> user.CheckUserInClassResponse
+	37, // 42: user.UserService.JoinClassByCode:output_type -> user.JoinClassByCodeResponse
+	24, // [24:43] is the sub-list for method output_type
+	5,  // [5:24] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name

@@ -94,6 +94,9 @@ func (h *gRPCHandler) GetClassDetails(ctx context.Context, req *pb.GetClassDetai
 func (h *gRPCHandler) AddMembers(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error) {
 	return h.service.AddMembers(ctx, req)
 }
+func (h *gRPCHandler) AddMembersBulk(ctx context.Context, req *pb.AddMembersRequest) (*pb.AddMembersResponse, error) {
+	return h.service.AddMembersBulk(ctx, req)
+}
 func (h *gRPCHandler) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequest) (*pb.RemoveMemberResponse, error) {
 	return h.service.RemoveMember(ctx, req)
 }

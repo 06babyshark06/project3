@@ -13,6 +13,7 @@ func InitRedis() {
 	var err error
 	RedisClient, err = util.InitRedis()
 	if err != nil {
-		log.Printf("⚠️ Cảnh báo: Không thể kết nối tới Redis trong exam-service: %v", err)
+		// Log error but don't fail if Redis is just for caching
+		log.Printf("⚠️ CẢNH BÁO: Không thể kết nối tới Redis trong course-service: %v. Caching sẽ bị vô hiệu hóa.", err)
 	}
 }

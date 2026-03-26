@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/06babyshark06/JQKStudy/services/ai-service/internal/databases"
 	"github.com/06babyshark06/JQKStudy/services/ai-service/internal/server"
 	"github.com/06babyshark06/JQKStudy/shared/env"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/ai"
@@ -18,6 +19,8 @@ import (
 func main() {
 	port := env.GetString("AI_GRPC_ADDR", ":9005")
 	geminiApiKey := env.GetString("GEMINI_API_KEY", "")
+
+	database.InitRedis()
 
 	if geminiApiKey == "" {
 		log.Println("WARNING: GEMINI_API_KEY is not set.")

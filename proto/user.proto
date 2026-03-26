@@ -202,6 +202,7 @@ service UserService {
   rpc GetClasses(GetClassesRequest) returns (GetClassesResponse);
   rpc GetClassDetails(GetClassDetailsRequest) returns (GetClassDetailsResponse);
   rpc AddMembers(AddMembersRequest) returns (AddMembersResponse);
+  rpc AddMembersBulk(AddMembersRequest) returns (AddMembersResponse);
   rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
   rpc CheckUserInClass(CheckUserInClassRequest) returns (CheckUserInClassResponse);
   rpc JoinClassByCode(JoinClassByCodeRequest) returns (JoinClassByCodeResponse);

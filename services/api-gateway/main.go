@@ -21,8 +21,7 @@ import (
 
 func main() {
 	httpAddr := env.GetString("HTTP_ADDR", ":8081")
-	redisAddr := env.GetString("REDIS_ADDR", "redis:6379")
-	redis.InitRedis(redisAddr)
+	redis.InitRedis()
 
 	userClient, err := grpcclients.NewUserServiceClient()
 	if err != nil {
@@ -53,10 +52,11 @@ func main() {
 	userHandler := handlers.NewUserHandler(userClient)
 	authHandler := handlers.NewAuthHandler(userClient, jwtMiddleware)
 	examHandler := handlers.NewExamHandler(examClient, userClient)
-	courseHandler := handlers.NewCourseHandler(courseClient)
+	courseHandler := handlers.NewCourseHandler(courseClient, userClient)
 	statsHandler := handlers.NewStatsHandler(userClient, courseClient, examClient)
 	classHandler := handlers.NewClassHandler(userClient, examClient)
 	aiHandler := handlers.NewAIHandler(aiClient)
+	healthHandler := handlers.NewHealthHandler(userClient.Client, courseClient.Client, examClient.Client)
 
 	// Tạo router
 	r := gin.Default()
@@ -78,6 +78,8 @@ func main() {
 		api.POST("/register", authHandler.Register)
 		api.POST("/refresh", authHandler.Refresh)
 		api.GET("/courses", courseHandler.GetCourses)
+		api.GET("/health", healthHandler.Check)
+		api.GET("/stats", statsHandler.GetAdminStats) // Di chuyển ra ngoài nếu muốn public hoặc để trong auth tùy ý, ở đây tôi để public mẫu
 
 		auth := api.Group("/")
 		auth.Use(jwtMiddleware.MiddlewareFunc())

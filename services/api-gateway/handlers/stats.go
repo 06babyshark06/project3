@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"sync"
+	"time"
 
+	"github.com/06babyshark06/JQKStudy/services/api-gateway/redis"
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	coursepb "github.com/06babyshark06/JQKStudy/shared/proto/course"
@@ -27,6 +30,16 @@ func NewStatsHandler(u *grpcclients.UserServiceClient, c *grpcclients.CourseServ
 }
 
 func (h *StatsHandler) GetAdminStats(c *gin.Context) {
+	// 1. Kiểm tra Cache trước
+	cacheKey := "admin_stats"
+	if cachedData, err := redis.GetCache(cacheKey); err == nil {
+		var data gin.H
+		if err := json.Unmarshal([]byte(cachedData), &data); err == nil {
+			c.JSON(http.StatusOK, contracts.APIResponse{Data: data})
+			return
+		}
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(3)
 
@@ -70,11 +83,18 @@ func (h *StatsHandler) GetAdminStats(c *gin.Context) {
 		return
 	}
 
+	statsData := gin.H{
+		"total_users":   userCount,
+		"total_courses": courseCount,
+		"total_exams":   examCount,
+	}
+
+	// 2. Lưu vào Cache (TTL 1 phút cho stats)
+	if jsonData, err := json.Marshal(statsData); err == nil {
+		redis.SetCache(cacheKey, string(jsonData), 1*time.Minute)
+	}
+
 	c.JSON(http.StatusOK, contracts.APIResponse{
-		Data: gin.H{
-			"total_users":   userCount,
-			"total_courses": courseCount,
-			"total_exams":   examCount,
-		},
+		Data: statsData,
 	})
 }

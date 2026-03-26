@@ -28,6 +28,14 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 	return &user, nil
 }
 
+func (r *userRepository) GetUsersByEmails(ctx context.Context, emails []string) ([]*domain.UserModel, error) {
+	var users []*domain.UserModel
+	if err := database.DB.WithContext(ctx).Preload("Role").Where("email IN ?", emails).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (r *userRepository) GetUserById(ctx context.Context, id int64) (*domain.UserModel, error) {
 	var user domain.UserModel
 	if err := database.DB.WithContext(ctx).Preload("Role").Where("id = ?", id).First(&user).Error; err != nil {
@@ -139,6 +147,14 @@ func (r *userRepository) GetClasses(ctx context.Context, teacherID, studentID in
 
 func (r *userRepository) AddClassMember(ctx context.Context, member *domain.ClassMemberModel) error {
 	return database.DB.WithContext(ctx).FirstOrCreate(member, domain.ClassMemberModel{ClassID: member.ClassID, UserID: member.UserID}).Error
+}
+
+func (r *userRepository) AddClassMembersBulk(ctx context.Context, members []*domain.ClassMemberModel) error {
+	if len(members) == 0 {
+		return nil
+	}
+	// Sử dụng Clause OnConflict để tránh lỗi khi user đã tồn tại trong lớp
+	return database.DB.WithContext(ctx).Create(members).Error
 }
 
 func (r *userRepository) RemoveClassMember(ctx context.Context, classID, userID int64) error {

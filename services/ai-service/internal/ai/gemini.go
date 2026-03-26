@@ -2,12 +2,16 @@ package ai
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/google/generative-ai-go/genai"
+	database "github.com/06babyshark06/JQKStudy/services/ai-service/internal/databases"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/ai"
+	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
 )
 
@@ -21,6 +25,19 @@ func NewGeminiClient(apiKey string) *GeminiClient {
 
 // GenerateQuestions formats the prompt and calls Gemini SDK
 func (c *GeminiClient) GenerateQuestions(ctx context.Context, req *pb.GenerateQuestionsFromAIRequest, text string) ([]*pb.GeneratedAIQuestion, error) {
+	// Try to get from cache
+	cacheKey := c.generateCacheKey(req, text)
+	if database.RedisClient != nil {
+		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
+		if err == nil {
+			var questions []*pb.GeneratedAIQuestion
+			if err := json.Unmarshal([]byte(cachedData), &questions); err == nil {
+				log.Printf("🔹 AI Cache Hit: %s", cacheKey)
+				return questions, nil
+			}
+		}
+	}
+
 	if c.apiKey == "" {
 		return nil, fmt.Errorf("GEMINI_API_KEY is missing")
 	}
@@ -126,5 +143,21 @@ Hãy soạn thảo cực kỳ cẩn thận, theo sát ngữ cảnh và đảm b�
 		})
 	}
 
+	// Save to cache
+	if database.RedisClient != nil {
+		data, _ := json.Marshal(grpcQuestions)
+		database.RedisClient.Set(ctx, cacheKey, data, 24*time.Hour)
+	}
+
 	return grpcQuestions, nil
+}
+
+func (c *GeminiClient) generateCacheKey(req *pb.GenerateQuestionsFromAIRequest, text string) string {
+	// Key includes all parameters that affect the output
+	keyData := fmt.Sprintf("%v|%v|%v|%v|%v|%v|%s",
+		req.QuestionCount, req.QuestionType, req.Difficulty,
+		req.Language, req.MaxOptions, req.FocusTopic, text)
+	
+	hash := md5.Sum([]byte(keyData))
+	return "ai:questions:" + hex.EncodeToString(hash[:])
 }

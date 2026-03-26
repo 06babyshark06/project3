@@ -142,7 +142,7 @@ func (h *ClassHandler) AddMembers(c *gin.Context) {
 	}
 	userID, _ := getUserIDFromContext(c)
 
-	resp, err := h.userClient.AddMembers(c.Request.Context(), &pbUser.AddMembersRequest{
+	resp, err := h.userClient.AddMembersBulk(c.Request.Context(), &pbUser.AddMembersRequest{
 		ClassId:   req.ClassId,
 		Emails:    req.Emails,
 		TeacherId: userID,
