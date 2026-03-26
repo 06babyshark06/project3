@@ -33,6 +33,7 @@ kind: Service
 metadata:
   name: user-service
 spec:
+  clusterIP: None
   selector:
     app: user-service
   ports:

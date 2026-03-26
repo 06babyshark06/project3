@@ -33,6 +33,7 @@ kind: Service
 metadata:
   name: exam-service
 spec:
+  clusterIP: None
   selector:
     app: exam-service
   ports:

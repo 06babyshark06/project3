@@ -38,6 +38,7 @@ kind: Service
 metadata:
   name: ai-service
 spec:
+  clusterIP: None
   selector:
     app: ai-service
   ports:

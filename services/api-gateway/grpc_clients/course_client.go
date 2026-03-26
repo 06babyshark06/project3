@@ -1,8 +1,6 @@
 package grpcclients
 
 import (
-	"time"
-
 	"github.com/06babyshark06/JQKStudy/shared/env"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/course"
 	"google.golang.org/grpc"
@@ -16,9 +14,11 @@ type CourseServiceClient struct {
 
 func NewCourseServiceClient() (*CourseServiceClient, error) {
 	courseServiceURL := env.GetString("COURSE_SERVICE_URL", "course-service:9003")
-	conn, err := grpc.NewClient(courseServiceURL, grpc.WithTransportCredentials(insecure.NewCredentials()),
+	conn, err := grpc.NewClient("dns:///"+courseServiceURL, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
 		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second))
+	)
 	if err != nil {
 		return nil, err
 	}

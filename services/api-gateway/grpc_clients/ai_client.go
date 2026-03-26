@@ -16,12 +16,11 @@ type AIServiceClient struct {
 
 func NewAIServiceClient() (*AIServiceClient, error) {
 	aiAddr := env.GetString("AI_GRPC_ADDR", "ai-service:9005")
-
-	opts := []grpc.DialOption{
+	conn, err := grpc.NewClient("dns:///"+aiAddr, 
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
-
-	conn, err := grpc.Dial(aiAddr, opts...)
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
+		grpc.WithBlock(),
+	)
 	if err != nil {
 		log.Printf("Failed to connect to ai service at %s: %v", aiAddr, err)
 		return nil, err

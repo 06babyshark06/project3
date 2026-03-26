@@ -1,8 +1,6 @@
 package grpcclients
 
 import (
-	"time"
-
 	"github.com/06babyshark06/JQKStudy/shared/env"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	"google.golang.org/grpc"
@@ -16,9 +14,11 @@ type ExamServiceClient struct {
 
 func NewExamServiceClient() (*ExamServiceClient, error) {
 	examServiceURL := env.GetString("EXAM_SERVICE_URL", "exam-service:9002")
-	conn, err := grpc.NewClient(examServiceURL, grpc.WithTransportCredentials(insecure.NewCredentials()),
+	conn, err := grpc.NewClient("dns:///"+examServiceURL, 
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
 		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second))
+	)
 	if err != nil {
 		return nil, err
 	}
