@@ -912,9 +912,27 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		}
 	}
 
+	var questions []*domain.QuestionModel
+	if examFull.IsDynamic {
+		sExam, err := s.repo.GetStudentExam(ctx, submission.ExamID, submission.UserID)
+		if err == nil {
+			var qIDs []int64
+			if err := json.Unmarshal([]byte(sExam.QuestionIDs), &qIDs); err == nil {
+				for _, qID := range qIDs {
+					q, err := s.repo.GetQuestionByID(ctx, qID)
+					if err == nil {
+						questions = append(questions, q)
+					}
+				}
+			}
+		}
+	} else {
+		questions = examFull.Questions
+	}
+
 	var pbDetails []*pb.SubmissionDetail
 
-	for _, q := range examFull.Questions {
+	for _, q := range questions {
 		var pbChoices []*pb.ChoiceReview
 
 		for _, c := range q.Choices {
@@ -955,7 +973,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		ExamTitle:      submission.Exam.Title,
 		Score:          float32(submission.Score),
 		CorrectCount:   int32(correctCount),
-		TotalQuestions: int32(len(examFull.Questions)),
+		TotalQuestions: int32(len(questions)),
 		Status:         submission.Status.Status,
 		SubmittedAt:    submittedAt,
 		Details:        pbDetails,
