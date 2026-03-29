@@ -55,6 +55,7 @@ service ExamService {
   rpc AssignExamToClass(AssignExamToClassRequest) returns (AssignExamToClassResponse);
   rpc UnassignExamFromClass(AssignExamToClassRequest) returns (AssignExamToClassResponse);
   rpc GetInstructorExams(GetInstructorExamsRequest) returns (GetInstructorExamsResponse);
+  rpc GetExamPreview(GetExamPreviewRequest) returns (GetExamDetailsResponse);
 }
 
 message Topic {
@@ -433,4 +434,8 @@ message Exam {
   string end_time = 11;
   int32 max_attempts = 12;
   int32 attempts_used = 13;
+}
+
+message GetExamPreviewRequest {
+  int64 exam_id = 1;
 }

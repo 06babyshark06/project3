@@ -326,6 +326,8 @@ func (h *ExamHandler) CreateExam(c *gin.Context) {
 			ShuffleQuestions      bool   `json:"shuffle_questions"`
 			ShowResultImmediately bool   `json:"show_result_immediately"`
 			RequiresApproval      bool   `json:"requires_approval"`
+			IsDynamic             bool   `json:"is_dynamic"`
+			DynamicConfig         string `json:"dynamic_config"`
 		} `json:"settings"`
 		Status string `json:"status"`
 	}
@@ -354,6 +356,8 @@ func (h *ExamHandler) CreateExam(c *gin.Context) {
 			ShuffleQuestions:      req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately,
 			RequiresApproval:      req.Settings.RequiresApproval,
+			IsDynamic:             req.Settings.IsDynamic,
+			DynamicConfig:         req.Settings.DynamicConfig,
 		},
 		Status: req.Status,
 	})
@@ -378,6 +382,24 @@ func (h *ExamHandler) GetExamDetails(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
+
+func (h *ExamHandler) GetExamPreview(c *gin.Context) {
+	examID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid exam id"})
+		return
+	}
+
+	resp, err := h.examClient.GetExamPreview(c.Request.Context(), &pb.GetExamPreviewRequest{
+		ExamId: examID,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
 
 func (h *ExamHandler) SubmitExam(c *gin.Context) {
 	var req pb.SubmitExamRequest
@@ -656,6 +678,8 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 			ShuffleQuestions      bool   `json:"shuffle_questions"`
 			ShowResultImmediately bool   `json:"show_result_immediately"`
 			RequiresApproval      bool   `json:"requires_approval"`
+			IsDynamic             bool   `json:"is_dynamic"`
+			DynamicConfig         string `json:"dynamic_config"`
 		} `json:"settings"`
 		Status string `json:"status"`
 	}
@@ -680,6 +704,8 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 			ShuffleQuestions:      req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately,
 			RequiresApproval:      req.Settings.RequiresApproval,
+			IsDynamic:             req.Settings.IsDynamic,
+			DynamicConfig:         req.Settings.DynamicConfig,
 		},
 		Status: req.Status,
 	})

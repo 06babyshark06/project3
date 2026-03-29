@@ -172,3 +172,6 @@ func (h *gRPCHandler) UnassignExamFromClass(ctx context.Context, req *pb.AssignE
 func (h *gRPCHandler) GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error) {
 	return h.service.GetExamSubmissions(ctx, req)
 }
+func (h *gRPCHandler) GetExamPreview(ctx context.Context, req *pb.GetExamPreviewRequest) (*pb.GetExamDetailsResponse, error) {
+	return h.service.GetExamPreview(ctx, req)
+}

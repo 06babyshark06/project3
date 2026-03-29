@@ -29,6 +29,7 @@ import (
 	"github.com/06babyshark06/JQKStudy/shared/env"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type examService struct {
@@ -218,9 +219,26 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 	}
 	defer f.Close()
 
-	rows, err := f.GetRows("Sheet1")
+	sheetName := "Sheet1"
+	sheets := f.GetSheetList()
+	if len(sheets) == 0 {
+		return nil, errors.New("file excel không có sheet nào")
+	}
+	found := false
+	for _, s := range sheets {
+		if s == "Sheet1" {
+			found = true
+			break
+		}
+	}
+	if !found {
+		sheetName = sheets[0]
+	}
+
+	log.Printf("📥 Đang import từ sheet: %s", sheetName)
+	rows, err := f.GetRows(sheetName)
 	if err != nil {
-		return nil, errors.New("không tìm thấy Sheet1")
+		return nil, fmt.Errorf("không thể đọc dữ liệu từ sheet %s: %v", sheetName, err)
 	}
 
 	topicCache := make(map[string]int64)
@@ -383,6 +401,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 		if err == nil {
 			successCount++
 		} else {
+			log.Printf("❌ Lỗi import dòng %d (%s): %v", i+1, content, err)
 			errorCount++
 		}
 	}
@@ -395,7 +414,7 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 	uniqueMap := make(map[int64]bool)
 
 	for _, cfg := range req.SectionConfigs {
-		ids, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, int(cfg.Count))
+		ids, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, int(cfg.Count), req.TopicId)
 		if err != nil {
 			continue
 		}
@@ -419,6 +438,7 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
 			TopicID: req.TopicId, CreatorID: req.CreatorId,
+			DynamicConfig: "{}", // Default to empty JSON object
 		}
 		if req.Settings.StartTime != "" {
 			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
@@ -506,6 +526,7 @@ func (s *examService) CheckExamAccess(ctx context.Context, req *pb.CheckExamAcce
 }
 
 func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest) (*pb.CreateExamResponse, error) {
+	log.Printf("RECEIVING CreateExam request: Title=%s, IsDynamic=%v", req.Title, req.Settings.IsDynamic)
 	var createdExam *domain.ExamModel
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		exam := &domain.ExamModel{
@@ -513,8 +534,13 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
 			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
-			IsDynamic: req.Settings.IsDynamic, DynamicConfig: req.Settings.DynamicConfig,
+			IsDynamic: req.Settings.IsDynamic,
 			TopicID: req.TopicId, CreatorID: req.CreatorId, Status: req.Status,
+		}
+		if req.Settings.DynamicConfig == "" {
+			exam.DynamicConfig = "{}"
+		} else {
+			exam.DynamicConfig = req.Settings.DynamicConfig
 		}
 		if req.Settings.StartTime != "" {
 			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
@@ -549,48 +575,7 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 
 	pbQuestions := []*pb.QuestionDetails{}
 	for _, q := range examModel.Questions {
-		pbChoices := []*pb.ChoiceDetails{}
-		for _, c := range q.Choices {
-			pbChoices = append(pbChoices, &pb.ChoiceDetails{
-				Id:            c.Id,
-				Content:       c.Content,
-				AttachmentUrl: c.AttachmentURL,
-			})
-		}
-		qType := "single_choice"
-		if q.Type.Type != "" {
-			qType = q.Type.Type
-		}
-		difficulty := "medium"
-		if q.Difficulty.Difficulty != "" {
-			difficulty = q.Difficulty.Difficulty
-		}
-		sectionName := ""
-		var sectionID int64 = 0
-		topicName := ""
-		var topicID int64 = 0
-
-		if q.Section != nil {
-			sectionName = q.Section.Name
-			sectionID = q.Section.Id
-			if q.Section.Topic != nil {
-				topicName = q.Section.Topic.Name
-				topicID = q.Section.Topic.Id
-			}
-		}
-		pbQuestions = append(pbQuestions, &pb.QuestionDetails{
-			Id:            q.Id,
-			Content:       q.Content,
-			Choices:       pbChoices,
-			QuestionType:  qType,
-			AttachmentUrl: q.AttachmentURL,
-			Difficulty:    difficulty,
-			Explanation:   q.Explanation,
-			SectionName:   sectionName,
-			TopicName:     topicName,
-			SectionId:     sectionID,
-			TopicId:       topicID,
-		})
+		pbQuestions = append(pbQuestions, s.convertToPBQuestion(q))
 	}
 
 	startTime := ""
@@ -604,17 +589,73 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 	}
 
 	return &pb.GetExamDetailsResponse{
-		Id:    examModel.Id,
-		Title: examModel.Title,
+		Id:          examModel.Id,
+		Title:       examModel.Title,
+		Description: examModel.Description,
 		Settings: &pb.ExamSettings{
 			DurationMinutes:       int32(examModel.DurationMinutes),
 			MaxAttempts:           int32(examModel.MaxAttempts),
+			Password:              examModel.Password,
 			StartTime:             startTime,
 			EndTime:               endTime,
 			ShuffleQuestions:      examModel.ShuffleQuestions,
 			ShowResultImmediately: examModel.ShowResultImmediately,
 			RequiresApproval:      examModel.RequiresApproval,
-			Password:              examModel.Password,
+			IsDynamic:             examModel.IsDynamic,
+			DynamicConfig:         examModel.DynamicConfig,
+		},
+		Questions: pbQuestions,
+		TopicId:   examModel.TopicID,
+		Status:    examModel.Status,
+	}, nil
+}
+
+func (s *examService) GetExamPreview(ctx context.Context, req *pb.GetExamPreviewRequest) (*pb.GetExamDetailsResponse, error) {
+	examModel, err := s.repo.GetExamDetails(ctx, req.ExamId)
+	if err != nil {
+		return nil, err
+	}
+
+	pbQuestions := []*pb.QuestionDetails{}
+
+	if examModel.IsDynamic {
+		var configs []struct {
+			SectionId  int64  `json:"section_id"`
+			Count      int    `json:"count"`
+			Difficulty string `json:"difficulty"`
+		}
+		if examModel.DynamicConfig != "" {
+			if err := json.Unmarshal([]byte(examModel.DynamicConfig), &configs); err != nil {
+				log.Printf("Lỗi parse DynamicConfig: %v", err)
+			}
+		}
+
+		for _, cfg := range configs {
+			// Correct signature: (sectionID int64, difficulty string, limit int, topicID int64)
+			questionIDs, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, cfg.Count, examModel.TopicID)
+			if err != nil {
+				continue
+			}
+			for _, qID := range questionIDs {
+				q, err := s.repo.GetQuestionByID(ctx, qID)
+				if err == nil {
+					pbQuestions = append(pbQuestions, s.convertToPBQuestion(q))
+				}
+			}
+		}
+	} else {
+		for _, q := range examModel.Questions {
+			pbQuestions = append(pbQuestions, s.convertToPBQuestion(q))
+		}
+	}
+
+	return &pb.GetExamDetailsResponse{
+		Id:    examModel.Id,
+		Title: examModel.Title,
+		Settings: &pb.ExamSettings{
+			DurationMinutes:       int32(examModel.DurationMinutes),
+			IsDynamic:             examModel.IsDynamic,
+			DynamicConfig:         examModel.DynamicConfig,
 		},
 		Questions:   pbQuestions,
 		TopicId:     examModel.TopicID,
@@ -622,6 +663,44 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 		Description: examModel.Description,
 	}, nil
 }
+
+func (s *examService) convertToPBQuestion(q *domain.QuestionModel) *pb.QuestionDetails {
+	pbChoices := []*pb.ChoiceDetails{}
+	for _, c := range q.Choices {
+		pbChoices = append(pbChoices, &pb.ChoiceDetails{
+			Id:            c.Id,
+			Content:       c.Content,
+			AttachmentUrl: c.AttachmentURL,
+		})
+	}
+	qType := "single_choice"
+	if q.Type.Type != "" {
+		qType = q.Type.Type
+	}
+	difficulty := "medium"
+	if q.Difficulty.Difficulty != "" {
+		difficulty = q.Difficulty.Difficulty
+	}
+	sectionName := ""
+	var sectionID int64 = 0
+	if q.Section != nil {
+		sectionName = q.Section.Name
+		sectionID = q.Section.Id
+	}
+
+	return &pb.QuestionDetails{
+		Id:            q.Id,
+		Content:       q.Content,
+		Choices:       pbChoices,
+		QuestionType:  qType,
+		AttachmentUrl: q.AttachmentURL,
+		Difficulty:    difficulty,
+		Explanation:   q.Explanation,
+		SectionName:   sectionName,
+		SectionId:     sectionID,
+	}
+}
+
 
 func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
 	// --- ANTI CHEAT: Kiểm tra Session Lock ---
@@ -1016,6 +1095,11 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 			updates["shuffle_questions"] = req.Settings.ShuffleQuestions
 			updates["show_result_immediately"] = req.Settings.ShowResultImmediately
 			updates["requires_approval"] = req.Settings.RequiresApproval
+			if req.Settings.DynamicConfig != "" {
+				updates["dynamic_config"] = req.Settings.DynamicConfig
+			} else {
+				updates["dynamic_config"] = "{}"
+			}
 
 			if req.Settings.StartTime != "" {
 				t, err := time.Parse(time.RFC3339, req.Settings.StartTime)
@@ -1605,7 +1689,18 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 	if examDetails.IsDynamic {
 		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
 		if err != nil {
-			return nil, fmt.Errorf("chưa có đề thi được sinh cho bạn (vui lòng chờ hệ thống xử lý)")
+			// --- FIX: Tự động sinh đề nếu chưa có (On-demand generation) ---
+			log.Printf("Bắt đầu sinh đề tự động cho User %d tại Exam %d", req.UserId, req.ExamId)
+			errGen := s.GeneratePersonalizedExamForStudents(ctx, req.ExamId, []int64{req.UserId})
+			if errGen != nil {
+				return nil, fmt.Errorf("không thể tự động sinh đề thi: %v", errGen)
+			}
+			
+			// Thử lấy lại sau khi sinh
+			sExam, err = s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
+			if err != nil {
+				return nil, fmt.Errorf("đề thi đang được sinh, vui lòng quay lại sau giây lát")
+			}
 		}
 		_ = json.Unmarshal([]byte(sExam.QuestionIDs), &qIDsToFetch)
 		orderMap = make(map[int64]int)
@@ -1621,6 +1716,11 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 			orderMap[id] = i
 		}
 	}
+	
+	if len(qIDsToFetch) == 0 {
+		return nil, errors.New("đề thi chưa có câu hỏi nào (vui lòng liên hệ giáo viên)")
+	}
+
 
 	if len(qIDsToFetch) > 0 {
 		pbQuestions = make([]*pb.QuestionDetails, len(qIDsToFetch))
@@ -1982,8 +2082,12 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 	if err != nil {
 		return err
 	}
-	if !examDetails.IsDynamic || examDetails.DynamicConfig == "" {
+	if !examDetails.IsDynamic {
 		return errors.New("đề thi không phải là dạng sinh động")
+	}
+	dynamicConfig := examDetails.DynamicConfig
+	if dynamicConfig == "" {
+		dynamicConfig = "{}"
 	}
 
 	// Parse JSON config
@@ -1992,7 +2096,7 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 		Count      int    `json:"count"`
 		Difficulty string `json:"difficulty"`
 	}
-	err = json.Unmarshal([]byte(examDetails.DynamicConfig), &configs)
+	err = json.Unmarshal([]byte(dynamicConfig), &configs)
 	if err != nil {
 		return errors.New("cấu hình sinh đề không hợp lệ")
 	}
@@ -2001,11 +2105,12 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 	// Map key là Index của config để phân biệt (phòng khi 1 exam có nhiều rules trùng SectionId)
 	configPools := make(map[int][]int64)
 	for i, cfg := range configs {
-		ids, err := s.repo.GetQuestionIDsForSection(ctx, cfg.SectionId, cfg.Difficulty)
+		ids, err := s.repo.GetQuestionIDsForSection(ctx, cfg.SectionId, cfg.Difficulty, examDetails.TopicID)
 		if err != nil {
 			log.Printf("Lỗi lấy danh sách câu hỏi cho section %d: %v", cfg.SectionId, err)
 			ids = []int64{}
 		}
+		log.Printf("Rule %d: Section=%d, Diff=%s, Topic=%d => Found %d questions", i, cfg.SectionId, cfg.Difficulty, examDetails.TopicID, len(ids))
 		configPools[i] = ids
 	}
 
@@ -2057,15 +2162,20 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 		}
 	}
 
-	// BƯỚC 3: BULK INSERT VÀO DATABASE
+	// BƯỚC 3: UPSERT VÀO DATABASE
 	if len(batchInserts) > 0 {
 		err := database.DB.Transaction(func(tx *gorm.DB) error {
-			return tx.WithContext(ctx).CreateInBatches(batchInserts, 200).Error
+			return tx.WithContext(ctx).Clauses(clause.OnConflict{
+				Columns:   []clause.Column{{Name: "exam_id"}, {Name: "user_id"}},
+				DoUpdates: clause.AssignmentColumns([]string{"question_ids", "created_at"}),
+			}).Create(&batchInserts).Error
 		})
 		if err != nil {
-			log.Printf("Lỗi Bulk Insert StudentExams cho exam %d: %v", examID, err)
+			log.Printf("Lỗi Upsert StudentExams cho exam %d: %v", examID, err)
 			return err
 		}
+	} else {
+		return errors.New("không tìm thấy đủ câu hỏi phù hợp để sinh đề")
 	}
 
 	return nil

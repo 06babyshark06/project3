@@ -201,8 +201,8 @@ type ExamRepository interface {
 	CreateChoices(ctx context.Context, tx *gorm.DB, choices []*ChoiceModel) error
 	GetQuestionType(ctx context.Context, typeName string) (*QuestionTypeModel, error)
 	GetDifficulty(ctx context.Context, level string) (*QuestionDifficultyModel, error)
-	GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int) ([]int64, error)
-	GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string) ([]int64, error)
+	GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int, topicID int64) ([]int64, error)
+	GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string, topicID int64) ([]int64, error)
 	UpdateQuestion(ctx context.Context, tx *gorm.DB, qID int64, updates map[string]interface{}) error
 	DeleteChoicesByQuestionID(ctx context.Context, tx *gorm.DB, qID int64) error
 	DeleteQuestion(ctx context.Context, tx *gorm.DB, questionID int64) error
@@ -303,5 +303,6 @@ type ExamService interface {
 	GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
 	UnassignExamFromClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
 	GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error)
+	GetExamPreview(ctx context.Context, req *pb.GetExamPreviewRequest) (*pb.GetExamDetailsResponse, error)
 	GeneratePersonalizedExamForStudents(ctx context.Context, examID int64, studentIDs []int64) error
 }

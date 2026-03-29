@@ -88,12 +88,18 @@ func (r *examRepository) CreateChoices(ctx context.Context, tx *gorm.DB, choices
 func (r *examRepository) GetQuestionType(ctx context.Context, typeName string) (*domain.QuestionTypeModel, error) {
 	var m domain.QuestionTypeModel
 	err := database.DB.WithContext(ctx).Where("type = ?", typeName).First(&m).Error
-	return &m, err
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
 func (r *examRepository) GetDifficulty(ctx context.Context, level string) (*domain.QuestionDifficultyModel, error) {
 	var m domain.QuestionDifficultyModel
 	err := database.DB.WithContext(ctx).Where("difficulty = ?", level).First(&m).Error
-	return &m, err
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
 func (r *examRepository) UpdateQuestion(ctx context.Context, tx *gorm.DB, qID int64, updates map[string]interface{}) error {
 	return tx.WithContext(ctx).Model(&domain.QuestionModel{}).Where("id = ?", qID).Updates(updates).Error
@@ -107,11 +113,17 @@ func (r *examRepository) DeleteQuestion(ctx context.Context, tx *gorm.DB, questi
 	return tx.WithContext(ctx).Delete(&domain.QuestionModel{}, questionID).Error
 }
 
-func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int) ([]int64, error) {
+func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int, topicID int64) ([]int64, error) {
 	var questionIDs []int64
-	query := database.DB.WithContext(ctx).Table("question_models").Select("DISTINCT question_models.id")
-	query = query.Where("section_id = ?", sectionID)
-	if difficulty != "" {
+	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("id")
+	
+	if sectionID > 0 {
+		query = query.Where("section_id = ?", sectionID)
+	} else if topicID > 0 {
+		query = query.Where("topic_id = ?", topicID)
+	}
+
+	if difficulty != "" && difficulty != "all" {
 		query = query.Joins("JOIN question_difficulty_models d ON question_models.difficulty_id = d.id").Where("d.difficulty = ?", difficulty)
 	}
 
@@ -119,10 +131,16 @@ func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectio
 	return questionIDs, err
 }
 
-func (r *examRepository) GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string) ([]int64, error) {
+func (r *examRepository) GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string, topicID int64) ([]int64, error) {
 	var questionIDs []int64
-	query := database.DB.WithContext(ctx).Table("question_models").Select("DISTINCT question_models.id")
-	query = query.Where("section_id = ?", sectionID)
+	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("id")
+	
+	if sectionID > 0 {
+		query = query.Where("section_id = ?", sectionID)
+	} else if topicID > 0 {
+		query = query.Where("topic_id = ?", topicID)
+	}
+
 	if difficulty != "" && difficulty != "all" {
 		query = query.Joins("JOIN question_difficulty_models d ON question_models.difficulty_id = d.id").Where("d.difficulty = ?", difficulty)
 	}

@@ -62,6 +62,7 @@ const (
 	ExamService_AssignExamToClass_FullMethodName     = "/exam.ExamService/AssignExamToClass"
 	ExamService_UnassignExamFromClass_FullMethodName = "/exam.ExamService/UnassignExamFromClass"
 	ExamService_GetInstructorExams_FullMethodName    = "/exam.ExamService/GetInstructorExams"
+	ExamService_GetExamPreview_FullMethodName        = "/exam.ExamService/GetExamPreview"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -111,6 +112,7 @@ type ExamServiceClient interface {
 	AssignExamToClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error)
 	UnassignExamFromClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error)
 	GetInstructorExams(ctx context.Context, in *GetInstructorExamsRequest, opts ...grpc.CallOption) (*GetInstructorExamsResponse, error)
+	GetExamPreview(ctx context.Context, in *GetExamPreviewRequest, opts ...grpc.CallOption) (*GetExamDetailsResponse, error)
 }
 
 type examServiceClient struct {
@@ -551,6 +553,16 @@ func (c *examServiceClient) GetInstructorExams(ctx context.Context, in *GetInstr
 	return out, nil
 }
 
+func (c *examServiceClient) GetExamPreview(ctx context.Context, in *GetExamPreviewRequest, opts ...grpc.CallOption) (*GetExamDetailsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetExamDetailsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetExamPreview_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -598,6 +610,7 @@ type ExamServiceServer interface {
 	AssignExamToClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error)
 	UnassignExamFromClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error)
 	GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error)
+	GetExamPreview(context.Context, *GetExamPreviewRequest) (*GetExamDetailsResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -736,6 +749,9 @@ func (UnimplementedExamServiceServer) UnassignExamFromClass(context.Context, *As
 }
 func (UnimplementedExamServiceServer) GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInstructorExams not implemented")
+}
+func (UnimplementedExamServiceServer) GetExamPreview(context.Context, *GetExamPreviewRequest) (*GetExamDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExamPreview not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -1532,6 +1548,24 @@ func _ExamService_GetInstructorExams_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GetExamPreview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExamPreviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetExamPreview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetExamPreview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetExamPreview(ctx, req.(*GetExamPreviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1710,6 +1744,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetInstructorExams",
 			Handler:    _ExamService_GetInstructorExams_Handler,
+		},
+		{
+			MethodName: "GetExamPreview",
+			Handler:    _ExamService_GetExamPreview_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -164,6 +164,7 @@ func main() {
 				instructorOnly.GET("/exams/:id/submissions", examHandler.GetExamSubmissions) // NEW ROUTE
 				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
 				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)
+				instructorOnly.GET("/exams/:id/preview", examHandler.GetExamPreview)
 
 				instructorOnly.POST("/classes", classHandler.CreateClass)
 				instructorOnly.PUT("/classes/:id", classHandler.UpdateClass)

@@ -118,11 +118,13 @@ func (r *userRepository) DeleteClass(ctx context.Context, id int64) error {
 
 func (r *userRepository) GetClassByID(ctx context.Context, id int64) (*domain.ClassModel, error) {
 	var class domain.ClassModel
-	err := database.DB.WithContext(ctx).
+	if err := database.DB.WithContext(ctx).
 		Preload("Teacher").
 		Preload("Members").Preload("Members.User").
-		First(&class, id).Error
-	return &class, err
+		First(&class, id).Error; err != nil {
+		return nil, err
+	}
+	return &class, nil
 }
 
 func (r *userRepository) GetClasses(ctx context.Context, teacherID, studentID int64, limit, offset int) ([]*domain.ClassModel, int64, error) {
@@ -164,7 +166,10 @@ func (r *userRepository) RemoveClassMember(ctx context.Context, classID, userID 
 func (r *userRepository) GetClassMember(ctx context.Context, classID, userID int64) (*domain.ClassMemberModel, error) {
 	var m domain.ClassMemberModel
 	err := database.DB.WithContext(ctx).Where("class_id = ? AND user_id = ?", classID, userID).First(&m).Error
-	return &m, err
+	if err != nil {
+		return nil, err
+	}
+	return &m, nil
 }
 
 func (r *userRepository) GetClassByCode(ctx context.Context, code string) (*domain.ClassModel, error) {
