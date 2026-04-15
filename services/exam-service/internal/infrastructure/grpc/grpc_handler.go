@@ -175,3 +175,11 @@ func (h *gRPCHandler) GetExamSubmissions(ctx context.Context, req *pb.GetExamSub
 func (h *gRPCHandler) GetExamPreview(ctx context.Context, req *pb.GetExamPreviewRequest) (*pb.GetExamDetailsResponse, error) {
 	return h.service.GetExamPreview(ctx, req)
 }
+
+func (h *gRPCHandler) GetRecentSubmissions(ctx context.Context, req *pb.GetRecentSubmissionsRequest) (*pb.GetRecentSubmissionsResponse, error) {
+	return h.service.GetRecentSubmissions(ctx, req)
+}
+
+func (h *gRPCHandler) GetMySubmissions(ctx context.Context, req *pb.GetMySubmissionsRequest) (*pb.GetMySubmissionsResponse, error) {
+	return h.service.GetMySubmissions(ctx, req)
+}

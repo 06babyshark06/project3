@@ -77,8 +77,8 @@ func (c *GeminiClient) GenerateQuestions(ctx context.Context, req *pb.GenerateQu
 	}
 	model.ResponseSchema = schema
 
-	prompt := fmt.Sprintf(`
-Bạn là một chuyên gia giáo dục. Từ tài liệu được cung cấp dưới đây, hãy tạo ra %d câu hỏi trắc nghiệm với độ khó %s. 
+	basePrompt := fmt.Sprintf(`
+Bạn là một chuyên gia giáo dục. Từ tài liệu được cung cấp, hãy tạo ra %d câu hỏi trắc nghiệm với độ khó %s. 
 Thể loại câu hỏi: %s.
 Yêu cầu về ngôn ngữ: TRẢ LỜI VÀ SINH CÂU HỎI BẰNG %s.
 Trọng tâm đặc biệt / Yêu cầu thêm từ giáo viên: %s.
@@ -88,13 +88,22 @@ Mỗi câu hỏi phải có CHÍNH XÁC %d lựa chọn (choices).
 - Nếu "Thể loại câu hỏi" là "Nhiều đáp án đúng", thì phải có ÍT NHẤT 2 lựa chọn có is_correct=true.
 
 Hãy soạn thảo cực kỳ cẩn thận, theo sát ngữ cảnh và đảm bảo tính chính xác về mặt học thuật.
+	`, req.QuestionCount, req.Difficulty, req.QuestionType, req.Language, req.FocusTopic, req.MaxOptions)
 
---- TÀI LIỆU BẮT ĐẦU ---
-%s
---- TÀI LIỆU KẾT THÚC ---
-	`, req.QuestionCount, req.Difficulty, req.QuestionType, req.Language, req.FocusTopic, req.MaxOptions, text)
+	var parts []genai.Part
 
-	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+	if req.MimeType == "application/pdf" && len(req.FileBytes) > 0 {
+		parts = append(parts, genai.Blob{
+			MIMEType: req.MimeType,
+			Data:     req.FileBytes,
+		})
+		parts = append(parts, genai.Text(basePrompt))
+	} else {
+		fullPrompt := basePrompt + fmt.Sprintf("\n--- TÀI LIỆU BẮT ĐẦU ---\n%s\n--- TÀI LIỆU KẾT THÚC ---\n", text)
+		parts = append(parts, genai.Text(fullPrompt))
+	}
+
+	resp, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
 		return nil, fmt.Errorf("API error: %v", err)
 	}
@@ -157,6 +166,11 @@ func (c *GeminiClient) generateCacheKey(req *pb.GenerateQuestionsFromAIRequest, 
 	keyData := fmt.Sprintf("%v|%v|%v|%v|%v|%v|%s",
 		req.QuestionCount, req.QuestionType, req.Difficulty,
 		req.Language, req.MaxOptions, req.FocusTopic, text)
+	
+	if req.MimeType == "application/pdf" && len(req.FileBytes) > 0 {
+		fileHash := md5.Sum(req.FileBytes)
+		keyData += fmt.Sprintf("|%x", fileHash)
+	}
 	
 	hash := md5.Sum([]byte(keyData))
 	return "ai:questions:" + hex.EncodeToString(hash[:])

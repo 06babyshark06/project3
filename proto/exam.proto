@@ -56,6 +56,8 @@ service ExamService {
   rpc UnassignExamFromClass(AssignExamToClassRequest) returns (AssignExamToClassResponse);
   rpc GetInstructorExams(GetInstructorExamsRequest) returns (GetInstructorExamsResponse);
   rpc GetExamPreview(GetExamPreviewRequest) returns (GetExamDetailsResponse);
+  rpc GetRecentSubmissions(GetRecentSubmissionsRequest) returns (GetRecentSubmissionsResponse);
+  rpc GetMySubmissions(GetMySubmissionsRequest) returns (GetMySubmissionsResponse);
 }
 
 message Topic {
@@ -271,6 +273,7 @@ message SubmissionSummary {
   int32 correct_count = 7;
   int32 total_questions = 8;
   int32 attempt_number = 9;
+  string exam_title = 10;
 }
 
 message GetExamSubmissionsRequest {
@@ -438,4 +441,32 @@ message Exam {
 
 message GetExamPreviewRequest {
   int64 exam_id = 1;
+}
+
+message GetRecentSubmissionsRequest {
+  int64 instructor_id = 1;
+  int32 limit = 2;
+}
+
+message RecentSubmissionItem {
+  int64 submission_id = 1;
+  int64 student_id = 2;
+  string student_name = 3;
+  int64 exam_id = 4;
+  string exam_title = 5;
+  float score = 6;
+  string submitted_at = 7;
+  string status = 8;
+}
+
+message GetRecentSubmissionsResponse {
+  repeated RecentSubmissionItem submissions = 1;
+}
+
+message GetMySubmissionsRequest {
+  int64 user_id = 1;
+}
+
+message GetMySubmissionsResponse {
+  repeated SubmissionSummary submissions = 1;
 }

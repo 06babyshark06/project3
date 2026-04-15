@@ -63,6 +63,8 @@ const (
 	ExamService_UnassignExamFromClass_FullMethodName = "/exam.ExamService/UnassignExamFromClass"
 	ExamService_GetInstructorExams_FullMethodName    = "/exam.ExamService/GetInstructorExams"
 	ExamService_GetExamPreview_FullMethodName        = "/exam.ExamService/GetExamPreview"
+	ExamService_GetRecentSubmissions_FullMethodName  = "/exam.ExamService/GetRecentSubmissions"
+	ExamService_GetMySubmissions_FullMethodName      = "/exam.ExamService/GetMySubmissions"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -113,6 +115,8 @@ type ExamServiceClient interface {
 	UnassignExamFromClass(ctx context.Context, in *AssignExamToClassRequest, opts ...grpc.CallOption) (*AssignExamToClassResponse, error)
 	GetInstructorExams(ctx context.Context, in *GetInstructorExamsRequest, opts ...grpc.CallOption) (*GetInstructorExamsResponse, error)
 	GetExamPreview(ctx context.Context, in *GetExamPreviewRequest, opts ...grpc.CallOption) (*GetExamDetailsResponse, error)
+	GetRecentSubmissions(ctx context.Context, in *GetRecentSubmissionsRequest, opts ...grpc.CallOption) (*GetRecentSubmissionsResponse, error)
+	GetMySubmissions(ctx context.Context, in *GetMySubmissionsRequest, opts ...grpc.CallOption) (*GetMySubmissionsResponse, error)
 }
 
 type examServiceClient struct {
@@ -563,6 +567,26 @@ func (c *examServiceClient) GetExamPreview(ctx context.Context, in *GetExamPrevi
 	return out, nil
 }
 
+func (c *examServiceClient) GetRecentSubmissions(ctx context.Context, in *GetRecentSubmissionsRequest, opts ...grpc.CallOption) (*GetRecentSubmissionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRecentSubmissionsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetRecentSubmissions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) GetMySubmissions(ctx context.Context, in *GetMySubmissionsRequest, opts ...grpc.CallOption) (*GetMySubmissionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMySubmissionsResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetMySubmissions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -611,6 +635,8 @@ type ExamServiceServer interface {
 	UnassignExamFromClass(context.Context, *AssignExamToClassRequest) (*AssignExamToClassResponse, error)
 	GetInstructorExams(context.Context, *GetInstructorExamsRequest) (*GetInstructorExamsResponse, error)
 	GetExamPreview(context.Context, *GetExamPreviewRequest) (*GetExamDetailsResponse, error)
+	GetRecentSubmissions(context.Context, *GetRecentSubmissionsRequest) (*GetRecentSubmissionsResponse, error)
+	GetMySubmissions(context.Context, *GetMySubmissionsRequest) (*GetMySubmissionsResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -752,6 +778,12 @@ func (UnimplementedExamServiceServer) GetInstructorExams(context.Context, *GetIn
 }
 func (UnimplementedExamServiceServer) GetExamPreview(context.Context, *GetExamPreviewRequest) (*GetExamDetailsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetExamPreview not implemented")
+}
+func (UnimplementedExamServiceServer) GetRecentSubmissions(context.Context, *GetRecentSubmissionsRequest) (*GetRecentSubmissionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRecentSubmissions not implemented")
+}
+func (UnimplementedExamServiceServer) GetMySubmissions(context.Context, *GetMySubmissionsRequest) (*GetMySubmissionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMySubmissions not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -1566,6 +1598,42 @@ func _ExamService_GetExamPreview_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GetRecentSubmissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRecentSubmissionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetRecentSubmissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetRecentSubmissions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetRecentSubmissions(ctx, req.(*GetRecentSubmissionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_GetMySubmissions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMySubmissionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetMySubmissions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetMySubmissions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetMySubmissions(ctx, req.(*GetMySubmissionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1748,6 +1816,14 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExamPreview",
 			Handler:    _ExamService_GetExamPreview_Handler,
+		},
+		{
+			MethodName: "GetRecentSubmissions",
+			Handler:    _ExamService_GetRecentSubmissions_Handler,
+		},
+		{
+			MethodName: "GetMySubmissions",
+			Handler:    _ExamService_GetMySubmissions_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

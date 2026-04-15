@@ -14,6 +14,8 @@ type TopicModel struct {
 	Description string         `gorm:"type:text" json:"description"`
 	CreatorID   int64          `gorm:"not null;default:0" json:"creator_id"`
 	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 	Sections    []SectionModel `gorm:"foreignKey:TopicID" json:"sections"`
 }
 
@@ -25,6 +27,8 @@ type SectionModel struct {
 	Topic       *TopicModel     `gorm:"foreignKey:TopicID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;" json:"-"`
 	Questions   []QuestionModel `gorm:"foreignKey:SectionID" json:"questions"`
 	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at"`
+	DeletedAt   gorm.DeletedAt  `gorm:"index" json:"-"`
 }
 
 func (SectionModel) TableName() string {
@@ -62,6 +66,7 @@ type QuestionModel struct {
 	Explanation   string                  `gorm:"type:text" json:"explanation"`
 	CreatedAt     time.Time               `json:"created_at"`
 	UpdatedAt     time.Time               `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt          `gorm:"index" json:"-"`
 	Choices       []ChoiceModel           `gorm:"foreignKey:QuestionID" json:"choices"`
 	AttachmentURL string                  `gorm:"size:255" json:"attachment_url"`
 }
@@ -99,10 +104,11 @@ type ExamModel struct {
 
 	TopicID   int64            `gorm:"not null;index" json:"topic_id"`
 	Topic     *TopicModel      `gorm:"foreignKey:TopicID" json:"topic"`
-	CreatorID int64            `gorm:"not null" json:"creator_id"`
+	CreatorID int64            `gorm:"not null;index" json:"creator_id"`
 	Status    string           `gorm:"size:20;default:'draft';index" json:"status"`
 	CreatedAt time.Time        `json:"created_at"`
 	UpdatedAt time.Time        `json:"updated_at"`
+	DeletedAt gorm.DeletedAt   `gorm:"index" json:"-"`
 	Questions []*QuestionModel `gorm:"many2many:exam_questions;joinForeignKey:exam_id;joinReferences:question_id" json:"questions"`
 }
 
@@ -146,7 +152,7 @@ type ExamSubmissionModel struct {
 	Status      SubmissionStatusModel `gorm:"foreignKey:StatusID"`
 	Score       float64
 	StartedAt   time.Time
-	SubmittedAt *time.Time
+	SubmittedAt *time.Time `gorm:"index"`
 	UserAnswers []UserAnswerModel `gorm:"foreignKey:SubmissionID"`
 }
 
@@ -242,10 +248,12 @@ type ExamRepository interface {
 	GetExamsByClass(ctx context.Context, classID int64) ([]*ExamModel, error)
 	GetExamsByTeacher(ctx context.Context, teacherID int64) ([]*ExamModel, error)
 	GetExamSubmissionsByExamID(ctx context.Context, examID int64, page, limit int, search string) ([]*ExamSubmissionModel, int64, error)
+	GetRecentSubmissions(ctx context.Context, instructorID int64, limit int) ([]*ExamSubmissionModel, error)
 
 	CreateStudentExam(ctx context.Context, tx *gorm.DB, sExam *StudentExamModel) error
 	GetStudentExam(ctx context.Context, examID, userID int64) (*StudentExamModel, error)
 	GetCorrectAnswersByQuestionIDs(ctx context.Context, questionIDs []int64) (map[int64][]int64, error)
+	GetSubmissionsByUserID(ctx context.Context, userID int64) ([]*ExamSubmissionModel, error)
 }
 
 type EventProducer interface {
@@ -303,6 +311,8 @@ type ExamService interface {
 	GetInstructorExams(ctx context.Context, req *pb.GetInstructorExamsRequest) (*pb.GetInstructorExamsResponse, error)
 	UnassignExamFromClass(ctx context.Context, req *pb.AssignExamToClassRequest) (*pb.AssignExamToClassResponse, error)
 	GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error)
+	GetRecentSubmissions(ctx context.Context, req *pb.GetRecentSubmissionsRequest) (*pb.GetRecentSubmissionsResponse, error)
 	GetExamPreview(ctx context.Context, req *pb.GetExamPreviewRequest) (*pb.GetExamDetailsResponse, error)
 	GeneratePersonalizedExamForStudents(ctx context.Context, examID int64, studentIDs []int64) error
+	GetMySubmissions(ctx context.Context, req *pb.GetMySubmissionsRequest) (*pb.GetMySubmissionsResponse, error)
 }

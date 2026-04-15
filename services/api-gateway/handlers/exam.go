@@ -1211,3 +1211,82 @@ func (h *ExamHandler) GetInstructorAllExams(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
+
+func (h *ExamHandler) GetRecentSubmissions(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
+
+	resp, err := h.examClient.GetRecentSubmissions(c.Request.Context(), &pb.GetRecentSubmissionsRequest{
+		InstructorId: userID,
+		Limit:        int32(limit),
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Enrich with User Names
+	userIDs := make([]int64, 0)
+	uniqueMap := make(map[int64]bool)
+	for _, sub := range resp.Submissions {
+		if !uniqueMap[sub.StudentId] {
+			uniqueMap[sub.StudentId] = true
+			userIDs = append(userIDs, sub.StudentId)
+		}
+	}
+
+	userMap := make(map[int64]string)
+	if len(userIDs) > 0 {
+		var wg sync.WaitGroup
+		var mu sync.Mutex
+
+		for _, uid := range userIDs {
+			wg.Add(1)
+			go func(id int64) {
+				defer wg.Done()
+				profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: id})
+
+				mu.Lock()
+				defer mu.Unlock()
+				if err == nil && profile != nil {
+					userMap[id] = profile.FullName
+				} else {
+					userMap[id] = fmt.Sprintf("User #%d", id)
+				}
+			}(uid)
+		}
+		wg.Wait()
+	}
+
+	for _, sub := range resp.Submissions {
+		if name, ok := userMap[sub.StudentId]; ok {
+			sub.StudentName = name
+		}
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+func (h *ExamHandler) GetMySubmissions(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	resp, err := h.examClient.GetMySubmissions(c.Request.Context(), &pb.GetMySubmissionsRequest{
+		UserId: userID,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}

@@ -600,3 +600,29 @@ func (r *examRepository) GetCorrectAnswersByQuestionIDs(ctx context.Context, que
 	}
 	return answerMap, nil
 }
+
+func (r *examRepository) GetRecentSubmissions(ctx context.Context, instructorID int64, limit int) ([]*domain.ExamSubmissionModel, error) {
+	var subs []*domain.ExamSubmissionModel
+
+	err := database.DB.WithContext(ctx).
+		Model(&domain.ExamSubmissionModel{}).
+		Preload("Exam").
+		Preload("Status").
+		Joins("JOIN exam_models ON exam_submission_models.exam_id = exam_models.id").
+		Where("exam_models.creator_id = ? AND exam_submission_models.status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", instructorID).
+		Order("exam_submission_models.submitted_at DESC").
+		Limit(limit).
+		Find(&subs).Error
+
+	return subs, err
+}
+func (r *examRepository) GetSubmissionsByUserID(ctx context.Context, userID int64) ([]*domain.ExamSubmissionModel, error) {
+	var subs []*domain.ExamSubmissionModel
+	err := database.DB.WithContext(ctx).
+		Preload("Exam").
+		Preload("Status").
+		Where("user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", userID).
+		Order("submitted_at DESC").
+		Find(&subs).Error
+	return subs, err
+}

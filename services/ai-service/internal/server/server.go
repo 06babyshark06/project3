@@ -26,17 +26,21 @@ func (s *AIServiceServer) GenerateQuestionsFromAI(ctx context.Context, req *pb.G
 
 	var textContext string
 
-	// TODO: Handle File extraction if file_bytes is provided depending on MIME Type
 	// For now, assume content_text is provided by API Gateway (so we can choose where to do file extraction)
 	if req.ContentText != "" {
 		textContext = req.ContentText
 	} else if len(req.FileBytes) > 0 {
-		// Attempt to extract text based on extension
-		extracted, err := ai.ExtractTextFromFile(req.FileBytes, req.FileName)
-		if err != nil {
-			return nil, status.Errorf(codes.InvalidArgument, "Failed to extract text from file: %v", err)
+		if req.MimeType == "application/pdf" {
+			log.Printf("Received PDF file, will pass natively to Gemini.")
+			// textContext is empty, let geminiClient handle genai.Blob
+		} else {
+			// Attempt to extract text based on extension
+			extracted, err := ai.ExtractTextFromFile(req.FileBytes, req.FileName)
+			if err != nil {
+				return nil, status.Errorf(codes.InvalidArgument, "Failed to extract text from file: %v", err)
+			}
+			textContext = extracted
 		}
-		textContext = extracted
 	} else {
 		return nil, status.Error(codes.InvalidArgument, "Either content_text or file_bytes is required")
 	}

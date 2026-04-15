@@ -4024,6 +4024,7 @@ type SubmissionSummary struct {
 	CorrectCount   int32                  `protobuf:"varint,7,opt,name=correct_count,json=correctCount,proto3" json:"correct_count,omitempty"`
 	TotalQuestions int32                  `protobuf:"varint,8,opt,name=total_questions,json=totalQuestions,proto3" json:"total_questions,omitempty"`
 	AttemptNumber  int32                  `protobuf:"varint,9,opt,name=attempt_number,json=attemptNumber,proto3" json:"attempt_number,omitempty"`
+	ExamTitle      string                 `protobuf:"bytes,10,opt,name=exam_title,json=examTitle,proto3" json:"exam_title,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -4119,6 +4120,13 @@ func (x *SubmissionSummary) GetAttemptNumber() int32 {
 		return x.AttemptNumber
 	}
 	return 0
+}
+
+func (x *SubmissionSummary) GetExamTitle() string {
+	if x != nil {
+		return x.ExamTitle
+	}
+	return ""
 }
 
 type GetExamSubmissionsRequest struct {
@@ -6105,6 +6113,290 @@ func (x *GetExamPreviewRequest) GetExamId() int64 {
 	return 0
 }
 
+type GetRecentSubmissionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	InstructorId  int64                  `protobuf:"varint,1,opt,name=instructor_id,json=instructorId,proto3" json:"instructor_id,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRecentSubmissionsRequest) Reset() {
+	*x = GetRecentSubmissionsRequest{}
+	mi := &file_exam_proto_msgTypes[101]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRecentSubmissionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentSubmissionsRequest) ProtoMessage() {}
+
+func (x *GetRecentSubmissionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[101]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentSubmissionsRequest.ProtoReflect.Descriptor instead.
+func (*GetRecentSubmissionsRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{101}
+}
+
+func (x *GetRecentSubmissionsRequest) GetInstructorId() int64 {
+	if x != nil {
+		return x.InstructorId
+	}
+	return 0
+}
+
+func (x *GetRecentSubmissionsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type RecentSubmissionItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SubmissionId  int64                  `protobuf:"varint,1,opt,name=submission_id,json=submissionId,proto3" json:"submission_id,omitempty"`
+	StudentId     int64                  `protobuf:"varint,2,opt,name=student_id,json=studentId,proto3" json:"student_id,omitempty"`
+	StudentName   string                 `protobuf:"bytes,3,opt,name=student_name,json=studentName,proto3" json:"student_name,omitempty"`
+	ExamId        int64                  `protobuf:"varint,4,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
+	ExamTitle     string                 `protobuf:"bytes,5,opt,name=exam_title,json=examTitle,proto3" json:"exam_title,omitempty"`
+	Score         float32                `protobuf:"fixed32,6,opt,name=score,proto3" json:"score,omitempty"`
+	SubmittedAt   string                 `protobuf:"bytes,7,opt,name=submitted_at,json=submittedAt,proto3" json:"submitted_at,omitempty"`
+	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecentSubmissionItem) Reset() {
+	*x = RecentSubmissionItem{}
+	mi := &file_exam_proto_msgTypes[102]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecentSubmissionItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecentSubmissionItem) ProtoMessage() {}
+
+func (x *RecentSubmissionItem) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[102]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecentSubmissionItem.ProtoReflect.Descriptor instead.
+func (*RecentSubmissionItem) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{102}
+}
+
+func (x *RecentSubmissionItem) GetSubmissionId() int64 {
+	if x != nil {
+		return x.SubmissionId
+	}
+	return 0
+}
+
+func (x *RecentSubmissionItem) GetStudentId() int64 {
+	if x != nil {
+		return x.StudentId
+	}
+	return 0
+}
+
+func (x *RecentSubmissionItem) GetStudentName() string {
+	if x != nil {
+		return x.StudentName
+	}
+	return ""
+}
+
+func (x *RecentSubmissionItem) GetExamId() int64 {
+	if x != nil {
+		return x.ExamId
+	}
+	return 0
+}
+
+func (x *RecentSubmissionItem) GetExamTitle() string {
+	if x != nil {
+		return x.ExamTitle
+	}
+	return ""
+}
+
+func (x *RecentSubmissionItem) GetScore() float32 {
+	if x != nil {
+		return x.Score
+	}
+	return 0
+}
+
+func (x *RecentSubmissionItem) GetSubmittedAt() string {
+	if x != nil {
+		return x.SubmittedAt
+	}
+	return ""
+}
+
+func (x *RecentSubmissionItem) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type GetRecentSubmissionsResponse struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Submissions   []*RecentSubmissionItem `protobuf:"bytes,1,rep,name=submissions,proto3" json:"submissions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRecentSubmissionsResponse) Reset() {
+	*x = GetRecentSubmissionsResponse{}
+	mi := &file_exam_proto_msgTypes[103]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRecentSubmissionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRecentSubmissionsResponse) ProtoMessage() {}
+
+func (x *GetRecentSubmissionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[103]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRecentSubmissionsResponse.ProtoReflect.Descriptor instead.
+func (*GetRecentSubmissionsResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{103}
+}
+
+func (x *GetRecentSubmissionsResponse) GetSubmissions() []*RecentSubmissionItem {
+	if x != nil {
+		return x.Submissions
+	}
+	return nil
+}
+
+type GetMySubmissionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMySubmissionsRequest) Reset() {
+	*x = GetMySubmissionsRequest{}
+	mi := &file_exam_proto_msgTypes[104]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMySubmissionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMySubmissionsRequest) ProtoMessage() {}
+
+func (x *GetMySubmissionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[104]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMySubmissionsRequest.ProtoReflect.Descriptor instead.
+func (*GetMySubmissionsRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{104}
+}
+
+func (x *GetMySubmissionsRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type GetMySubmissionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Submissions   []*SubmissionSummary   `protobuf:"bytes,1,rep,name=submissions,proto3" json:"submissions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetMySubmissionsResponse) Reset() {
+	*x = GetMySubmissionsResponse{}
+	mi := &file_exam_proto_msgTypes[105]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetMySubmissionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMySubmissionsResponse) ProtoMessage() {}
+
+func (x *GetMySubmissionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[105]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMySubmissionsResponse.ProtoReflect.Descriptor instead.
+func (*GetMySubmissionsResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{105}
+}
+
+func (x *GetMySubmissionsResponse) GetSubmissions() []*SubmissionSummary {
+	if x != nil {
+		return x.Submissions
+	}
+	return nil
+}
+
 var File_exam_proto protoreflect.FileDescriptor
 
 const file_exam_proto_rawDesc = "" +
@@ -6425,7 +6717,7 @@ const file_exam_proto_rawDesc = "" +
 	"\x12score_distribution\x18\x06 \x03(\v29.exam.GetExamStatsDetailedResponse.ScoreDistributionEntryR\x11scoreDistribution\x1aD\n" +
 	"\x16ScoreDistributionEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"\xba\x02\n" +
+	"\x05value\x18\x02 \x01(\x05R\x05value:\x028\x01\"\xd9\x02\n" +
 	"\x11SubmissionSummary\x12#\n" +
 	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12!\n" +
@@ -6435,7 +6727,10 @@ const file_exam_proto_rawDesc = "" +
 	"\x06status\x18\x06 \x01(\tR\x06status\x12#\n" +
 	"\rcorrect_count\x18\a \x01(\x05R\fcorrectCount\x12'\n" +
 	"\x0ftotal_questions\x18\b \x01(\x05R\x0etotalQuestions\x12%\n" +
-	"\x0eattempt_number\x18\t \x01(\x05R\rattemptNumber\"\x9b\x01\n" +
+	"\x0eattempt_number\x18\t \x01(\x05R\rattemptNumber\x12\x1d\n" +
+	"\n" +
+	"exam_title\x18\n" +
+	" \x01(\tR\texamTitle\"\x9b\x01\n" +
 	"\x19GetExamSubmissionsRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
@@ -6592,7 +6887,27 @@ const file_exam_proto_rawDesc = "" +
 	"\fmax_attempts\x18\f \x01(\x05R\vmaxAttempts\x12#\n" +
 	"\rattempts_used\x18\r \x01(\x05R\fattemptsUsed\"0\n" +
 	"\x15GetExamPreviewRequest\x12\x17\n" +
-	"\aexam_id\x18\x01 \x01(\x03R\x06examId2\x89\x1a\n" +
+	"\aexam_id\x18\x01 \x01(\x03R\x06examId\"X\n" +
+	"\x1bGetRecentSubmissionsRequest\x12#\n" +
+	"\rinstructor_id\x18\x01 \x01(\x03R\finstructorId\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\x86\x02\n" +
+	"\x14RecentSubmissionItem\x12#\n" +
+	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x1d\n" +
+	"\n" +
+	"student_id\x18\x02 \x01(\x03R\tstudentId\x12!\n" +
+	"\fstudent_name\x18\x03 \x01(\tR\vstudentName\x12\x17\n" +
+	"\aexam_id\x18\x04 \x01(\x03R\x06examId\x12\x1d\n" +
+	"\n" +
+	"exam_title\x18\x05 \x01(\tR\texamTitle\x12\x14\n" +
+	"\x05score\x18\x06 \x01(\x02R\x05score\x12!\n" +
+	"\fsubmitted_at\x18\a \x01(\tR\vsubmittedAt\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\"\\\n" +
+	"\x1cGetRecentSubmissionsResponse\x12<\n" +
+	"\vsubmissions\x18\x01 \x03(\v2\x1a.exam.RecentSubmissionItemR\vsubmissions\"2\n" +
+	"\x17GetMySubmissionsRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\"U\n" +
+	"\x18GetMySubmissionsResponse\x129\n" +
+	"\vsubmissions\x18\x01 \x03(\v2\x17.exam.SubmissionSummaryR\vsubmissions2\xbb\x1b\n" +
 	"\vExamService\x12B\n" +
 	"\vCreateTopic\x12\x18.exam.CreateTopicRequest\x1a\x19.exam.CreateTopicResponse\x12<\n" +
 	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12H\n" +
@@ -6642,7 +6957,9 @@ const file_exam_proto_rawDesc = "" +
 	"\x11AssignExamToClass\x12\x1e.exam.AssignExamToClassRequest\x1a\x1f.exam.AssignExamToClassResponse\x12X\n" +
 	"\x15UnassignExamFromClass\x12\x1e.exam.AssignExamToClassRequest\x1a\x1f.exam.AssignExamToClassResponse\x12W\n" +
 	"\x12GetInstructorExams\x12\x1f.exam.GetInstructorExamsRequest\x1a .exam.GetInstructorExamsResponse\x12K\n" +
-	"\x0eGetExamPreview\x12\x1b.exam.GetExamPreviewRequest\x1a\x1c.exam.GetExamDetailsResponseB\x18Z\x16shared/proto/exam;examb\x06proto3"
+	"\x0eGetExamPreview\x12\x1b.exam.GetExamPreviewRequest\x1a\x1c.exam.GetExamDetailsResponse\x12]\n" +
+	"\x14GetRecentSubmissions\x12!.exam.GetRecentSubmissionsRequest\x1a\".exam.GetRecentSubmissionsResponse\x12Q\n" +
+	"\x10GetMySubmissions\x12\x1d.exam.GetMySubmissionsRequest\x1a\x1e.exam.GetMySubmissionsResponseB\x18Z\x16shared/proto/exam;examb\x06proto3"
 
 var (
 	file_exam_proto_rawDescOnce sync.Once
@@ -6656,7 +6973,7 @@ func file_exam_proto_rawDescGZIP() []byte {
 	return file_exam_proto_rawDescData
 }
 
-var file_exam_proto_msgTypes = make([]protoimpl.MessageInfo, 102)
+var file_exam_proto_msgTypes = make([]protoimpl.MessageInfo, 107)
 var file_exam_proto_goTypes = []any{
 	(*Topic)(nil),                        // 0: exam.Topic
 	(*Section)(nil),                      // 1: exam.Section
@@ -6759,7 +7076,12 @@ var file_exam_proto_goTypes = []any{
 	(*GetInstructorExamsResponse)(nil),   // 98: exam.GetInstructorExamsResponse
 	(*Exam)(nil),                         // 99: exam.Exam
 	(*GetExamPreviewRequest)(nil),        // 100: exam.GetExamPreviewRequest
-	nil,                                  // 101: exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
+	(*GetRecentSubmissionsRequest)(nil),  // 101: exam.GetRecentSubmissionsRequest
+	(*RecentSubmissionItem)(nil),         // 102: exam.RecentSubmissionItem
+	(*GetRecentSubmissionsResponse)(nil), // 103: exam.GetRecentSubmissionsResponse
+	(*GetMySubmissionsRequest)(nil),      // 104: exam.GetMySubmissionsRequest
+	(*GetMySubmissionsResponse)(nil),     // 105: exam.GetMySubmissionsResponse
+	nil,                                  // 106: exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
 }
 var file_exam_proto_depIdxs = []int32{
 	0,   // 0: exam.CreateTopicResponse.topic:type_name -> exam.Topic
@@ -6781,7 +7103,7 @@ var file_exam_proto_depIdxs = []int32{
 	49,  // 16: exam.SubmitExamRequest.answers:type_name -> exam.UserAnswer
 	54,  // 17: exam.SubmissionDetail.choices:type_name -> exam.ChoiceReview
 	53,  // 18: exam.GetSubmissionResponse.details:type_name -> exam.SubmissionDetail
-	101, // 19: exam.GetExamStatsDetailedResponse.score_distribution:type_name -> exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
+	106, // 19: exam.GetExamStatsDetailedResponse.score_distribution:type_name -> exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
 	66,  // 20: exam.GetExamSubmissionsResponse.submissions:type_name -> exam.SubmissionSummary
 	72,  // 21: exam.GetQuestionsResponse.questions:type_name -> exam.QuestionListItem
 	74,  // 22: exam.GetExamViolationsResponse.violations:type_name -> exam.ExamViolation
@@ -6789,99 +7111,105 @@ var file_exam_proto_depIdxs = []int32{
 	83,  // 24: exam.GetAccessRequestsResponse.requests:type_name -> exam.AccessRequestItem
 	99,  // 25: exam.GetExamsByClassResponse.exams:type_name -> exam.Exam
 	99,  // 26: exam.GetInstructorExamsResponse.exams:type_name -> exam.Exam
-	2,   // 27: exam.ExamService.CreateTopic:input_type -> exam.CreateTopicRequest
-	4,   // 28: exam.ExamService.GetTopics:input_type -> exam.GetTopicsRequest
-	6,   // 29: exam.ExamService.CreateSection:input_type -> exam.CreateSectionRequest
-	8,   // 30: exam.ExamService.GetSections:input_type -> exam.GetSectionsRequest
-	85,  // 31: exam.ExamService.UpdateTopic:input_type -> exam.UpdateTopicRequest
-	87,  // 32: exam.ExamService.DeleteTopic:input_type -> exam.DeleteTopicRequest
-	89,  // 33: exam.ExamService.UpdateSection:input_type -> exam.UpdateSectionRequest
-	91,  // 34: exam.ExamService.DeleteSection:input_type -> exam.DeleteSectionRequest
-	71,  // 35: exam.ExamService.GetQuestions:input_type -> exam.GetQuestionsRequest
-	11,  // 36: exam.ExamService.CreateQuestion:input_type -> exam.CreateQuestionRequest
-	13,  // 37: exam.ExamService.CreateBulkQuestions:input_type -> exam.CreateBulkQuestionsRequest
-	34,  // 38: exam.ExamService.GetQuestion:input_type -> exam.GetQuestionRequest
-	17,  // 39: exam.ExamService.ImportQuestions:input_type -> exam.ImportQuestionsRequest
-	36,  // 40: exam.ExamService.UpdateQuestion:input_type -> exam.UpdateQuestionRequest
-	38,  // 41: exam.ExamService.DeleteQuestion:input_type -> exam.DeleteQuestionRequest
-	15,  // 42: exam.ExamService.GetUploadURL:input_type -> exam.GetUploadURLRequest
-	20,  // 43: exam.ExamService.CreateExam:input_type -> exam.CreateExamRequest
-	22,  // 44: exam.ExamService.GenerateExam:input_type -> exam.GenerateExamRequest
-	26,  // 45: exam.ExamService.GetExamDetails:input_type -> exam.GetExamDetailsRequest
-	41,  // 46: exam.ExamService.GetExams:input_type -> exam.GetExamsRequest
-	43,  // 47: exam.ExamService.UpdateExam:input_type -> exam.UpdateExamRequest
-	45,  // 48: exam.ExamService.DeleteExam:input_type -> exam.DeleteExamRequest
-	47,  // 49: exam.ExamService.PublishExam:input_type -> exam.PublishExamRequest
-	28,  // 50: exam.ExamService.RequestExamAccess:input_type -> exam.RequestExamAccessRequest
-	30,  // 51: exam.ExamService.ApproveExamAccess:input_type -> exam.ApproveExamAccessRequest
-	32,  // 52: exam.ExamService.CheckExamAccess:input_type -> exam.CheckExamAccessRequest
-	82,  // 53: exam.ExamService.GetAccessRequests:input_type -> exam.GetAccessRequestsRequest
-	50,  // 54: exam.ExamService.SubmitExam:input_type -> exam.SubmitExamRequest
-	52,  // 55: exam.ExamService.GetSubmission:input_type -> exam.GetSubmissionRequest
-	56,  // 56: exam.ExamService.GetUserExamStats:input_type -> exam.GetUserExamStatsRequest
-	58,  // 57: exam.ExamService.GetExamCount:input_type -> exam.GetExamCountRequest
-	60,  // 58: exam.ExamService.SaveAnswer:input_type -> exam.SaveAnswerRequest
-	62,  // 59: exam.ExamService.LogViolation:input_type -> exam.LogViolationRequest
-	64,  // 60: exam.ExamService.GetExamStatsDetailed:input_type -> exam.GetExamStatsDetailedRequest
-	67,  // 61: exam.ExamService.GetExamSubmissions:input_type -> exam.GetExamSubmissionsRequest
-	69,  // 62: exam.ExamService.ExportExamResults:input_type -> exam.ExportExamResultsRequest
-	75,  // 63: exam.ExamService.GetExamViolations:input_type -> exam.GetExamViolationsRequest
-	77,  // 64: exam.ExamService.ExportQuestions:input_type -> exam.ExportQuestionsRequest
-	79,  // 65: exam.ExamService.StartExam:input_type -> exam.StartExamRequest
-	93,  // 66: exam.ExamService.GetExamsByClass:input_type -> exam.GetExamsByClassRequest
-	95,  // 67: exam.ExamService.AssignExamToClass:input_type -> exam.AssignExamToClassRequest
-	95,  // 68: exam.ExamService.UnassignExamFromClass:input_type -> exam.AssignExamToClassRequest
-	97,  // 69: exam.ExamService.GetInstructorExams:input_type -> exam.GetInstructorExamsRequest
-	100, // 70: exam.ExamService.GetExamPreview:input_type -> exam.GetExamPreviewRequest
-	3,   // 71: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
-	5,   // 72: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
-	7,   // 73: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
-	9,   // 74: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
-	86,  // 75: exam.ExamService.UpdateTopic:output_type -> exam.UpdateTopicResponse
-	88,  // 76: exam.ExamService.DeleteTopic:output_type -> exam.DeleteTopicResponse
-	90,  // 77: exam.ExamService.UpdateSection:output_type -> exam.UpdateSectionResponse
-	92,  // 78: exam.ExamService.DeleteSection:output_type -> exam.DeleteSectionResponse
-	73,  // 79: exam.ExamService.GetQuestions:output_type -> exam.GetQuestionsResponse
-	12,  // 80: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
-	14,  // 81: exam.ExamService.CreateBulkQuestions:output_type -> exam.CreateBulkQuestionsResponse
-	35,  // 82: exam.ExamService.GetQuestion:output_type -> exam.GetQuestionResponse
-	18,  // 83: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
-	37,  // 84: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
-	39,  // 85: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
-	16,  // 86: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
-	23,  // 87: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
-	23,  // 88: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
-	27,  // 89: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
-	42,  // 90: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
-	44,  // 91: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
-	46,  // 92: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
-	48,  // 93: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
-	29,  // 94: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
-	31,  // 95: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
-	33,  // 96: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
-	84,  // 97: exam.ExamService.GetAccessRequests:output_type -> exam.GetAccessRequestsResponse
-	51,  // 98: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
-	55,  // 99: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
-	57,  // 100: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
-	59,  // 101: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
-	61,  // 102: exam.ExamService.SaveAnswer:output_type -> exam.SaveAnswerResponse
-	63,  // 103: exam.ExamService.LogViolation:output_type -> exam.LogViolationResponse
-	65,  // 104: exam.ExamService.GetExamStatsDetailed:output_type -> exam.GetExamStatsDetailedResponse
-	68,  // 105: exam.ExamService.GetExamSubmissions:output_type -> exam.GetExamSubmissionsResponse
-	70,  // 106: exam.ExamService.ExportExamResults:output_type -> exam.ExportExamResultsResponse
-	76,  // 107: exam.ExamService.GetExamViolations:output_type -> exam.GetExamViolationsResponse
-	78,  // 108: exam.ExamService.ExportQuestions:output_type -> exam.ExportQuestionsResponse
-	80,  // 109: exam.ExamService.StartExam:output_type -> exam.StartExamResponse
-	94,  // 110: exam.ExamService.GetExamsByClass:output_type -> exam.GetExamsByClassResponse
-	96,  // 111: exam.ExamService.AssignExamToClass:output_type -> exam.AssignExamToClassResponse
-	96,  // 112: exam.ExamService.UnassignExamFromClass:output_type -> exam.AssignExamToClassResponse
-	98,  // 113: exam.ExamService.GetInstructorExams:output_type -> exam.GetInstructorExamsResponse
-	27,  // 114: exam.ExamService.GetExamPreview:output_type -> exam.GetExamDetailsResponse
-	71,  // [71:115] is the sub-list for method output_type
-	27,  // [27:71] is the sub-list for method input_type
-	27,  // [27:27] is the sub-list for extension type_name
-	27,  // [27:27] is the sub-list for extension extendee
-	0,   // [0:27] is the sub-list for field type_name
+	102, // 27: exam.GetRecentSubmissionsResponse.submissions:type_name -> exam.RecentSubmissionItem
+	66,  // 28: exam.GetMySubmissionsResponse.submissions:type_name -> exam.SubmissionSummary
+	2,   // 29: exam.ExamService.CreateTopic:input_type -> exam.CreateTopicRequest
+	4,   // 30: exam.ExamService.GetTopics:input_type -> exam.GetTopicsRequest
+	6,   // 31: exam.ExamService.CreateSection:input_type -> exam.CreateSectionRequest
+	8,   // 32: exam.ExamService.GetSections:input_type -> exam.GetSectionsRequest
+	85,  // 33: exam.ExamService.UpdateTopic:input_type -> exam.UpdateTopicRequest
+	87,  // 34: exam.ExamService.DeleteTopic:input_type -> exam.DeleteTopicRequest
+	89,  // 35: exam.ExamService.UpdateSection:input_type -> exam.UpdateSectionRequest
+	91,  // 36: exam.ExamService.DeleteSection:input_type -> exam.DeleteSectionRequest
+	71,  // 37: exam.ExamService.GetQuestions:input_type -> exam.GetQuestionsRequest
+	11,  // 38: exam.ExamService.CreateQuestion:input_type -> exam.CreateQuestionRequest
+	13,  // 39: exam.ExamService.CreateBulkQuestions:input_type -> exam.CreateBulkQuestionsRequest
+	34,  // 40: exam.ExamService.GetQuestion:input_type -> exam.GetQuestionRequest
+	17,  // 41: exam.ExamService.ImportQuestions:input_type -> exam.ImportQuestionsRequest
+	36,  // 42: exam.ExamService.UpdateQuestion:input_type -> exam.UpdateQuestionRequest
+	38,  // 43: exam.ExamService.DeleteQuestion:input_type -> exam.DeleteQuestionRequest
+	15,  // 44: exam.ExamService.GetUploadURL:input_type -> exam.GetUploadURLRequest
+	20,  // 45: exam.ExamService.CreateExam:input_type -> exam.CreateExamRequest
+	22,  // 46: exam.ExamService.GenerateExam:input_type -> exam.GenerateExamRequest
+	26,  // 47: exam.ExamService.GetExamDetails:input_type -> exam.GetExamDetailsRequest
+	41,  // 48: exam.ExamService.GetExams:input_type -> exam.GetExamsRequest
+	43,  // 49: exam.ExamService.UpdateExam:input_type -> exam.UpdateExamRequest
+	45,  // 50: exam.ExamService.DeleteExam:input_type -> exam.DeleteExamRequest
+	47,  // 51: exam.ExamService.PublishExam:input_type -> exam.PublishExamRequest
+	28,  // 52: exam.ExamService.RequestExamAccess:input_type -> exam.RequestExamAccessRequest
+	30,  // 53: exam.ExamService.ApproveExamAccess:input_type -> exam.ApproveExamAccessRequest
+	32,  // 54: exam.ExamService.CheckExamAccess:input_type -> exam.CheckExamAccessRequest
+	82,  // 55: exam.ExamService.GetAccessRequests:input_type -> exam.GetAccessRequestsRequest
+	50,  // 56: exam.ExamService.SubmitExam:input_type -> exam.SubmitExamRequest
+	52,  // 57: exam.ExamService.GetSubmission:input_type -> exam.GetSubmissionRequest
+	56,  // 58: exam.ExamService.GetUserExamStats:input_type -> exam.GetUserExamStatsRequest
+	58,  // 59: exam.ExamService.GetExamCount:input_type -> exam.GetExamCountRequest
+	60,  // 60: exam.ExamService.SaveAnswer:input_type -> exam.SaveAnswerRequest
+	62,  // 61: exam.ExamService.LogViolation:input_type -> exam.LogViolationRequest
+	64,  // 62: exam.ExamService.GetExamStatsDetailed:input_type -> exam.GetExamStatsDetailedRequest
+	67,  // 63: exam.ExamService.GetExamSubmissions:input_type -> exam.GetExamSubmissionsRequest
+	69,  // 64: exam.ExamService.ExportExamResults:input_type -> exam.ExportExamResultsRequest
+	75,  // 65: exam.ExamService.GetExamViolations:input_type -> exam.GetExamViolationsRequest
+	77,  // 66: exam.ExamService.ExportQuestions:input_type -> exam.ExportQuestionsRequest
+	79,  // 67: exam.ExamService.StartExam:input_type -> exam.StartExamRequest
+	93,  // 68: exam.ExamService.GetExamsByClass:input_type -> exam.GetExamsByClassRequest
+	95,  // 69: exam.ExamService.AssignExamToClass:input_type -> exam.AssignExamToClassRequest
+	95,  // 70: exam.ExamService.UnassignExamFromClass:input_type -> exam.AssignExamToClassRequest
+	97,  // 71: exam.ExamService.GetInstructorExams:input_type -> exam.GetInstructorExamsRequest
+	100, // 72: exam.ExamService.GetExamPreview:input_type -> exam.GetExamPreviewRequest
+	101, // 73: exam.ExamService.GetRecentSubmissions:input_type -> exam.GetRecentSubmissionsRequest
+	104, // 74: exam.ExamService.GetMySubmissions:input_type -> exam.GetMySubmissionsRequest
+	3,   // 75: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
+	5,   // 76: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
+	7,   // 77: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
+	9,   // 78: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
+	86,  // 79: exam.ExamService.UpdateTopic:output_type -> exam.UpdateTopicResponse
+	88,  // 80: exam.ExamService.DeleteTopic:output_type -> exam.DeleteTopicResponse
+	90,  // 81: exam.ExamService.UpdateSection:output_type -> exam.UpdateSectionResponse
+	92,  // 82: exam.ExamService.DeleteSection:output_type -> exam.DeleteSectionResponse
+	73,  // 83: exam.ExamService.GetQuestions:output_type -> exam.GetQuestionsResponse
+	12,  // 84: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
+	14,  // 85: exam.ExamService.CreateBulkQuestions:output_type -> exam.CreateBulkQuestionsResponse
+	35,  // 86: exam.ExamService.GetQuestion:output_type -> exam.GetQuestionResponse
+	18,  // 87: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
+	37,  // 88: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
+	39,  // 89: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
+	16,  // 90: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
+	23,  // 91: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
+	23,  // 92: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
+	27,  // 93: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
+	42,  // 94: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
+	44,  // 95: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
+	46,  // 96: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
+	48,  // 97: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
+	29,  // 98: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
+	31,  // 99: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
+	33,  // 100: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
+	84,  // 101: exam.ExamService.GetAccessRequests:output_type -> exam.GetAccessRequestsResponse
+	51,  // 102: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
+	55,  // 103: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
+	57,  // 104: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
+	59,  // 105: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
+	61,  // 106: exam.ExamService.SaveAnswer:output_type -> exam.SaveAnswerResponse
+	63,  // 107: exam.ExamService.LogViolation:output_type -> exam.LogViolationResponse
+	65,  // 108: exam.ExamService.GetExamStatsDetailed:output_type -> exam.GetExamStatsDetailedResponse
+	68,  // 109: exam.ExamService.GetExamSubmissions:output_type -> exam.GetExamSubmissionsResponse
+	70,  // 110: exam.ExamService.ExportExamResults:output_type -> exam.ExportExamResultsResponse
+	76,  // 111: exam.ExamService.GetExamViolations:output_type -> exam.GetExamViolationsResponse
+	78,  // 112: exam.ExamService.ExportQuestions:output_type -> exam.ExportQuestionsResponse
+	80,  // 113: exam.ExamService.StartExam:output_type -> exam.StartExamResponse
+	94,  // 114: exam.ExamService.GetExamsByClass:output_type -> exam.GetExamsByClassResponse
+	96,  // 115: exam.ExamService.AssignExamToClass:output_type -> exam.AssignExamToClassResponse
+	96,  // 116: exam.ExamService.UnassignExamFromClass:output_type -> exam.AssignExamToClassResponse
+	98,  // 117: exam.ExamService.GetInstructorExams:output_type -> exam.GetInstructorExamsResponse
+	27,  // 118: exam.ExamService.GetExamPreview:output_type -> exam.GetExamDetailsResponse
+	103, // 119: exam.ExamService.GetRecentSubmissions:output_type -> exam.GetRecentSubmissionsResponse
+	105, // 120: exam.ExamService.GetMySubmissions:output_type -> exam.GetMySubmissionsResponse
+	75,  // [75:121] is the sub-list for method output_type
+	29,  // [29:75] is the sub-list for method input_type
+	29,  // [29:29] is the sub-list for extension type_name
+	29,  // [29:29] is the sub-list for extension extendee
+	0,   // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_exam_proto_init() }
@@ -6895,7 +7223,7 @@ func file_exam_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_exam_proto_rawDesc), len(file_exam_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   102,
+			NumMessages:   107,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

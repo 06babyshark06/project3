@@ -56,6 +56,7 @@ func main() {
 	statsHandler := handlers.NewStatsHandler(userClient, courseClient, examClient)
 	classHandler := handlers.NewClassHandler(userClient, examClient)
 	aiHandler := handlers.NewAIHandler(aiClient)
+	notificationHandler := handlers.NewNotificationHandler()
 	healthHandler := handlers.NewHealthHandler(userClient.Client, courseClient.Client, examClient.Client)
 
 	// Tạo router
@@ -86,6 +87,8 @@ func main() {
 		auth.Use(jwtMiddleware.MiddlewareFunc())
 		{
 			auth.POST("/logout", authHandler.Logout)
+
+			auth.GET("/notifications/stream", notificationHandler.StreamNotifications)
 
 			auth.GET("/courses/:id", courseHandler.GetCourseDetails)
 			auth.GET("/exams/:id", examHandler.GetExamDetails)
@@ -156,6 +159,7 @@ func main() {
 				instructorOnly.PUT("/exams/:id", examHandler.UpdateExam)
 				instructorOnly.PUT("/exams/:id/publish", examHandler.PublishExam)
 				instructorOnly.GET("/instructor/exams", examHandler.GetInstructorExams)
+				instructorOnly.GET("/instructor/recent-submissions", examHandler.GetRecentSubmissions)
 				instructorOnly.DELETE("/exams/:id", examHandler.DeleteExam)
 
 				instructorOnly.PUT("/exams/access/approve", examHandler.ApproveAccess)
@@ -194,6 +198,7 @@ func main() {
 				studentOnly.POST("/exams/save-answer", examHandler.SaveAnswer)
 				studentOnly.POST("/exams/log-violation", examHandler.LogViolation)
 				studentOnly.POST("/exams/:id/start", examHandler.StartExam)
+				studentOnly.GET("/exams/my-submissions", examHandler.GetMySubmissions)
 				studentOnly.GET("/classes/:id/exams", classHandler.GetClassExams)
 				studentOnly.GET("/classes", classHandler.GetClasses)
 				studentOnly.GET("/classes/:id", classHandler.GetClassDetails)

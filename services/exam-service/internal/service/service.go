@@ -129,6 +129,7 @@ func (s *examService) GetSections(ctx context.Context, req *pb.GetSectionsReques
 }
 
 func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
+
 	var qID int64
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		section, err := s.repo.GetSectionByID(ctx, req.SectionId)
@@ -827,11 +828,22 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	key := []byte(strconv.FormatInt(submission.Id, 10))
 	s.producer.Produce("exam_events", key, eventBytes)
 
+	// Check if we should hide results in the immediate response
+	respScore := float32(finalScore)
+	respCorrectCount := correctCount
+	respTotalQuestions := totalQuestions
+
+	if examModel != nil && !examModel.ShowResultImmediately {
+		respScore = 0
+		respCorrectCount = 0
+		respTotalQuestions = 0
+	}
+
 	return &pb.SubmitExamResponse{
 		SubmissionId:   submission.Id,
-		Score:          float32(finalScore),
-		CorrectCount:   correctCount,
-		TotalQuestions: totalQuestions,
+		Score:          respScore,
+		CorrectCount:   respCorrectCount,
+		TotalQuestions: respTotalQuestions,
 	}, nil
 }
 
@@ -862,13 +874,16 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		return nil, errors.New("không tìm thấy kết quả bài thi")
 	}
 
+	isInstructor := false
 	if submission.UserID != req.UserId {
 		// Check if requester is the creator of the exam
 		exam, err := s.repo.GetExamDetails(ctx, submission.ExamID)
 		if err != nil {
 			return nil, errors.New("không thể kiểm tra quyền truy cập")
 		}
-		if exam.CreatorID != req.UserId {
+		if exam.CreatorID == req.UserId {
+			isInstructor = true
+		} else {
 			return nil, errors.New("bạn không có quyền xem kết quả này")
 		}
 	}
@@ -882,7 +897,8 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		submittedAt = submission.SubmittedAt.Format(time.RFC3339)
 	}
 
-	if !examFull.ShowResultImmediately {
+	// Nếu không cho xem kết quả ngay và KHÔNG PHẢI giáo viên thì ẩn bớt
+	if !examFull.ShowResultImmediately && !isInstructor {
 		return &pb.GetSubmissionResponse{
 			Id:             submission.Id,
 			ExamTitle:      submission.Exam.Title,
@@ -1113,6 +1129,7 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 			updates["shuffle_questions"] = req.Settings.ShuffleQuestions
 			updates["show_result_immediately"] = req.Settings.ShowResultImmediately
 			updates["requires_approval"] = req.Settings.RequiresApproval
+			updates["is_dynamic"] = req.Settings.IsDynamic
 			if req.Settings.DynamicConfig != "" {
 				updates["dynamic_config"] = req.Settings.DynamicConfig
 			} else {
@@ -1217,6 +1234,26 @@ func (s *examService) LogViolation(ctx context.Context, req *pb.LogViolationRequ
 		ViolationTime: time.Now().UTC(),
 	}
 	err := s.repo.LogViolation(ctx, v)
+	
+	if err == nil {
+		exam, _ := s.repo.GetExamDetails(ctx, req.ExamId)
+		if exam != nil {
+			if database.RedisClient != nil {
+				msg := map[string]interface{}{
+					"type":           "VIOLATION",
+					"exam_id":        req.ExamId,
+					"user_id":        req.UserId,
+					"violation_type": req.ViolationType,
+					"message":        fmt.Sprintf("Hệ thống phát hiện hành vi: %s", req.ViolationType),
+					"timestamp":      v.ViolationTime.Format(time.RFC3339),
+				}
+				jsonMsg, _ := json.Marshal(msg)
+				channel := fmt.Sprintf("notifications:%d", exam.CreatorID)
+				database.RedisClient.Publish(ctx, channel, string(jsonMsg))
+			}
+		}
+	}
+
 	return &pb.LogViolationResponse{Success: err == nil}, err
 }
 
@@ -2058,6 +2095,41 @@ func (s *examService) GetExamSubmissions(ctx context.Context, req *pb.GetExamSub
 	}, nil
 }
 
+func (s *examService) GetRecentSubmissions(ctx context.Context, req *pb.GetRecentSubmissionsRequest) (*pb.GetRecentSubmissionsResponse, error) {
+	limit := int(req.Limit)
+	if limit < 1 {
+		limit = 5
+	}
+
+	subs, err := s.repo.GetRecentSubmissions(ctx, req.InstructorId, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var pbItems []*pb.RecentSubmissionItem
+	for _, sub := range subs {
+		submittedAt := ""
+		if sub.SubmittedAt != nil {
+			submittedAt = sub.SubmittedAt.Format(time.RFC3339)
+		}
+
+		pbItems = append(pbItems, &pb.RecentSubmissionItem{
+			SubmissionId: sub.Id,
+			ExamId:       sub.ExamID,
+			ExamTitle:    sub.Exam.Title,
+			StudentId:    sub.UserID,
+			StudentName:  "", // Fill by caller if needed
+			Score:        float32(sub.Score),
+			SubmittedAt:  submittedAt,
+			Status:       sub.Status.Status,
+		})
+	}
+
+	return &pb.GetRecentSubmissionsResponse{
+		Submissions: pbItems,
+	}, nil
+}
+
 func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {
 	if e == nil {
 		return nil
@@ -2197,4 +2269,36 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 	}
 
 	return nil
+}
+func (s *examService) GetMySubmissions(ctx context.Context, req *pb.GetMySubmissionsRequest) (*pb.GetMySubmissionsResponse, error) {
+	subs, err := s.repo.GetSubmissionsByUserID(ctx, req.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pbSubs []*pb.SubmissionSummary
+	for _, sub := range subs {
+		submittedAt := ""
+		if sub.SubmittedAt != nil {
+			submittedAt = sub.SubmittedAt.Format(time.RFC3339)
+		}
+
+		status := "unknown"
+		if sub.Status.Status != "" {
+			status = sub.Status.Status
+		}
+
+		pbSubs = append(pbSubs, &pb.SubmissionSummary{
+			SubmissionId: sub.Id,
+			UserId:       sub.UserID,
+			Score:        float32(sub.Score),
+			SubmittedAt:  submittedAt,
+			Status:       status,
+			ExamTitle:    sub.Exam.Title,
+		})
+	}
+
+	return &pb.GetMySubmissionsResponse{
+		Submissions: pbSubs,
+	}, nil
 }
