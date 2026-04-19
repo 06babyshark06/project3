@@ -6,6 +6,8 @@ option go_package = "shared/proto/ai;ai";
 
 service AIService {
   rpc GenerateQuestionsFromAI(GenerateQuestionsFromAIRequest) returns (GenerateQuestionsFromAIResponse);
+  rpc ExplainAnswer(ExplainAnswerRequest) returns (ExplainAnswerResponse);
+  rpc ChatWithTutor(ChatWithTutorRequest) returns (ChatWithTutorResponse);
 }
 
 message GenerateQuestionsFromAIRequest {
@@ -42,4 +44,34 @@ message GenerateQuestionsFromAIResponse {
   bool success = 1;
   string message = 2;
   repeated GeneratedAIQuestion questions = 3;
+}
+
+message ExplainAnswerRequest {
+  string question_content = 1;
+  repeated string choices = 2;
+  string correct_choice = 3;
+  string user_choice = 4;
+}
+
+message ExplainAnswerResponse {
+  string explanation = 1;
+}
+
+message ChatMessage {
+  string role = 1; // "user" or "model"
+  string content = 2;
+}
+
+message ChatWithTutorRequest {
+  string question_content = 1;
+  repeated string choices = 2;
+  string correct_choice = 3;
+  string user_choice = 4;
+  
+  repeated ChatMessage history = 5;
+  string new_message = 6;
+}
+
+message ChatWithTutorResponse {
+  string reply = 1;
 }

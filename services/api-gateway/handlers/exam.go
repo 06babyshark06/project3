@@ -1,20 +1,24 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 
 	grpcclients "github.com/06babyshark06/JQKStudy/services/api-gateway/grpc_clients"
+	"github.com/06babyshark06/JQKStudy/services/api-gateway/redis"
 	"github.com/06babyshark06/JQKStudy/shared/contracts"
 	pb "github.com/06babyshark06/JQKStudy/shared/proto/exam"
 	pbUser "github.com/06babyshark06/JQKStudy/shared/proto/user"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 type ExamHandler struct {
@@ -1289,4 +1293,57 @@ func (h *ExamHandler) GetMySubmissions(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func (h *ExamHandler) MonitorExamViolationsWS(c *gin.Context) {
+	examIDStr := c.Param("id")
+	examID, err := strconv.ParseInt(examIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid exam id"})
+		return
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("Failed to set websocket upgrade: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	channel := fmt.Sprintf("exam_monitor:%d", examID)
+	subscriber := redis.Rdb.Subscribe(ctx, channel)
+	defer subscriber.Close()
+
+	ch := subscriber.Channel()
+
+	go func() {
+		for {
+			if _, _, err := conn.ReadMessage(); err != nil {
+				cancel()
+				break
+			}
+		}
+	}()
+
+	for {
+		select {
+		case msg := <-ch:
+			err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
+			if err != nil {
+				log.Println("write WS error:", err)
+				cancel()
+			}
+		case <-ctx.Done():
+			return
+		}
+	}
 }

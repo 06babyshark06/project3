@@ -94,3 +94,90 @@ func (h *AIHandler) GenerateQuestions(c *gin.Context) {
 
 	c.JSON(http.StatusOK, resp)
 }
+
+// ExplainAnswer accepts JSON payload to request AI explanation for an answer
+func (h *AIHandler) ExplainAnswer(c *gin.Context) {
+	var reqBody struct {
+		QuestionContent string   `json:"question_content"`
+		Choices         []string `json:"choices"`
+		CorrectChoice   string   `json:"correct_choice"`
+		UserChoice      string   `json:"user_choice"`
+	}
+
+	if err := c.ShouldBindJSON(&reqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	req := &pb.ExplainAnswerRequest{
+		QuestionContent: reqBody.QuestionContent,
+		Choices:         reqBody.Choices,
+		CorrectChoice:   reqBody.CorrectChoice,
+		UserChoice:      reqBody.UserChoice,
+	}
+
+	resp, err := h.aiClient.Client.ExplainAnswer(c.Request.Context(), req)
+	if err != nil {
+		log.Printf("AI Explain Error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lỗi khi gọi AI Service: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"explanation": resp.Explanation,
+		},
+	})
+}
+
+// ChatWithTutor handles subsequent questions in a chat-like manner
+func (h *AIHandler) ChatWithTutor(c *gin.Context) {
+	var body struct {
+		QuestionContent string   `json:"question_content"`
+		Choices         []string `json:"choices"`
+		CorrectChoice   string   `json:"correct_choice"`
+		UserChoice      string   `json:"user_choice"`
+		History         []struct {
+			Role    string `json:"role"`
+			Content string `json:"content"`
+		} `json:"history"`
+		NewMessage string `json:"new_message"`
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	var grpcHistory []*pb.ChatMessage
+	for _, h := range body.History {
+		grpcHistory = append(grpcHistory, &pb.ChatMessage{
+			Role:    h.Role,
+			Content: h.Content,
+		})
+	}
+
+	req := &pb.ChatWithTutorRequest{
+		QuestionContent: body.QuestionContent,
+		Choices:         body.Choices,
+		CorrectChoice:   body.CorrectChoice,
+		UserChoice:      body.UserChoice,
+		History:         grpcHistory,
+		NewMessage:      body.NewMessage,
+	}
+
+	resp, err := h.aiClient.Client.ChatWithTutor(c.Request.Context(), req)
+	if err != nil {
+		log.Printf("AI Chat Error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Lỗi khi gọi AI Service: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"reply": resp.Reply,
+		},
+	})
+}

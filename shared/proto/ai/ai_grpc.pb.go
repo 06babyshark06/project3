@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	AIService_GenerateQuestionsFromAI_FullMethodName = "/ai.AIService/GenerateQuestionsFromAI"
+	AIService_ExplainAnswer_FullMethodName           = "/ai.AIService/ExplainAnswer"
+	AIService_ChatWithTutor_FullMethodName           = "/ai.AIService/ChatWithTutor"
 )
 
 // AIServiceClient is the client API for AIService service.
@@ -27,6 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AIServiceClient interface {
 	GenerateQuestionsFromAI(ctx context.Context, in *GenerateQuestionsFromAIRequest, opts ...grpc.CallOption) (*GenerateQuestionsFromAIResponse, error)
+	ExplainAnswer(ctx context.Context, in *ExplainAnswerRequest, opts ...grpc.CallOption) (*ExplainAnswerResponse, error)
+	ChatWithTutor(ctx context.Context, in *ChatWithTutorRequest, opts ...grpc.CallOption) (*ChatWithTutorResponse, error)
 }
 
 type aIServiceClient struct {
@@ -47,11 +51,33 @@ func (c *aIServiceClient) GenerateQuestionsFromAI(ctx context.Context, in *Gener
 	return out, nil
 }
 
+func (c *aIServiceClient) ExplainAnswer(ctx context.Context, in *ExplainAnswerRequest, opts ...grpc.CallOption) (*ExplainAnswerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExplainAnswerResponse)
+	err := c.cc.Invoke(ctx, AIService_ExplainAnswer_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *aIServiceClient) ChatWithTutor(ctx context.Context, in *ChatWithTutorRequest, opts ...grpc.CallOption) (*ChatWithTutorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ChatWithTutorResponse)
+	err := c.cc.Invoke(ctx, AIService_ChatWithTutor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AIServiceServer is the server API for AIService service.
 // All implementations must embed UnimplementedAIServiceServer
 // for forward compatibility.
 type AIServiceServer interface {
 	GenerateQuestionsFromAI(context.Context, *GenerateQuestionsFromAIRequest) (*GenerateQuestionsFromAIResponse, error)
+	ExplainAnswer(context.Context, *ExplainAnswerRequest) (*ExplainAnswerResponse, error)
+	ChatWithTutor(context.Context, *ChatWithTutorRequest) (*ChatWithTutorResponse, error)
 	mustEmbedUnimplementedAIServiceServer()
 }
 
@@ -64,6 +90,12 @@ type UnimplementedAIServiceServer struct{}
 
 func (UnimplementedAIServiceServer) GenerateQuestionsFromAI(context.Context, *GenerateQuestionsFromAIRequest) (*GenerateQuestionsFromAIResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateQuestionsFromAI not implemented")
+}
+func (UnimplementedAIServiceServer) ExplainAnswer(context.Context, *ExplainAnswerRequest) (*ExplainAnswerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ExplainAnswer not implemented")
+}
+func (UnimplementedAIServiceServer) ChatWithTutor(context.Context, *ChatWithTutorRequest) (*ChatWithTutorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChatWithTutor not implemented")
 }
 func (UnimplementedAIServiceServer) mustEmbedUnimplementedAIServiceServer() {}
 func (UnimplementedAIServiceServer) testEmbeddedByValue()                   {}
@@ -104,6 +136,42 @@ func _AIService_GenerateQuestionsFromAI_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AIService_ExplainAnswer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExplainAnswerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIServiceServer).ExplainAnswer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIService_ExplainAnswer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIServiceServer).ExplainAnswer(ctx, req.(*ExplainAnswerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AIService_ChatWithTutor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatWithTutorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AIServiceServer).ChatWithTutor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AIService_ChatWithTutor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AIServiceServer).ChatWithTutor(ctx, req.(*ChatWithTutorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AIService_ServiceDesc is the grpc.ServiceDesc for AIService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +182,14 @@ var AIService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateQuestionsFromAI",
 			Handler:    _AIService_GenerateQuestionsFromAI_Handler,
+		},
+		{
+			MethodName: "ExplainAnswer",
+			Handler:    _AIService_ExplainAnswer_Handler,
+		},
+		{
+			MethodName: "ChatWithTutor",
+			Handler:    _AIService_ChatWithTutor_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

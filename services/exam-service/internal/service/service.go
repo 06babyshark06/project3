@@ -1249,7 +1249,12 @@ func (s *examService) LogViolation(ctx context.Context, req *pb.LogViolationRequ
 				}
 				jsonMsg, _ := json.Marshal(msg)
 				channel := fmt.Sprintf("notifications:%d", exam.CreatorID)
+				log.Printf("📢 Redis Publish: Sending violation to [%s]", channel)
 				database.RedisClient.Publish(ctx, channel, string(jsonMsg))
+
+				monitorChannel := fmt.Sprintf("exam_monitor:%d", req.ExamId)
+				log.Printf("📢 Redis Publish: Sending violation to [%s]", monitorChannel)
+				database.RedisClient.Publish(ctx, monitorChannel, string(jsonMsg))
 			}
 		}
 	}

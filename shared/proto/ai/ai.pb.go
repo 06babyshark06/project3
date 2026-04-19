@@ -353,6 +353,298 @@ func (x *GenerateQuestionsFromAIResponse) GetQuestions() []*GeneratedAIQuestion 
 	return nil
 }
 
+type ExplainAnswerRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	QuestionContent string                 `protobuf:"bytes,1,opt,name=question_content,json=questionContent,proto3" json:"question_content,omitempty"`
+	Choices         []string               `protobuf:"bytes,2,rep,name=choices,proto3" json:"choices,omitempty"`
+	CorrectChoice   string                 `protobuf:"bytes,3,opt,name=correct_choice,json=correctChoice,proto3" json:"correct_choice,omitempty"`
+	UserChoice      string                 `protobuf:"bytes,4,opt,name=user_choice,json=userChoice,proto3" json:"user_choice,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ExplainAnswerRequest) Reset() {
+	*x = ExplainAnswerRequest{}
+	mi := &file_ai_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExplainAnswerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExplainAnswerRequest) ProtoMessage() {}
+
+func (x *ExplainAnswerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExplainAnswerRequest.ProtoReflect.Descriptor instead.
+func (*ExplainAnswerRequest) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ExplainAnswerRequest) GetQuestionContent() string {
+	if x != nil {
+		return x.QuestionContent
+	}
+	return ""
+}
+
+func (x *ExplainAnswerRequest) GetChoices() []string {
+	if x != nil {
+		return x.Choices
+	}
+	return nil
+}
+
+func (x *ExplainAnswerRequest) GetCorrectChoice() string {
+	if x != nil {
+		return x.CorrectChoice
+	}
+	return ""
+}
+
+func (x *ExplainAnswerRequest) GetUserChoice() string {
+	if x != nil {
+		return x.UserChoice
+	}
+	return ""
+}
+
+type ExplainAnswerResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Explanation   string                 `protobuf:"bytes,1,opt,name=explanation,proto3" json:"explanation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExplainAnswerResponse) Reset() {
+	*x = ExplainAnswerResponse{}
+	mi := &file_ai_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExplainAnswerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExplainAnswerResponse) ProtoMessage() {}
+
+func (x *ExplainAnswerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExplainAnswerResponse.ProtoReflect.Descriptor instead.
+func (*ExplainAnswerResponse) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ExplainAnswerResponse) GetExplanation() string {
+	if x != nil {
+		return x.Explanation
+	}
+	return ""
+}
+
+type ChatMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Role          string                 `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"` // "user" or "model"
+	Content       string                 `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatMessage) Reset() {
+	*x = ChatMessage{}
+	mi := &file_ai_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatMessage) ProtoMessage() {}
+
+func (x *ChatMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
+func (*ChatMessage) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ChatMessage) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+type ChatWithTutorRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	QuestionContent string                 `protobuf:"bytes,1,opt,name=question_content,json=questionContent,proto3" json:"question_content,omitempty"`
+	Choices         []string               `protobuf:"bytes,2,rep,name=choices,proto3" json:"choices,omitempty"`
+	CorrectChoice   string                 `protobuf:"bytes,3,opt,name=correct_choice,json=correctChoice,proto3" json:"correct_choice,omitempty"`
+	UserChoice      string                 `protobuf:"bytes,4,opt,name=user_choice,json=userChoice,proto3" json:"user_choice,omitempty"`
+	History         []*ChatMessage         `protobuf:"bytes,5,rep,name=history,proto3" json:"history,omitempty"`
+	NewMessage      string                 `protobuf:"bytes,6,opt,name=new_message,json=newMessage,proto3" json:"new_message,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ChatWithTutorRequest) Reset() {
+	*x = ChatWithTutorRequest{}
+	mi := &file_ai_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatWithTutorRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatWithTutorRequest) ProtoMessage() {}
+
+func (x *ChatWithTutorRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatWithTutorRequest.ProtoReflect.Descriptor instead.
+func (*ChatWithTutorRequest) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ChatWithTutorRequest) GetQuestionContent() string {
+	if x != nil {
+		return x.QuestionContent
+	}
+	return ""
+}
+
+func (x *ChatWithTutorRequest) GetChoices() []string {
+	if x != nil {
+		return x.Choices
+	}
+	return nil
+}
+
+func (x *ChatWithTutorRequest) GetCorrectChoice() string {
+	if x != nil {
+		return x.CorrectChoice
+	}
+	return ""
+}
+
+func (x *ChatWithTutorRequest) GetUserChoice() string {
+	if x != nil {
+		return x.UserChoice
+	}
+	return ""
+}
+
+func (x *ChatWithTutorRequest) GetHistory() []*ChatMessage {
+	if x != nil {
+		return x.History
+	}
+	return nil
+}
+
+func (x *ChatWithTutorRequest) GetNewMessage() string {
+	if x != nil {
+		return x.NewMessage
+	}
+	return ""
+}
+
+type ChatWithTutorResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Reply         string                 `protobuf:"bytes,1,opt,name=reply,proto3" json:"reply,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatWithTutorResponse) Reset() {
+	*x = ChatWithTutorResponse{}
+	mi := &file_ai_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatWithTutorResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatWithTutorResponse) ProtoMessage() {}
+
+func (x *ChatWithTutorResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_ai_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatWithTutorResponse.ProtoReflect.Descriptor instead.
+func (*ChatWithTutorResponse) Descriptor() ([]byte, []int) {
+	return file_ai_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ChatWithTutorResponse) GetReply() string {
+	if x != nil {
+		return x.Reply
+	}
+	return ""
+}
+
 var File_ai_proto protoreflect.FileDescriptor
 
 const file_ai_proto_rawDesc = "" +
@@ -393,9 +685,33 @@ const file_ai_proto_rawDesc = "" +
 	"\x1fGenerateQuestionsFromAIResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\x125\n" +
-	"\tquestions\x18\x03 \x03(\v2\x17.ai.GeneratedAIQuestionR\tquestions2o\n" +
+	"\tquestions\x18\x03 \x03(\v2\x17.ai.GeneratedAIQuestionR\tquestions\"\xa3\x01\n" +
+	"\x14ExplainAnswerRequest\x12)\n" +
+	"\x10question_content\x18\x01 \x01(\tR\x0fquestionContent\x12\x18\n" +
+	"\achoices\x18\x02 \x03(\tR\achoices\x12%\n" +
+	"\x0ecorrect_choice\x18\x03 \x01(\tR\rcorrectChoice\x12\x1f\n" +
+	"\vuser_choice\x18\x04 \x01(\tR\n" +
+	"userChoice\"9\n" +
+	"\x15ExplainAnswerResponse\x12 \n" +
+	"\vexplanation\x18\x01 \x01(\tR\vexplanation\";\n" +
+	"\vChatMessage\x12\x12\n" +
+	"\x04role\x18\x01 \x01(\tR\x04role\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\tR\acontent\"\xef\x01\n" +
+	"\x14ChatWithTutorRequest\x12)\n" +
+	"\x10question_content\x18\x01 \x01(\tR\x0fquestionContent\x12\x18\n" +
+	"\achoices\x18\x02 \x03(\tR\achoices\x12%\n" +
+	"\x0ecorrect_choice\x18\x03 \x01(\tR\rcorrectChoice\x12\x1f\n" +
+	"\vuser_choice\x18\x04 \x01(\tR\n" +
+	"userChoice\x12)\n" +
+	"\ahistory\x18\x05 \x03(\v2\x0f.ai.ChatMessageR\ahistory\x12\x1f\n" +
+	"\vnew_message\x18\x06 \x01(\tR\n" +
+	"newMessage\"-\n" +
+	"\x15ChatWithTutorResponse\x12\x14\n" +
+	"\x05reply\x18\x01 \x01(\tR\x05reply2\xfb\x01\n" +
 	"\tAIService\x12b\n" +
-	"\x17GenerateQuestionsFromAI\x12\".ai.GenerateQuestionsFromAIRequest\x1a#.ai.GenerateQuestionsFromAIResponseB\x14Z\x12shared/proto/ai;aib\x06proto3"
+	"\x17GenerateQuestionsFromAI\x12\".ai.GenerateQuestionsFromAIRequest\x1a#.ai.GenerateQuestionsFromAIResponse\x12D\n" +
+	"\rExplainAnswer\x12\x18.ai.ExplainAnswerRequest\x1a\x19.ai.ExplainAnswerResponse\x12D\n" +
+	"\rChatWithTutor\x12\x18.ai.ChatWithTutorRequest\x1a\x19.ai.ChatWithTutorResponseB\x14Z\x12shared/proto/ai;aib\x06proto3"
 
 var (
 	file_ai_proto_rawDescOnce sync.Once
@@ -409,23 +725,33 @@ func file_ai_proto_rawDescGZIP() []byte {
 	return file_ai_proto_rawDescData
 }
 
-var file_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_ai_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_ai_proto_goTypes = []any{
 	(*GenerateQuestionsFromAIRequest)(nil),  // 0: ai.GenerateQuestionsFromAIRequest
 	(*GeneratedChoice)(nil),                 // 1: ai.GeneratedChoice
 	(*GeneratedAIQuestion)(nil),             // 2: ai.GeneratedAIQuestion
 	(*GenerateQuestionsFromAIResponse)(nil), // 3: ai.GenerateQuestionsFromAIResponse
+	(*ExplainAnswerRequest)(nil),            // 4: ai.ExplainAnswerRequest
+	(*ExplainAnswerResponse)(nil),           // 5: ai.ExplainAnswerResponse
+	(*ChatMessage)(nil),                     // 6: ai.ChatMessage
+	(*ChatWithTutorRequest)(nil),            // 7: ai.ChatWithTutorRequest
+	(*ChatWithTutorResponse)(nil),           // 8: ai.ChatWithTutorResponse
 }
 var file_ai_proto_depIdxs = []int32{
 	1, // 0: ai.GeneratedAIQuestion.choices:type_name -> ai.GeneratedChoice
 	2, // 1: ai.GenerateQuestionsFromAIResponse.questions:type_name -> ai.GeneratedAIQuestion
-	0, // 2: ai.AIService.GenerateQuestionsFromAI:input_type -> ai.GenerateQuestionsFromAIRequest
-	3, // 3: ai.AIService.GenerateQuestionsFromAI:output_type -> ai.GenerateQuestionsFromAIResponse
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	6, // 2: ai.ChatWithTutorRequest.history:type_name -> ai.ChatMessage
+	0, // 3: ai.AIService.GenerateQuestionsFromAI:input_type -> ai.GenerateQuestionsFromAIRequest
+	4, // 4: ai.AIService.ExplainAnswer:input_type -> ai.ExplainAnswerRequest
+	7, // 5: ai.AIService.ChatWithTutor:input_type -> ai.ChatWithTutorRequest
+	3, // 6: ai.AIService.GenerateQuestionsFromAI:output_type -> ai.GenerateQuestionsFromAIResponse
+	5, // 7: ai.AIService.ExplainAnswer:output_type -> ai.ExplainAnswerResponse
+	8, // 8: ai.AIService.ChatWithTutor:output_type -> ai.ChatWithTutorResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_ai_proto_init() }
@@ -439,7 +765,7 @@ func file_ai_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_ai_proto_rawDesc), len(file_ai_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

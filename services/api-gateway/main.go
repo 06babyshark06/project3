@@ -87,6 +87,8 @@ func main() {
 		auth.Use(jwtMiddleware.MiddlewareFunc())
 		{
 			auth.POST("/logout", authHandler.Logout)
+			auth.POST("/ai/explain", aiHandler.ExplainAnswer)
+			auth.POST("/ai/chat", aiHandler.ChatWithTutor)
 
 			auth.GET("/notifications/stream", notificationHandler.StreamNotifications)
 
@@ -167,6 +169,7 @@ func main() {
 				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
 				instructorOnly.GET("/exams/:id/submissions", examHandler.GetExamSubmissions) // NEW ROUTE
 				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
+				instructorOnly.GET("/exams/:id/monitor/ws", examHandler.MonitorExamViolationsWS)
 				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)
 				instructorOnly.GET("/exams/:id/preview", examHandler.GetExamPreview)
 

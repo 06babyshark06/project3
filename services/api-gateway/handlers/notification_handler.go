@@ -3,10 +3,11 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
+	"time"
 
 	"github.com/06babyshark06/JQKStudy/services/api-gateway/redis"
+	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,29 +18,26 @@ func NewNotificationHandler() *NotificationHandler {
 }
 
 func (h *NotificationHandler) StreamNotifications(c *gin.Context) {
-	// Require Auth
-	userIDVal, exists := c.Get("user_id")
-	if !exists {
-		c.JSON(401, gin.H{"error": "Unauthorized"})
-		return
-	}
-	
-	// Convert userId to string or int as needed, usually in this middleware it's int64
+	// Dùng jwt.ExtractClaims giống như các handler khác để lấy user_id xịn
+	claims := jwt.ExtractClaims(c)
 	var userIDStr string
-	switch v := userIDVal.(type) {
-	case string:
-		userIDStr = v
-	case int64:
-		userIDStr = fmt.Sprintf("%d", v)
-	case int:
-		userIDStr = fmt.Sprintf("%d", v)
-	case float64:
-		userIDStr = fmt.Sprintf("%d", int(v))
-	default:
-		userIDStr = fmt.Sprintf("%v", v)
+	
+	if val, ok := claims["user_id"]; ok {
+		switch v := val.(type) {
+		case float64:
+			userIDStr = fmt.Sprintf("%d", int(v))
+		case string:
+			userIDStr = v
+		default:
+			userIDStr = fmt.Sprintf("%v", v)
+		}
+	} else {
+		c.JSON(401, gin.H{"error": "Unauthorized: No user_id in claims"})
+		return
 	}
 
 	channel := fmt.Sprintf("notifications:%s", userIDStr)
+	log.Printf("🔌 SSE: Client connected. Subscribing to Redis channel: [%s] and [notifications:all]", channel)
 
 	// Set headers for SSE
 	c.Writer.Header().Set("Content-Type", "text/event-stream")
@@ -57,17 +55,25 @@ func (h *NotificationHandler) StreamNotifications(c *gin.Context) {
 
 	ch := subscriber.Channel()
 
-	c.Stream(func(w io.Writer) bool {
+	// 🛠 Test if SSE works immediately upon connection
+	welcomeMsg := fmt.Sprintf(`{"type":"INFO", "message":"Đã kết nối luồng SSE! (Đang nghe kênh %s)", "timestamp":"%s"}`, channel, time.Now().Format(time.RFC3339))
+	c.SSEvent("message", welcomeMsg)
+	c.Writer.Flush()
+
+	// Bỏ c.Stream của Gin để dùng vòng lặp for native, sửa lỗi miss sự kiện
+	for {
 		select {
-		case msg := <-ch:
-			// Write the SSE event
+		case msg, ok := <-ch:
+			if !ok {
+				log.Printf("Redis Channel closed for user %s", userIDStr)
+				return
+			}
+			log.Printf("📥 API-Gateway Received from Redis: %s", msg.Payload)
 			c.SSEvent("message", msg.Payload)
-			// Returning true means keep the connection open
-			return true
+			c.Writer.Flush()
 		case <-ctx.Done():
 			log.Printf("Client disconnected from SSE stream. User: %s", userIDStr)
-			// Returning false closes the stream
-			return false
+			return
 		}
-	})
+	}
 }

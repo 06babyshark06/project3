@@ -175,3 +175,181 @@ func (c *GeminiClient) generateCacheKey(req *pb.GenerateQuestionsFromAIRequest, 
 	hash := md5.Sum([]byte(keyData))
 	return "ai:questions:" + hex.EncodeToString(hash[:])
 }
+
+// ExplainAnswer provides an explanation for why a specific choice is correct/incorrect
+func (c *GeminiClient) ExplainAnswer(ctx context.Context, req *pb.ExplainAnswerRequest) (string, error) {
+	cacheKey := c.generateExplainCacheKey(req)
+	if database.RedisClient != nil {
+		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
+		if err == nil && cachedData != "" {
+			log.Printf("🔹 AI Cache Hit (Explain): %s", cacheKey)
+			return cachedData, nil
+		}
+	}
+
+	if c.apiKey == "" {
+		return "", fmt.Errorf("GEMINI_API_KEY is missing")
+	}
+
+	client, err := genai.NewClient(ctx, option.WithAPIKey(c.apiKey))
+	if err != nil {
+		return "", fmt.Errorf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-2.5-flash")
+	
+	// Format choices
+	choicesContext := "Các lựa chọn:\n"
+	for i, choice := range req.Choices {
+		choicesContext += fmt.Sprintf("- Lựa chọn %d: %s\n", i+1, choice)
+	}
+
+	prompt := fmt.Sprintf(`
+Bạn là một gia sư AI thân thiện, chuyên môn cao. Xin hãy nhận xét ngắn gọn và giải thích cặn kẽ câu hỏi sau để giúp sinh viên nhận ra lỗi sai:
+
+Câu hỏi: %s
+
+%s
+Đáp án đúng là: %s
+
+Học sinh đã chọn: %s
+
+Yêu cầu:
+1. Giải thích cụ thể tại sao "Đáp án đúng" lại đúng.
+2. Chỉ ra lỗi sai logic hoặc lỗ hổng kiến thức dẫn đến việc học sinh chọn "Đáp án đã chọn".
+3. Lời lẽ khích lệ, thân thiện nhưng đúng văn phong học thuật.
+4. Trả về định dạng Markdown.
+`, req.QuestionContent, choicesContext, req.CorrectChoice, req.UserChoice)
+
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+	if err != nil {
+		return "", fmt.Errorf("API error: %v", err)
+	}
+
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil || len(resp.Candidates[0].Content.Parts) == 0 {
+		return "", fmt.Errorf("empty response from model")
+	}
+
+	part := resp.Candidates[0].Content.Parts[0]
+	textResponse, ok := part.(genai.Text)
+	if !ok {
+		return "", fmt.Errorf("expected text part but got something else")
+	}
+
+	explanation := string(textResponse)
+
+	if database.RedisClient != nil {
+		database.RedisClient.Set(ctx, cacheKey, explanation, 7*24*time.Hour) // Cache for 7 days
+	}
+
+	return explanation, nil
+}
+
+func (c *GeminiClient) generateExplainCacheKey(req *pb.ExplainAnswerRequest) string {
+	keyData := fmt.Sprintf("%v|%v|%v", req.QuestionContent, req.CorrectChoice, req.UserChoice)
+	hash := md5.Sum([]byte(keyData))
+	return "ai:explain:" + hex.EncodeToString(hash[:])
+}
+
+// ChatWithTutor handles subsequent questions from the student about a specific answer
+func (c *GeminiClient) ChatWithTutor(ctx context.Context, req *pb.ChatWithTutorRequest) (string, error) {
+	// Generate cache key for the whole conversation history + new message
+	cacheKey := c.generateChatCacheKey(req)
+	if database.RedisClient != nil {
+		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
+		if err == nil && cachedData != "" {
+			log.Printf("🔹 AI Cache Hit (Chat): %s", cacheKey)
+			return cachedData, nil
+		}
+	}
+
+	if c.apiKey == "" {
+		return "", fmt.Errorf("GEMINI_API_KEY is missing")
+	}
+
+	client, err := genai.NewClient(ctx, option.WithAPIKey(c.apiKey))
+	if err != nil {
+		return "", fmt.Errorf("failed to create client: %v", err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel("gemini-2.5-flash")
+	
+	// Create the chat session with history
+	chat := model.StartChat()
+	
+	// Prepare system context / initial history if not present
+	// We want the AI to remember it's a tutor for a specific question
+	choicesContext := "Các lựa chọn:\n"
+	for i, choice := range req.Choices {
+		choicesContext += fmt.Sprintf("- Lựa chọn %d: %s\n", i+1, choice)
+	}
+
+	systemContext := fmt.Sprintf(`
+BỐI CẢNH LUỒNG HỘI THOẠI:
+Bạn là một gia sư AI đang giúp sinh viên hiểu một câu hỏi trắc nghiệm.
+Câu hỏi: %s
+%s
+Đáp án đúng: %s
+Học sinh đã trả lời: %s
+
+Nhiệm vụ: Trả lời các thắc mắc tiếp theo của sinh viên về câu hỏi này. 
+Hãy giữ văn phong gia sư, giải thích cặn kẽ, khích lệ. 
+Nếu sinh viên hỏi lạc đề, hãy nhắc sinh viên quay lại nội dung kiến thức của câu hỏi.
+Trả về định dạng Markdown.
+`, req.QuestionContent, choicesContext, req.CorrectChoice, req.UserChoice)
+
+	// In the Go SDK, we can't easily set a "System Instruction" for individual StartChat calls 
+	// unless we set it on the model. To keep it per-request, we'll prepend it to the history 
+	// or use the first user message. 
+	// Actually, the best way for genai Go SDK is model.SystemInstruction = ... before StartChat()
+	model.SystemInstruction = genai.NewUserContent(genai.Text(systemContext))
+
+	// Convert pb.ChatMessage history to genai.Content
+	var history []*genai.Content
+	for _, msg := range req.History {
+		history = append(history, &genai.Content{
+			Role:  msg.Role,
+			Parts: []genai.Part{genai.Text(msg.Content)},
+		})
+	}
+	chat.History = history
+
+	resp, err := chat.SendMessage(ctx, genai.Text(req.NewMessage))
+	if err != nil {
+		return "", fmt.Errorf("API error during chat: %v", err)
+	}
+
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil || len(resp.Candidates[0].Content.Parts) == 0 {
+		return "", fmt.Errorf("empty response from model in chat")
+	}
+
+	part := resp.Candidates[0].Content.Parts[0]
+	textResponse, ok := part.(genai.Text)
+	if !ok {
+		return "", fmt.Errorf("expected text part but got something else in chat")
+	}
+
+	reply := string(textResponse)
+
+	if database.RedisClient != nil {
+		database.RedisClient.Set(ctx, cacheKey, reply, 7*24*time.Hour)
+	}
+
+	return reply, nil
+}
+
+func (c *GeminiClient) generateChatCacheKey(req *pb.ChatWithTutorRequest) string {
+	// History content + original context + new message
+	historyStr := ""
+	for _, h := range req.History {
+		historyStr += h.Role + ":" + h.Content + "|"
+	}
+	keyData := fmt.Sprintf("%v|%v|%v|%v|%v|%v", 
+		req.QuestionContent, req.CorrectChoice, req.UserChoice, 
+		historyStr, req.NewMessage, "v1") // v1 for busting cache if needed
+	
+	hash := md5.Sum([]byte(keyData))
+	return "ai:chat:" + hex.EncodeToString(hash[:])
+}
