@@ -31,7 +31,10 @@ func main() {
 		log.Fatalf("failed to listen on port %s: %v", port, err)
 	}
 
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.MaxRecvMsgSize(50*1024*1024),
+		grpc.MaxSendMsgSize(50*1024*1024),
+	)
 	aiServer := server.NewAIServiceServer(geminiApiKey)
 	pb.RegisterAIServiceServer(s, aiServer)
 

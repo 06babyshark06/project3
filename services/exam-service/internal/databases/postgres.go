@@ -77,6 +77,8 @@ func seedExamData(db *gorm.DB) {
 	types := []domain.QuestionTypeModel{
 		{Type: "single_choice"},
 		{Type: "multiple_choice"},
+		{Type: "short_answer"},
+		{Type: "essay"},
 	}
 	for _, t := range types {
 		db.FirstOrCreate(&t, domain.QuestionTypeModel{Type: t.Type})

@@ -755,9 +755,10 @@ func (h *ExamHandler) GetMyExamStats(c *gin.Context) {
 
 func (h *ExamHandler) SaveAnswer(c *gin.Context) {
 	var req struct {
-		ExamId         int64 `json:"exam_id"`
-		QuestionId     int64 `json:"question_id"`
-		ChosenChoiceId int64 `json:"chosen_choice_id"`
+		ExamId         int64  `json:"exam_id"`
+		QuestionId     int64  `json:"question_id"`
+		ChosenChoiceId int64  `json:"chosen_choice_id"`
+		TextAnswer     string `json:"text_answer"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -775,6 +776,7 @@ func (h *ExamHandler) SaveAnswer(c *gin.Context) {
 		ExamId:         req.ExamId,
 		QuestionId:     req.QuestionId,
 		ChosenChoiceId: req.ChosenChoiceId,
+		TextAnswer:     req.TextAnswer,
 		IpAddress:      c.ClientIP(),
 		UserAgent:      c.GetHeader("User-Agent"),
 	})
@@ -1346,4 +1348,31 @@ func (h *ExamHandler) MonitorExamViolationsWS(c *gin.Context) {
 			return
 		}
 	}
+}
+func (h *ExamHandler) GradeEssay(c *gin.Context) {
+	submissionIDStr := c.Param("submission_id")
+	submissionID, _ := strconv.ParseInt(submissionIDStr, 10, 64)
+
+	var body struct {
+		QuestionID int64 `json:"question_id"`
+		IsCorrect  bool  `json:"is_correct"`
+	}
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	resp, err := h.examClient.GradeEssay(c.Request.Context(), &pb.GradeEssayRequest{
+		SubmissionId: submissionID,
+		QuestionId:   body.QuestionID,
+		IsCorrect:    body.IsCorrect,
+	})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }

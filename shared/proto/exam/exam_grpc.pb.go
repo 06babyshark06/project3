@@ -65,6 +65,8 @@ const (
 	ExamService_GetExamPreview_FullMethodName        = "/exam.ExamService/GetExamPreview"
 	ExamService_GetRecentSubmissions_FullMethodName  = "/exam.ExamService/GetRecentSubmissions"
 	ExamService_GetMySubmissions_FullMethodName      = "/exam.ExamService/GetMySubmissions"
+	ExamService_GradeEssay_FullMethodName            = "/exam.ExamService/GradeEssay"
+	ExamService_GetClassGradebook_FullMethodName     = "/exam.ExamService/GetClassGradebook"
 )
 
 // ExamServiceClient is the client API for ExamService service.
@@ -117,6 +119,8 @@ type ExamServiceClient interface {
 	GetExamPreview(ctx context.Context, in *GetExamPreviewRequest, opts ...grpc.CallOption) (*GetExamDetailsResponse, error)
 	GetRecentSubmissions(ctx context.Context, in *GetRecentSubmissionsRequest, opts ...grpc.CallOption) (*GetRecentSubmissionsResponse, error)
 	GetMySubmissions(ctx context.Context, in *GetMySubmissionsRequest, opts ...grpc.CallOption) (*GetMySubmissionsResponse, error)
+	GradeEssay(ctx context.Context, in *GradeEssayRequest, opts ...grpc.CallOption) (*GradeEssayResponse, error)
+	GetClassGradebook(ctx context.Context, in *GetClassGradebookRequest, opts ...grpc.CallOption) (*GetClassGradebookResponse, error)
 }
 
 type examServiceClient struct {
@@ -587,6 +591,26 @@ func (c *examServiceClient) GetMySubmissions(ctx context.Context, in *GetMySubmi
 	return out, nil
 }
 
+func (c *examServiceClient) GradeEssay(ctx context.Context, in *GradeEssayRequest, opts ...grpc.CallOption) (*GradeEssayResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GradeEssayResponse)
+	err := c.cc.Invoke(ctx, ExamService_GradeEssay_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) GetClassGradebook(ctx context.Context, in *GetClassGradebookRequest, opts ...grpc.CallOption) (*GetClassGradebookResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetClassGradebookResponse)
+	err := c.cc.Invoke(ctx, ExamService_GetClassGradebook_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExamServiceServer is the server API for ExamService service.
 // All implementations must embed UnimplementedExamServiceServer
 // for forward compatibility.
@@ -637,6 +661,8 @@ type ExamServiceServer interface {
 	GetExamPreview(context.Context, *GetExamPreviewRequest) (*GetExamDetailsResponse, error)
 	GetRecentSubmissions(context.Context, *GetRecentSubmissionsRequest) (*GetRecentSubmissionsResponse, error)
 	GetMySubmissions(context.Context, *GetMySubmissionsRequest) (*GetMySubmissionsResponse, error)
+	GradeEssay(context.Context, *GradeEssayRequest) (*GradeEssayResponse, error)
+	GetClassGradebook(context.Context, *GetClassGradebookRequest) (*GetClassGradebookResponse, error)
 	mustEmbedUnimplementedExamServiceServer()
 }
 
@@ -784,6 +810,12 @@ func (UnimplementedExamServiceServer) GetRecentSubmissions(context.Context, *Get
 }
 func (UnimplementedExamServiceServer) GetMySubmissions(context.Context, *GetMySubmissionsRequest) (*GetMySubmissionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMySubmissions not implemented")
+}
+func (UnimplementedExamServiceServer) GradeEssay(context.Context, *GradeEssayRequest) (*GradeEssayResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GradeEssay not implemented")
+}
+func (UnimplementedExamServiceServer) GetClassGradebook(context.Context, *GetClassGradebookRequest) (*GetClassGradebookResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetClassGradebook not implemented")
 }
 func (UnimplementedExamServiceServer) mustEmbedUnimplementedExamServiceServer() {}
 func (UnimplementedExamServiceServer) testEmbeddedByValue()                     {}
@@ -1634,6 +1666,42 @@ func _ExamService_GetMySubmissions_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExamService_GradeEssay_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GradeEssayRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GradeEssay(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GradeEssay_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GradeEssay(ctx, req.(*GradeEssayRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_GetClassGradebook_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetClassGradebookRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).GetClassGradebook(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_GetClassGradebook_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).GetClassGradebook(ctx, req.(*GetClassGradebookRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExamService_ServiceDesc is the grpc.ServiceDesc for ExamService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1824,6 +1892,14 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMySubmissions",
 			Handler:    _ExamService_GetMySubmissions_Handler,
+		},
+		{
+			MethodName: "GradeEssay",
+			Handler:    _ExamService_GradeEssay_Handler,
+		},
+		{
+			MethodName: "GetClassGradebook",
+			Handler:    _ExamService_GetClassGradebook_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

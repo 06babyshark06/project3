@@ -286,6 +286,71 @@ func (h *ClassHandler) GetClassExams(c *gin.Context) {
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp.Exams})
 }
 
+func (h *ClassHandler) GetClassGradebook(c *gin.Context) {
+	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+
+	// 1. Lấy thông tin thành viên từ User Service
+	classDetail, err := h.userClient.GetClassDetails(c.Request.Context(), &pbUser.GetClassDetailsRequest{ClassId: id})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể lấy thông tin thành viên lớp: " + err.Error()})
+		return
+	}
+
+	if len(classDetail.Members) == 0 {
+		c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{
+			"exams":    []interface{}{},
+			"students": []interface{}{},
+		}})
+		return
+	}
+
+	studentIDs := make([]int64, len(classDetail.Members))
+	studentMap := make(map[int64]string)
+	for i, m := range classDetail.Members {
+		studentIDs[i] = m.UserId
+		studentMap[m.UserId] = m.FullName
+	}
+
+	// 2. Lấy bảng điểm từ Exam Service
+	resp, err := h.examClient.GetClassGradebook(c.Request.Context(), &pbExam.GetClassGradebookRequest{
+		ClassId:    id,
+		StudentIds: studentIDs,
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể lấy bảng điểm: " + err.Error()})
+		return
+	}
+
+	// 3. Mapping lại kết quả để frontend dễ dùng
+	type GradeInfo struct {
+		StudentID int64             `json:"student_id"`
+		FullName  string            `json:"full_name"`
+		Scores    map[int64]float32 `json:"scores"` // exam_id -> score
+		Completed map[int64]bool    `json:"completed"`
+	}
+
+	var studentGrades []GradeInfo
+	for _, g := range resp.Grades {
+		scores := make(map[int64]float32)
+		completed := make(map[int64]bool)
+		for _, s := range g.Scores {
+			scores[s.ExamId] = s.Score
+			completed[s.ExamId] = s.Completed
+		}
+		studentGrades = append(studentGrades, GradeInfo{
+			StudentID: g.StudentId,
+			FullName:  studentMap[g.StudentId],
+			Scores:    scores,
+			Completed: completed,
+		})
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{
+		"exams":    resp.Exams,
+		"students": studentGrades,
+	}})
+}
+
 func getUserRoleFromContext(c *gin.Context) string {
 	claims := jwt.ExtractClaims(c)
 	return fmt.Sprintf("%v", claims["role"])

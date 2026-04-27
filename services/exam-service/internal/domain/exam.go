@@ -165,6 +165,7 @@ type UserAnswerModel struct {
 	SubmissionID   int64 `gorm:"not null;index"`
 	QuestionID     int64 `gorm:"not null"`
 	ChosenChoiceID *int64
+	TextAnswer     *string
 	Choice         ChoiceModel   `gorm:"foreignKey:ChosenChoiceID"`
 	Question       QuestionModel `gorm:"foreignKey:QuestionID"`
 	IsCorrect      *bool
@@ -254,6 +255,8 @@ type ExamRepository interface {
 	GetStudentExam(ctx context.Context, examID, userID int64) (*StudentExamModel, error)
 	GetCorrectAnswersByQuestionIDs(ctx context.Context, questionIDs []int64) (map[int64][]int64, error)
 	GetSubmissionsByUserID(ctx context.Context, userID int64) ([]*ExamSubmissionModel, error)
+	UpdateUserAnswer(ctx context.Context, tx *gorm.DB, submissionID, questionID int64, updates map[string]interface{}) error
+	GetBestScoresForGradebook(ctx context.Context, examIDs []int64, studentIDs []int64) (map[int64]map[int64]float64, error)
 }
 
 type EventProducer interface {
@@ -315,4 +318,6 @@ type ExamService interface {
 	GetExamPreview(ctx context.Context, req *pb.GetExamPreviewRequest) (*pb.GetExamDetailsResponse, error)
 	GeneratePersonalizedExamForStudents(ctx context.Context, examID int64, studentIDs []int64) error
 	GetMySubmissions(ctx context.Context, req *pb.GetMySubmissionsRequest) (*pb.GetMySubmissionsResponse, error)
+	GradeEssay(ctx context.Context, req *pb.GradeEssayRequest) (*pb.GradeEssayResponse, error)
+	GetClassGradebook(ctx context.Context, req *pb.GetClassGradebookRequest) (*pb.GetClassGradebookResponse, error)
 }

@@ -320,9 +320,17 @@ func (r *examRepository) SaveUserAnswer(ctx context.Context, tx *gorm.DB, ans *d
 		First(&existing).Error
 
 	if err == nil {
-		existing.ChosenChoiceID = ans.ChosenChoiceID
-		existing.IsCorrect = ans.IsCorrect
-		return tx.WithContext(ctx).Save(&existing).Error
+		updates := map[string]interface{}{
+			"chosen_choice_id": ans.ChosenChoiceID,
+			"is_correct":       ans.IsCorrect,
+		}
+		if ans.TextAnswer != nil {
+			updates["text_answer"] = *ans.TextAnswer
+		} else {
+			updates["text_answer"] = nil
+		}
+
+		return tx.WithContext(ctx).Model(&existing).Updates(updates).Error
 	}
 	return tx.WithContext(ctx).Create(ans).Error
 }
@@ -626,3 +634,43 @@ func (r *examRepository) GetSubmissionsByUserID(ctx context.Context, userID int6
 		Find(&subs).Error
 	return subs, err
 }
+
+func (r *examRepository) UpdateUserAnswer(ctx context.Context, tx *gorm.DB, submissionID, questionID int64, updates map[string]interface{}) error {
+	db := tx
+	if db == nil {
+		db = database.DB
+	}
+	return db.WithContext(ctx).Model(&domain.UserAnswerModel{}).
+		Where("submission_id = ? AND question_id = ?", submissionID, questionID).
+		Updates(updates).Error
+}
+
+func (r *examRepository) GetBestScoresForGradebook(ctx context.Context, examIDs []int64, studentIDs []int64) (map[int64]map[int64]float64, error) {
+	type Result struct {
+		UserID    int64   `gorm:"column:user_id"`
+		ExamID    int64   `gorm:"column:exam_id"`
+		BestScore float64 `gorm:"column:best_score"`
+	}
+	var results []Result
+
+	err := database.DB.WithContext(ctx).Table("exam_submission_models").
+		Select("user_id, exam_id, MAX(score) as best_score").
+		Where("exam_id IN ? AND user_id IN ?", examIDs, studentIDs).
+		Group("user_id, exam_id").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	scoreMap := make(map[int64]map[int64]float64)
+	for _, res := range results {
+		if _, ok := scoreMap[res.UserID]; !ok {
+			scoreMap[res.UserID] = make(map[int64]float64)
+		}
+		scoreMap[res.UserID][res.ExamID] = res.BestScore
+	}
+
+	return scoreMap, nil
+}
+

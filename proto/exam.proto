@@ -58,6 +58,8 @@ service ExamService {
   rpc GetExamPreview(GetExamPreviewRequest) returns (GetExamDetailsResponse);
   rpc GetRecentSubmissions(GetRecentSubmissionsRequest) returns (GetRecentSubmissionsResponse);
   rpc GetMySubmissions(GetMySubmissionsRequest) returns (GetMySubmissionsResponse);
+  rpc GradeEssay(GradeEssayRequest) returns (GradeEssayResponse);
+  rpc GetClassGradebook(GetClassGradebookRequest) returns (GetClassGradebookResponse);
 }
 
 message Topic {
@@ -213,7 +215,7 @@ message DeleteExamResponse { bool success = 1; }
 message PublishExamRequest { int64 exam_id = 1; string status = 2; }
 message PublishExamResponse { bool success = 1; }
 
-message UserAnswer { int64 question_id = 1; int64 chosen_choice_id = 2; }
+message UserAnswer { int64 question_id = 1; int64 chosen_choice_id = 2; string text_answer = 3; }
 message SubmitExamRequest {
   int64 exam_id = 1;
   int64 user_id = 2;
@@ -226,7 +228,7 @@ message SubmitExamRequest {
 message SubmitExamResponse { int64 submission_id = 1; float score = 2; int32 correct_count = 3; int32 total_questions = 4; }
 
 message GetSubmissionRequest { int64 submission_id = 1; int64 user_id = 2; }
-message SubmissionDetail { int64 question_id = 1; string question_content = 2; string explanation = 3; string question_type = 4; bool is_correct = 5; repeated ChoiceReview choices = 6; string attachment_url = 7; }
+message SubmissionDetail { int64 question_id = 1; string question_content = 2; string explanation = 3; string question_type = 4; bool is_correct = 5; repeated ChoiceReview choices = 6; string attachment_url = 7; string text_answer = 8; }
 message ChoiceReview { int64 id = 1; string content = 2; bool is_correct = 3; bool user_selected = 4; string attachment_url = 5; }
 message GetSubmissionResponse { int64 id = 1; string exam_title = 2; float score = 3; int32 correct_count = 4; int32 total_questions = 5; string status = 6; string submitted_at = 7; repeated SubmissionDetail details = 8; }
 
@@ -242,6 +244,7 @@ message SaveAnswerRequest {
   int64 chosen_choice_id = 4;
   string ip_address = 5;
   string user_agent = 6;
+  string text_answer = 7;
 }
 message SaveAnswerResponse { bool success = 1; }
 
@@ -252,6 +255,13 @@ message LogViolationRequest {
   string violation_time = 4;
 }
 message LogViolationResponse { bool success = 1; }
+
+message GradeEssayRequest {
+  int64 submission_id = 1;
+  int64 question_id = 2;
+  bool is_correct = 3;
+}
+message GradeEssayResponse { bool success = 1; }
 
 message GetExamStatsDetailedRequest { int64 exam_id = 1; }
 message GetExamStatsDetailedResponse {
@@ -357,10 +367,17 @@ message StartExamRequest {
   string user_agent = 4;
 }
 
+message AnswerDetail {
+  int64 question_id = 1;
+  repeated int64 choice_ids = 2;
+  string text_answer = 3;
+}
+
 message StartExamResponse {
   int64 submission_id = 1;
   int32 remaining_seconds = 2;
   repeated QuestionDetails questions = 3;
+  repeated AnswerDetail current_answers = 4;
 }
 
 message Int64List {
@@ -470,3 +487,24 @@ message GetMySubmissionsRequest {
 message GetMySubmissionsResponse {
   repeated SubmissionSummary submissions = 1;
 }
+
+message GetClassGradebookRequest {
+  int64 class_id = 1;
+  repeated int64 student_ids = 2;
+}
+
+message ExamScore {
+  int64 exam_id = 1;
+  float score = 2;
+  bool completed = 3;
+}
+
+message StudentGrade {
+  int64 student_id = 1;
+  repeated ExamScore scores = 2;
+}
+
+message GetClassGradebookResponse {
+  repeated Exam exams = 1;
+  repeated StudentGrade grades = 2;
+}

@@ -19,6 +19,10 @@ func NewAIServiceClient() (*AIServiceClient, error) {
 	conn, err := grpc.NewClient("dns:///"+aiAddr, 
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(50*1024*1024),
+			grpc.MaxCallSendMsgSize(50*1024*1024),
+		),
 		grpc.WithBlock(),
 	)
 	if err != nil {

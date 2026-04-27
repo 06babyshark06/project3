@@ -78,17 +78,18 @@ func (c *GeminiClient) GenerateQuestions(ctx context.Context, req *pb.GenerateQu
 	model.ResponseSchema = schema
 
 	basePrompt := fmt.Sprintf(`
-Bạn là một chuyên gia giáo dục. Từ tài liệu được cung cấp, hãy tạo ra %d câu hỏi trắc nghiệm với độ khó %s. 
+Bạn là một chuyên gia giáo dục. Từ tài liệu được cung cấp, hãy tạo ra %d câu hỏi với độ khó %s. 
 Thể loại câu hỏi: %s.
 Yêu cầu về ngôn ngữ: TRẢ LỜI VÀ SINH CÂU HỎI BẰNG %s.
 Trọng tâm đặc biệt / Yêu cầu thêm từ giáo viên: %s.
 
-Mỗi câu hỏi phải có CHÍNH XÁC %d lựa chọn (choices).
-- Nếu "Thể loại câu hỏi" là "Một đáp án đúng", thì chỉ được có DUY NHẤT 1 lựa chọn có is_correct=true, các cái khác phải là false.
-- Nếu "Thể loại câu hỏi" là "Nhiều đáp án đúng", thì phải có ÍT NHẤT 2 lựa chọn có is_correct=true.
+Quy tắc tạo đáp án (choices):
+- Nếu "Thể loại câu hỏi" là "Một đáp án đúng" (single choice), mỗi câu hỏi phải có CHÍNH XÁC %d lựa chọn, và chỉ được có DUY NHẤT 1 lựa chọn có is_correct=true.
+- Nếu "Thể loại câu hỏi" là "Nhiều đáp án đúng" (multiple choice), mỗi câu hỏi phải có CHÍNH XÁC %d lựa chọn, và có ÍT NHẤT 2 lựa chọn có is_correct=true.
+- Nếu "Thể loại câu hỏi" là "Điền vào chỗ trống" hoặc "Trả lời ngắn", hãy cung cấp danh sách các ĐÁP ÁN ĐƯỢC CHẤP NHẬN trong mảng choices (mỗi đáp án chấp nhận được là 1 choice với is_correct=true). Không tạo đáp án sai. Tối thiểu 1 đáp án.
 
 Hãy soạn thảo cực kỳ cẩn thận, theo sát ngữ cảnh và đảm bảo tính chính xác về mặt học thuật.
-	`, req.QuestionCount, req.Difficulty, req.QuestionType, req.Language, req.FocusTopic, req.MaxOptions)
+	`, req.QuestionCount, req.Difficulty, req.QuestionType, req.Language, req.FocusTopic, req.MaxOptions, req.MaxOptions)
 
 	var parts []genai.Part
 
@@ -206,18 +207,18 @@ func (c *GeminiClient) ExplainAnswer(ctx context.Context, req *pb.ExplainAnswerR
 	}
 
 	prompt := fmt.Sprintf(`
-Bạn là một gia sư AI thân thiện, chuyên môn cao. Xin hãy nhận xét ngắn gọn và giải thích cặn kẽ câu hỏi sau để giúp sinh viên nhận ra lỗi sai:
+Bạn là một gia sư AI thân thiện, chuyên môn cao. Xin hãy nhận xét ngắn gọn và giải thích cặn kẽ câu hỏi sau để giúp sinh viên nhận ra lỗi sai (nếu có):
 
 Câu hỏi: %s
 
 %s
-Đáp án đúng là: %s
+Đáp án đúng/Được chấp nhận là: %s
 
-Học sinh đã chọn: %s
+Học sinh đã trả lời/chọn: %s
 
 Yêu cầu:
 1. Giải thích cụ thể tại sao "Đáp án đúng" lại đúng.
-2. Chỉ ra lỗi sai logic hoặc lỗ hổng kiến thức dẫn đến việc học sinh chọn "Đáp án đã chọn".
+2. Nếu học sinh trả lời sai, chỉ ra lỗi sai logic hoặc lỗ hổng kiến thức dẫn đến việc học sinh có câu trả lời như trên.
 3. Lời lẽ khích lệ, thân thiện nhưng đúng văn phong học thuật.
 4. Trả về định dạng Markdown.
 `, req.QuestionContent, choicesContext, req.CorrectChoice, req.UserChoice)

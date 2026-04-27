@@ -172,6 +172,7 @@ func main() {
 				instructorOnly.GET("/exams/:id/monitor/ws", examHandler.MonitorExamViolationsWS)
 				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)
 				instructorOnly.GET("/exams/:id/preview", examHandler.GetExamPreview)
+				instructorOnly.POST("/submissions/:submission_id/grade", examHandler.GradeEssay)
 
 				instructorOnly.POST("/classes", classHandler.CreateClass)
 				instructorOnly.PUT("/classes/:id", classHandler.UpdateClass)
@@ -182,6 +183,7 @@ func main() {
 				instructorOnly.GET("/instructor/all-exams", examHandler.GetInstructorAllExams)
 				instructorOnly.POST("/classes/:id/exams", classHandler.AssignExamToClass)
 				instructorOnly.DELETE("/classes/:id/exams/:exam_id", classHandler.RemoveExamFromClass)
+				instructorOnly.GET("/classes/:id/gradebook", classHandler.GetClassGradebook)
 
 				instructorOnly.POST("/ai/generate-questions", aiHandler.GenerateQuestions)
 			}

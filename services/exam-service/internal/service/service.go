@@ -154,7 +154,10 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 		for _, c := range req.Choices {
 			choices = append(choices, &domain.ChoiceModel{QuestionID: qID, Content: c.Content, IsCorrect: c.IsCorrect, AttachmentURL: c.AttachmentUrl})
 		}
-		return s.repo.CreateChoices(ctx, tx, choices)
+		if len(choices) > 0 {
+			return s.repo.CreateChoices(ctx, tx, choices)
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -193,8 +196,10 @@ func (s *examService) CreateBulkQuestions(ctx context.Context, req *pb.CreateBul
 					QuestionID: createdQ.Id, Content: c.Content, IsCorrect: c.IsCorrect, AttachmentURL: c.AttachmentUrl,
 				})
 			}
-			if err := s.repo.CreateChoices(ctx, tx, choices); err != nil {
-				return err
+			if len(choices) > 0 {
+				if err := s.repo.CreateChoices(ctx, tx, choices); err != nil {
+					return err
+				}
 			}
 			successCount++
 		}
@@ -296,6 +301,10 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 		name = strings.TrimSpace(strings.ToLower(name))
 		if name == "multiple" || name == "multiple_choice" {
 			name = "multiple_choice"
+		} else if name == "short" || name == "short_answer" {
+			name = "short_answer"
+		} else if name == "essay" {
+			name = "essay"
 		} else {
 			name = "single_choice"
 		}
@@ -393,10 +402,15 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 					QuestionID: createdQ.Id, Content: val, IsCorrect: isCorrect, AttachmentURL: "",
 				})
 			}
-			if len(choices) < 2 {
-				return errors.New("cần ít nhất 2 lựa chọn")
+			// Chỉ bắt buộc có >= 2 lựa chọn cho câu hỏi trắc nghiệm
+			isObjective := row[3] == "single_choice" || row[3] == "multiple_choice" || row[3] == "multiple"
+			if isObjective && len(choices) < 2 {
+				return errors.New("cần ít nhất 2 lựa chọn cho câu hỏi trắc nghiệm")
 			}
-			return s.repo.CreateChoices(ctx, tx, choices)
+			if len(choices) > 0 {
+				return s.repo.CreateChoices(ctx, tx, choices)
+			}
+			return nil
 		})
 
 		if err == nil {
@@ -722,8 +736,7 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	var finalScore float64 = 0
 
 	examModel, _ := s.repo.GetExamDetails(ctx, req.ExamId)
-	var correctMap map[int64][]int64
-
+	var questions []*domain.QuestionModel
 	if examModel != nil && examModel.IsDynamic {
 		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
 		if err != nil {
@@ -731,23 +744,26 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		}
 		var qIDs []int64
 		_ = json.Unmarshal([]byte(sExam.QuestionIDs), &qIDs)
-		correctMap, err = s.repo.GetCorrectAnswersByQuestionIDs(ctx, qIDs)
-		if err != nil {
-			return nil, errors.New("lỗi lấy đáp án: " + err.Error())
+		for _, qID := range qIDs {
+			q, err := s.repo.GetQuestionByID(ctx, qID)
+			if err == nil {
+				questions = append(questions, q)
+			}
 		}
-	} else {
-		var err error
-		correctMap, err = s.repo.GetCorrectAnswers(ctx, req.ExamId)
-		if err != nil {
-			return nil, errors.New("lỗi lấy đáp án: " + err.Error())
-		}
+	} else if examModel != nil {
+		questions = examModel.Questions
 	}
-	totalQuestions := int32(len(correctMap))
+	
+	totalQuestions := int32(len(questions))
 
 	userAnswerMap := make(map[int64][]int64)
+	userTextMap := make(map[int64]string)
 	for _, ans := range req.Answers {
 		if ans.ChosenChoiceId != 0 {
 			userAnswerMap[ans.QuestionId] = append(userAnswerMap[ans.QuestionId], ans.ChosenChoiceId)
+		}
+		if ans.TextAnswer != "" {
+			userTextMap[ans.QuestionId] = ans.TextAnswer
 		}
 	}
 
@@ -755,24 +771,93 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 
 		var userAnswerModels []*domain.UserAnswerModel
 
-		for qID, correctChoices := range correctMap {
-			userChoices := userAnswerMap[qID]
-			isCorrect := compareInt64Slices(userChoices, correctChoices)
+		for _, q := range questions {
+			userChoices := userAnswerMap[q.Id]
+			textAnswer := userTextMap[q.Id]
+			
+			isCorrect := false
+			
+			qType := ""
+			if q.Type.Type != "" {
+				qType = q.Type.Type
+			}
+
+			if qType == "short_answer" {
+				// Check text answer
+				for _, c := range q.Choices {
+					if c.IsCorrect && strings.EqualFold(strings.TrimSpace(c.Content), strings.TrimSpace(textAnswer)) {
+						isCorrect = true
+						break
+					}
+				}
+				
+				// Check choices if student clicked an option
+				if !isCorrect {
+					for _, cID := range userChoices {
+						for _, c := range q.Choices {
+							if c.Id == cID && c.IsCorrect {
+								isCorrect = true
+								break
+							}
+						}
+						if isCorrect { break }
+					}
+				}
+
+				if textAnswer != "" {
+					correctVal := isCorrect
+					val := textAnswer
+					userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
+						SubmissionID:   submission.Id,
+						QuestionID:     q.Id,
+						TextAnswer:     &val,
+						IsCorrect:      &correctVal,
+					})
+				}
+
+				for _, cID := range userChoices {
+					choiceIDVal := cID
+					correctVal := isCorrect
+					userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
+						SubmissionID:   submission.Id,
+						QuestionID:     q.Id,
+						ChosenChoiceID: &choiceIDVal,
+						IsCorrect:      &correctVal,
+					})
+				}
+			} else if qType == "essay" {
+				if textAnswer != "" {
+					val := textAnswer
+					userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
+						SubmissionID:   submission.Id,
+						QuestionID:     q.Id,
+						TextAnswer:     &val,
+					})
+				}
+			} else {
+				var correctChoices []int64
+				for _, c := range q.Choices {
+					if c.IsCorrect {
+						correctChoices = append(correctChoices, c.Id)
+					}
+				}
+				isCorrect = compareInt64Slices(userChoices, correctChoices)
+
+				for _, cID := range userChoices {
+					choiceIDVal := cID
+					correctVal := isCorrect
+
+					userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
+						SubmissionID:   submission.Id,
+						QuestionID:     q.Id,
+						ChosenChoiceID: &choiceIDVal,
+						IsCorrect:      &correctVal,
+					})
+				}
+			}
 
 			if isCorrect {
 				correctCount++
-			}
-
-			for _, cID := range userChoices {
-				choiceIDVal := cID
-				correctVal := isCorrect
-
-				userAnswerModels = append(userAnswerModels, &domain.UserAnswerModel{
-					SubmissionID:   submission.Id,
-					QuestionID:     qID,
-					ChosenChoiceID: &choiceIDVal,
-					IsCorrect:      &correctVal,
-				})
 			}
 		}
 
@@ -912,8 +997,8 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 	}
 
 	userSelections := make(map[int64]map[int64]bool)
-
 	questionIsCorrectMap := make(map[int64]bool)
+	userTextAnswers := make(map[int64]string)
 
 	for _, ua := range submission.UserAnswers {
 		if _, exists := userSelections[ua.QuestionID]; !exists {
@@ -925,6 +1010,10 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 
 		if ua.IsCorrect != nil && *ua.IsCorrect {
 			questionIsCorrectMap[ua.QuestionID] = true
+		}
+
+		if ua.TextAnswer != nil {
+			userTextAnswers[ua.QuestionID] = *ua.TextAnswer
 		}
 	}
 
@@ -974,6 +1063,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			IsCorrect:       questionIsCorrectMap[q.Id],
 			Choices:         pbChoices,
 			AttachmentUrl:   q.AttachmentURL,
+			TextAnswer:      userTextAnswers[q.Id],
 		})
 	}
 
@@ -1201,22 +1291,30 @@ func (s *examService) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest)
 		return nil, errors.New("không tìm thấy bài làm đang diễn ra")
 	}
 
-	correctMap, _ := s.repo.GetCorrectAnswers(ctx, req.ExamId)
-	correctChoices := correctMap[req.QuestionId]
-
-	isCorrect := false
-	for _, cID := range correctChoices {
-		if cID == req.ChosenChoiceId {
-			isCorrect = true
-			break
-		}
+	ans := &domain.UserAnswerModel{
+		SubmissionID: sub.Id,
+		QuestionID:   req.QuestionId,
 	}
 
-	ans := &domain.UserAnswerModel{
-		SubmissionID:   sub.Id,
-		QuestionID:     req.QuestionId,
-		ChosenChoiceID: &req.ChosenChoiceId,
-		IsCorrect:      &isCorrect,
+	if req.TextAnswer != "" {
+		ans.TextAnswer = &req.TextAnswer
+		// Text answers (essay, short_answer) are not immediately graded as correct/incorrect
+		// unless we add automatic string matching for short_answer here.
+		// For now, we just save it.
+		ans.IsCorrect = nil
+	} else if req.ChosenChoiceId != 0 {
+		correctMap, _ := s.repo.GetCorrectAnswers(ctx, req.ExamId)
+		correctChoices := correctMap[req.QuestionId]
+
+		isCorrect := false
+		for _, cID := range correctChoices {
+			if cID == req.ChosenChoiceId {
+				isCorrect = true
+				break
+			}
+		}
+		ans.ChosenChoiceID = &req.ChosenChoiceId
+		ans.IsCorrect = &isCorrect
 	}
 
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
@@ -1896,10 +1994,31 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 		pbQuestions = finalPbQs
 	}
 
+	var pbCurrentAnswers []*pb.AnswerDetail
+	userAnswerMap := make(map[int64]*pb.AnswerDetail)
+
+	for _, ua := range submission.UserAnswers {
+		if _, exists := userAnswerMap[ua.QuestionID]; !exists {
+			userAnswerMap[ua.QuestionID] = &pb.AnswerDetail{
+				QuestionId: ua.QuestionID,
+			}
+		}
+		if ua.ChosenChoiceID != nil {
+			userAnswerMap[ua.QuestionID].ChoiceIds = append(userAnswerMap[ua.QuestionID].ChoiceIds, *ua.ChosenChoiceID)
+		}
+		if ua.TextAnswer != nil {
+			userAnswerMap[ua.QuestionID].TextAnswer = *ua.TextAnswer
+		}
+	}
+	for _, ad := range userAnswerMap {
+		pbCurrentAnswers = append(pbCurrentAnswers, ad)
+	}
+
 	return &pb.StartExamResponse{
 		SubmissionId:     submissionID,
 		RemainingSeconds: remaining,
 		Questions:        pbQuestions,
+		CurrentAnswers:   pbCurrentAnswers,
 	}, nil
 }
 
@@ -2307,3 +2426,105 @@ func (s *examService) GetMySubmissions(ctx context.Context, req *pb.GetMySubmiss
 		Submissions: pbSubs,
 	}, nil
 }
+
+func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest) (*pb.GradeEssayResponse, error) {
+	// 1. Cập nhật trạng thái câu trả lời
+	updates := map[string]interface{}{
+		"is_correct": req.IsCorrect,
+	}
+	err := s.repo.UpdateUserAnswer(ctx, nil, req.SubmissionId, req.QuestionId, updates)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Lỗi cập nhật câu trả lời: %v", err)
+	}
+
+	// 2. Lấy lại toàn bộ bài nộp để tính lại điểm
+	submission, err := s.repo.GetSubmissionByID(ctx, req.SubmissionId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Lỗi lấy thông tin bài nộp: %v", err)
+	}
+
+	// 3. Tính toán lại correct_count và score
+	correctCount := 0
+	for _, ans := range submission.UserAnswers {
+		if ans.IsCorrect != nil && *ans.IsCorrect {
+			correctCount++
+		}
+	}
+
+	totalQuestions := len(submission.UserAnswers)
+	if totalQuestions == 0 {
+		return nil, status.Errorf(codes.Internal, "Bài nộp không có câu trả lời nào")
+	}
+
+	newScore := (float64(correctCount) / float64(totalQuestions)) * 10.0
+
+	// 4. Cập nhật lại submission
+	submission.Score = newScore
+	_, err = s.repo.UpdateSubmission(ctx, nil, submission)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Lỗi cập nhật điểm bài nộp: %v", err)
+	}
+
+	return &pb.GradeEssayResponse{Success: true}, nil
+}
+
+func (s *examService) GetClassGradebook(ctx context.Context, req *pb.GetClassGradebookRequest) (*pb.GetClassGradebookResponse, error) {
+	if req.ClassId == 0 {
+		return nil, status.Error(codes.InvalidArgument, "Mã lớp không hợp lệ")
+	}
+
+	// 1. Lấy danh sách bài thi đã giao cho lớp
+	exams, err := s.repo.GetExamsByClass(ctx, req.ClassId)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Lỗi lấy danh sách bài thi của lớp: %v", err)
+	}
+
+	examIDs := make([]int64, len(exams))
+	pbExams := make([]*pb.Exam, len(exams))
+	for i, e := range exams {
+		examIDs[i] = e.Id
+		pbExams[i] = &pb.Exam{
+			Id:              e.Id,
+			Title:           e.Title,
+			DurationMinutes: int32(e.DurationMinutes),
+			QuestionCount:   int32(len(e.Questions)),
+		}
+	}
+
+	if len(exams) == 0 || len(req.StudentIds) == 0 {
+		return &pb.GetClassGradebookResponse{
+			Exams:  pbExams,
+			Grades: []*pb.StudentGrade{},
+		}, nil
+	}
+
+	// 2. Lấy điểm của các học sinh
+	scoreMap, err := s.repo.GetBestScoresForGradebook(ctx, examIDs, req.StudentIds)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "Lỗi lấy bảng điểm: %v", err)
+	}
+
+	// 3. Format response
+	var grades []*pb.StudentGrade
+	for _, studentID := range req.StudentIds {
+		var studentScores []*pb.ExamScore
+		for _, examID := range examIDs {
+			score, found := scoreMap[studentID][examID]
+			studentScores = append(studentScores, &pb.ExamScore{
+				ExamId:    examID,
+				Score:     float32(score),
+				Completed: found,
+			})
+		}
+		grades = append(grades, &pb.StudentGrade{
+			StudentId: studentID,
+			Scores:    studentScores,
+		})
+	}
+
+	return &pb.GetClassGradebookResponse{
+		Exams:  pbExams,
+		Grades: grades,
+	}, nil
+}
+
