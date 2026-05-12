@@ -183,3 +183,11 @@ func (h *gRPCHandler) GetRecentSubmissions(ctx context.Context, req *pb.GetRecen
 func (h *gRPCHandler) GetMySubmissions(ctx context.Context, req *pb.GetMySubmissionsRequest) (*pb.GetMySubmissionsResponse, error) {
 	return h.service.GetMySubmissions(ctx, req)
 }
+
+func (h *gRPCHandler) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest) (*pb.GradeEssayResponse, error) {
+	return h.service.GradeEssay(ctx, req)
+}
+
+func (h *gRPCHandler) GetClassGradebook(ctx context.Context, req *pb.GetClassGradebookRequest) (*pb.GetClassGradebookResponse, error) {
+	return h.service.GetClassGradebook(ctx, req)
+}

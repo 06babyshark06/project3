@@ -291,7 +291,11 @@ func (r *examRepository) CreateUserAnswers(ctx context.Context, tx *gorm.DB, ans
 	return tx.WithContext(ctx).Create(ans).Error
 }
 func (r *examRepository) UpdateSubmission(ctx context.Context, tx *gorm.DB, sub *domain.ExamSubmissionModel) (*domain.ExamSubmissionModel, error) {
-	if err := tx.WithContext(ctx).Save(sub).Error; err != nil {
+	db := tx
+	if db == nil {
+		db = database.DB
+	}
+	if err := db.WithContext(ctx).Save(sub).Error; err != nil {
 		return nil, err
 	}
 	return sub, nil
