@@ -143,6 +143,7 @@ func (s *examService) CreateQuestion(ctx context.Context, req *pb.CreateQuestion
 			SectionID: req.SectionId, TopicID: section.TopicID, CreatorID: req.CreatorId,
 			Content: req.Content, TypeID: qType.Id, DifficultyID: diff.Id,
 			Explanation: req.Explanation, AttachmentURL: req.AttachmentUrl,
+			Points: 1.0,
 		}
 		createdQ, err := s.repo.CreateQuestion(ctx, tx, question)
 		if err != nil {
@@ -184,6 +185,7 @@ func (s *examService) CreateBulkQuestions(ctx context.Context, req *pb.CreateBul
 				SectionID: qReq.SectionId, TopicID: section.TopicID, CreatorID: qReq.CreatorId,
 				Content: qReq.Content, TypeID: qType.Id, DifficultyID: diff.Id,
 				Explanation: qReq.Explanation, AttachmentURL: qReq.AttachmentUrl,
+				Points: 1.0,
 			}
 			createdQ, err := s.repo.CreateQuestion(ctx, tx, question)
 			if err != nil {
@@ -385,6 +387,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 				SectionID: sID, TopicID: tID, CreatorID: req.CreatorId,
 				Content: content, TypeID: qTypeID, DifficultyID: diffID, Explanation: explanation,
 				AttachmentURL: imageURL,
+				Points: 1.0,
 			}
 			createdQ, err := s.repo.CreateQuestion(ctx, tx, q)
 			if err != nil {
@@ -425,36 +428,77 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 }
 
 func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequest) (*pb.CreateExamResponse, error) {
-	allQuestionIDs := []int64{}
-	uniqueMap := make(map[int64]bool)
+	var examID int64
 
-	for _, cfg := range req.SectionConfigs {
-		ids, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, int(cfg.Count), req.TopicId)
-		if err != nil {
-			continue
-		}
-		for _, id := range ids {
-			if !uniqueMap[id] {
-				uniqueMap[id] = true
-				allQuestionIDs = append(allQuestionIDs, id)
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		isDynamic := false
+		dynamicConfig := "{}"
+		var examQuestions []*domain.ExamQuestionModel
+
+		if req.Settings != nil && req.Settings.IsDynamic {
+			isDynamic = true
+			if len(req.SectionConfigs) > 0 {
+				b, _ := json.Marshal(req.SectionConfigs)
+				dynamicConfig = string(b)
+			}
+			// Map Fixed Questions
+			for i, q := range req.FixedQuestions {
+				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
+					QuestionID: q.QuestionId,
+					Points:     float64(q.Points),
+					Sequence:   i + 1,
+				})
+			}
+		} else {
+			// STATIC RANDOM CASE: Bốc câu hỏi ngay bây giờ
+			allQuestionIDs := []int64{}
+			uniqueMap := make(map[int64]bool)
+
+			for _, cfg := range req.SectionConfigs {
+				ids, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, int(cfg.Count), req.TopicId)
+				if err != nil {
+					continue
+				}
+				for _, id := range ids {
+					if !uniqueMap[id] {
+						uniqueMap[id] = true
+						allQuestionIDs = append(allQuestionIDs, id)
+					}
+				}
+			}
+
+			if len(allQuestionIDs) == 0 && len(req.FixedQuestions) == 0 {
+				return errors.New("không tìm thấy câu hỏi nào phù hợp với cấu hình")
+			}
+
+			// Map Generated + Fixed Questions
+			for i, qID := range allQuestionIDs {
+				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
+					QuestionID: qID,
+					Sequence:   i + 1,
+					Points:     1.0, // Default for random
+				})
+			}
+			// Thêm cả fixed questions nếu có trong static mode
+			offset := len(allQuestionIDs)
+			for i, q := range req.FixedQuestions {
+				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
+					QuestionID: q.QuestionId,
+					Points:     float64(q.Points),
+					Sequence:   offset + i + 1,
+				})
 			}
 		}
-	}
 
-	if len(allQuestionIDs) == 0 {
-		return nil, errors.New("không tìm thấy câu hỏi nào phù hợp với cấu hình")
-	}
-
-	var examID int64
-	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		exam := &domain.ExamModel{
 			Title: req.Title, Description: req.Description,
 			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
 			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
 			TopicID: req.TopicId, CreatorID: req.CreatorId,
-			DynamicConfig: "{}", // Default to empty JSON object
+			IsDynamic: isDynamic, DynamicConfig: dynamicConfig,
 		}
+
 		if req.Settings.StartTime != "" {
 			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
 			exam.StartTime = &t
@@ -470,7 +514,10 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 		}
 		examID = created.Id
 
-		return s.repo.LinkQuestionsToExam(ctx, tx, created.Id, allQuestionIDs)
+		if len(examQuestions) > 0 {
+			return s.repo.LinkQuestionsToExam(ctx, tx, created.Id, examQuestions)
+		}
+		return nil
 	})
 
 	if err != nil {
@@ -572,7 +619,15 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 			return err
 		}
 		if !createdExam.IsDynamic {
-			return s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, req.QuestionIds)
+			var examQuestions []*domain.ExamQuestionModel
+			for i, q := range req.Questions {
+				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
+					QuestionID: q.QuestionId,
+					Points:     float64(q.Points),
+					Sequence:   i,
+				})
+			}
+			return s.repo.LinkQuestionsToExam(ctx, tx, createdExam.Id, examQuestions)
 		}
 		return nil
 	})
@@ -713,6 +768,7 @@ func (s *examService) convertToPBQuestion(q *domain.QuestionModel) *pb.QuestionD
 		Explanation:   q.Explanation,
 		SectionName:   sectionName,
 		SectionId:     sectionID,
+		Points:        float32(q.Points),
 	}
 }
 
@@ -737,43 +793,58 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 
 	examModel, _ := s.repo.GetExamDetails(ctx, req.ExamId)
 	var questions []*domain.QuestionModel
+	qPointsMap := make(map[int64]float64)
+
 	if examModel != nil && examModel.IsDynamic {
 		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
 		if err != nil {
 			return nil, errors.New("lỗi lấy đề thi cá nhân hóa")
 		}
-		var qIDs []int64
-		_ = json.Unmarshal([]byte(sExam.QuestionIDs), &qIDs)
-		for _, qID := range qIDs {
-			q, err := s.repo.GetQuestionByID(ctx, qID)
+		
+		dynamicQs := parseStudentExamQuestions(sExam.QuestionIDs)
+		for _, dq := range dynamicQs {
+			q, err := s.repo.GetQuestionByID(ctx, dq.ID)
 			if err == nil {
+				qPointsMap[dq.ID] = dq.Points
 				questions = append(questions, q)
 			}
 		}
 	} else if examModel != nil {
 		questions = examModel.Questions
+		for _, eq := range examModel.Questions {
+			qPointsMap[eq.Id] = eq.Points
+		}
 	}
 	
 	totalQuestions := int32(len(questions))
 
 	userAnswerMap := make(map[int64][]int64)
-	userTextMap := make(map[int64]string)
+	userTextAnswerMap := make(map[int64]string)
 	for _, ans := range req.Answers {
 		if ans.ChosenChoiceId != 0 {
 			userAnswerMap[ans.QuestionId] = append(userAnswerMap[ans.QuestionId], ans.ChosenChoiceId)
 		}
 		if ans.TextAnswer != "" {
-			userTextMap[ans.QuestionId] = ans.TextAnswer
+			userTextAnswerMap[ans.QuestionId] = ans.TextAnswer
 		}
 	}
 
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
 
 		var userAnswerModels []*domain.UserAnswerModel
+		var totalMaxPoints float64 = 0
+		var totalEarnedPoints float64 = 0
 
 		for _, q := range questions {
 			userChoices := userAnswerMap[q.Id]
-			textAnswer := userTextMap[q.Id]
+			textAnswer := userTextAnswerMap[q.Id]
+			
+			qPoints := 1.0
+			if pts, ok := qPointsMap[q.Id]; ok {
+				qPoints = pts
+			}
+			
+			totalMaxPoints += qPoints
 			
 			isCorrect := false
 			
@@ -858,6 +929,7 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 
 			if isCorrect {
 				correctCount++
+				totalEarnedPoints += qPoints
 			}
 		}
 
@@ -870,7 +942,9 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 			}
 		}
 
-		if totalQuestions > 0 {
+		if totalMaxPoints > 0 {
+			finalScore = (totalEarnedPoints / totalMaxPoints) * 10.0
+		} else if totalQuestions > 0 {
 			finalScore = (float64(correctCount) / float64(totalQuestions)) * 10.0
 		}
 
@@ -998,6 +1072,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 
 	userSelections := make(map[int64]map[int64]bool)
 	questionIsCorrectMap := make(map[int64]bool)
+	questionAwardedPointsMap := make(map[int64]float32)
 	userTextAnswers := make(map[int64]string)
 
 	for _, ua := range submission.UserAnswers {
@@ -1010,6 +1085,14 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 
 		if ua.IsCorrect != nil && *ua.IsCorrect {
 			questionIsCorrectMap[ua.QuestionID] = true
+		}
+		
+		if ua.AwardedPoints != nil {
+			questionAwardedPointsMap[ua.QuestionID] = float32(*ua.AwardedPoints)
+		} else if ua.IsCorrect != nil && *ua.IsCorrect {
+			questionAwardedPointsMap[ua.QuestionID] = 1.0
+		} else {
+			questionAwardedPointsMap[ua.QuestionID] = 0.0
 		}
 
 		if ua.TextAnswer != nil {
@@ -1055,6 +1138,14 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			qType = q.Type.Type
 		}
 
+		qPoints := float64(1.0)
+		for _, ua := range submission.UserAnswers {
+			if ua.QuestionID == q.Id {
+				qPoints = ua.Question.Points
+				break
+			}
+		}
+
 		pbDetails = append(pbDetails, &pb.SubmissionDetail{
 			QuestionId:      q.Id,
 			QuestionContent: q.Content,
@@ -1064,6 +1155,8 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			Choices:         pbChoices,
 			AttachmentUrl:   q.AttachmentURL,
 			TextAnswer:      userTextAnswers[q.Id],
+			AwardedPoints:   questionAwardedPointsMap[q.Id],
+			Points:          float32(qPoints),
 		})
 	}
 
@@ -1246,7 +1339,15 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 			}
 		}
 
-		if err := s.repo.ReplaceExamQuestions(ctx, tx, req.ExamId, req.QuestionIds); err != nil {
+		var examQuestions []*domain.ExamQuestionModel
+		for i, q := range req.Questions {
+			examQuestions = append(examQuestions, &domain.ExamQuestionModel{
+				QuestionID: q.QuestionId,
+				Points:     float64(q.Points),
+				Sequence:   i,
+			})
+		}
+		if err := s.repo.ReplaceExamQuestions(ctx, tx, req.ExamId, examQuestions); err != nil {
 			return err
 		}
 
@@ -1843,6 +1944,7 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 
 	var qIDsToFetch []int64
 	var orderMap map[int64]int
+	qPointsMap := make(map[int64]float64)
 
 	if examDetails.IsDynamic {
 		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
@@ -1860,10 +1962,12 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 				return nil, fmt.Errorf("đề thi đang được sinh, vui lòng quay lại sau giây lát")
 			}
 		}
-		_ = json.Unmarshal([]byte(sExam.QuestionIDs), &qIDsToFetch)
+		dynamicQs := parseStudentExamQuestions(sExam.QuestionIDs)
 		orderMap = make(map[int64]int)
-		for i, id := range qIDsToFetch {
-			orderMap[id] = i
+		for i, dq := range dynamicQs {
+			qIDsToFetch = append(qIDsToFetch, dq.ID)
+			orderMap[dq.ID] = i
+			qPointsMap[dq.ID] = dq.Points
 		}
 	} else {
 		for _, q := range examDetails.Questions {
@@ -1896,6 +2000,17 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 					if val != nil {
 						var pbQ pb.QuestionDetails
 						if err := json.Unmarshal([]byte(val.(string)), &pbQ); err == nil {
+							// Override points if dynamic
+							if pts, ok := qPointsMap[pbQ.Id]; ok {
+								pbQ.Points = float32(pts)
+							} else if !examDetails.IsDynamic {
+								for _, eq := range examDetails.Questions {
+									if eq.Id == pbQ.Id {
+										pbQ.Points = float32(eq.Points)
+										break
+									}
+								}
+							}
 							pbQuestions[i] = &pbQ
 						} else {
 							missingIDs = append(missingIDs, qIDsToFetch[i])
@@ -1949,6 +2064,20 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 					}
 				}
 
+				qPoints := float64(1.0)
+				if !examDetails.IsDynamic {
+					for _, eq := range examDetails.Questions {
+						if eq.Id == q.Id {
+							qPoints = eq.Points
+							break
+						}
+					}
+				} else {
+					if pts, ok := qPointsMap[q.Id]; ok {
+						qPoints = pts
+					}
+				}
+
 				pbQ := &pb.QuestionDetails{
 					Id:            q.Id,
 					Content:       q.Content,
@@ -1961,6 +2090,7 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 					TopicName:     topicName,
 					SectionId:     secID,
 					TopicId:       topicID,
+					Points:        float32(qPoints),
 				}
 
 				idx := orderMap[q.Id]
@@ -2254,6 +2384,32 @@ func (s *examService) GetRecentSubmissions(ctx context.Context, req *pb.GetRecen
 	}, nil
 }
 
+type DynamicQuestion struct {
+	ID     int64   `json:"id"`
+	Points float64 `json:"points"`
+}
+
+func parseStudentExamQuestions(jsonStr string) []DynamicQuestion {
+	var rawData []json.RawMessage
+	if err := json.Unmarshal([]byte(jsonStr), &rawData); err != nil {
+		return nil
+	}
+
+	var result []DynamicQuestion
+	for _, raw := range rawData {
+		var id int64
+		if err := json.Unmarshal(raw, &id); err == nil {
+			result = append(result, DynamicQuestion{ID: id, Points: 1.0})
+		} else {
+			var dq DynamicQuestion
+			if err := json.Unmarshal(raw, &dq); err == nil {
+				result = append(result, dq)
+			}
+		}
+	}
+	return result
+}
+
 func mapDomainExamToProto(e *domain.ExamModel) *pb.Exam {
 	if e == nil {
 		return nil
@@ -2306,9 +2462,10 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 
 	// Parse JSON config
 	var configs []struct {
-		SectionId  int64  `json:"section_id"`
-		Count      int    `json:"count"`
-		Difficulty string `json:"difficulty"`
+		SectionId  int64   `json:"section_id"`
+		Count      int     `json:"count"`
+		Difficulty string  `json:"difficulty"`
+		Points     float64 `json:"points"`
 	}
 	err = json.Unmarshal([]byte(dynamicConfig), &configs)
 	if err != nil {
@@ -2332,8 +2489,18 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 	var batchInserts []*domain.StudentExamModel
 
 	for _, studentID := range studentIDs {
-		allQuestionIDs := []int64{}
+		allQuestions := []DynamicQuestion{}
 		uniqueMap := make(map[int64]bool)
+
+		// --- HYBRID CASE: Thêm các câu hỏi cố định (Fixed Questions) ---
+		// Các câu hỏi này đã được Preload trong GetExamDetails
+		for _, q := range examDetails.Questions {
+			if !uniqueMap[q.Id] {
+				uniqueMap[q.Id] = true
+				allQuestions = append(allQuestions, DynamicQuestion{ID: q.Id, Points: q.Points})
+			}
+		}
+		// -----------------------------------------------------------
 
 		for i, cfg := range configs {
 			pool := configPools[i]
@@ -2353,10 +2520,14 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 
 			// Bốc đủ số lượng Count
 			collectedCount := 0
+			pts := cfg.Points
+			if pts <= 0 {
+				pts = 1.0
+			}
 			for _, id := range shuffledPool {
 				if !uniqueMap[id] {
 					uniqueMap[id] = true
-					allQuestionIDs = append(allQuestionIDs, id)
+					allQuestions = append(allQuestions, DynamicQuestion{ID: id, Points: pts})
 					collectedCount++
 					if collectedCount >= cfg.Count {
 						break
@@ -2365,8 +2536,8 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 			}
 		}
 
-		if len(allQuestionIDs) > 0 {
-			qBytes, _ := json.Marshal(allQuestionIDs)
+		if len(allQuestions) > 0 {
+			qBytes, _ := json.Marshal(allQuestions)
 			sExam := &domain.StudentExamModel{
 				ExamID:      examID,
 				UserID:      studentID,
@@ -2431,6 +2602,7 @@ func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest)
 	// 1. Cập nhật trạng thái câu trả lời
 	updates := map[string]interface{}{
 		"is_correct": req.IsCorrect,
+		"awarded_points": req.ScoreRatio,
 	}
 	err := s.repo.UpdateUserAnswer(ctx, nil, req.SubmissionId, req.QuestionId, updates)
 	if err != nil {
@@ -2443,20 +2615,54 @@ func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest)
 		return nil, status.Errorf(codes.Internal, "Lỗi lấy thông tin bài nộp: %v", err)
 	}
 
-	// 3. Tính toán lại correct_count và score
-	correctCount := 0
-	for _, ans := range submission.UserAnswers {
-		if ans.IsCorrect != nil && *ans.IsCorrect {
-			correctCount++
+	// 2.5 Lấy map điểm cá nhân hóa nếu là đề động
+	qPointsMap := make(map[int64]float64)
+	if submission.Exam.Id != 0 {
+		if submission.Exam.IsDynamic {
+			sExam, err := s.repo.GetStudentExam(ctx, submission.ExamID, submission.UserID)
+			if err == nil {
+				dynamicQs := parseStudentExamQuestions(sExam.QuestionIDs)
+				for _, dq := range dynamicQs {
+					qPointsMap[dq.ID] = dq.Points
+				}
+			}
+		} else {
+			for _, eq := range submission.Exam.Questions {
+				qPointsMap[eq.Id] = eq.Points
+			}
 		}
 	}
 
-	totalQuestions := len(submission.UserAnswers)
-	if totalQuestions == 0 {
-		return nil, status.Errorf(codes.Internal, "Bài nộp không có câu trả lời nào")
+	// 3. Tính toán lại correct_count và score
+	var totalMaxPoints float64 = 0
+	var totalEarnedPoints float64 = 0
+
+	for _, ans := range submission.UserAnswers {
+		qPts := 1.0
+		if pts, ok := qPointsMap[ans.QuestionID]; ok {
+			qPts = pts
+		} else if ans.Question.Points > 0 {
+			qPts = ans.Question.Points
+		}
+
+		totalMaxPoints += qPts
+
+		if ans.AwardedPoints != nil {
+			totalEarnedPoints += (*ans.AwardedPoints) * qPts
+		} else if ans.IsCorrect != nil && *ans.IsCorrect {
+			totalEarnedPoints += qPts
+		}
 	}
 
-	newScore := (float64(correctCount) / float64(totalQuestions)) * 10.0
+	newScore := 0.0
+	if totalMaxPoints > 0 {
+		newScore = (totalEarnedPoints / totalMaxPoints) * 10.0
+	} else {
+		totalQuestions := len(submission.UserAnswers)
+		if totalQuestions > 0 {
+			newScore = (totalEarnedPoints / float64(totalQuestions)) * 10.0
+		}
+	}
 
 	// 4. Cập nhật lại submission
 	submission.Score = newScore

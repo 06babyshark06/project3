@@ -320,7 +320,10 @@ func (h *ExamHandler) CreateExam(c *gin.Context) {
 		Title       string  `json:"title" binding:"required"`
 		Description string  `json:"description"`
 		TopicId     int64   `json:"topic_id" binding:"required"`
-		QuestionIds []int64 `json:"question_ids"`
+		Questions   []struct {
+			QuestionId int64   `json:"question_id"`
+			Points     float32 `json:"points"`
+		} `json:"questions"`
 		Settings    struct {
 			DurationMinutes       int    `json:"duration_minutes" binding:"required"`
 			MaxAttempts           int    `json:"max_attempts"`
@@ -349,7 +352,16 @@ func (h *ExamHandler) CreateExam(c *gin.Context) {
 		Title:       req.Title,
 		Description: req.Description,
 		TopicId:     req.TopicId,
-		QuestionIds: req.QuestionIds,
+		Questions: func() []*pb.QuestionAssignment {
+			var qs []*pb.QuestionAssignment
+			for _, q := range req.Questions {
+				qs = append(qs, &pb.QuestionAssignment{
+					QuestionId: q.QuestionId,
+					Points:     q.Points,
+				})
+			}
+			return qs
+		}(),
 		CreatorId:   userID,
 		Settings: &pb.ExamSettings{
 			DurationMinutes:       int32(req.Settings.DurationMinutes),
@@ -672,7 +684,10 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 		Title       string  `json:"title"`
 		Description string  `json:"description"`
 		TopicId     int64   `json:"topic_id"`
-		QuestionIds []int64 `json:"question_ids"`
+		Questions   []struct {
+			QuestionId int64   `json:"question_id"`
+			Points     float32 `json:"points"`
+		} `json:"questions"`
 		Settings    struct {
 			DurationMinutes       int    `json:"duration_minutes"`
 			MaxAttempts           int    `json:"max_attempts"`
@@ -698,7 +713,16 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 		Title:       req.Title,
 		Description: req.Description,
 		TopicId:     req.TopicId,
-		QuestionIds: req.QuestionIds,
+		Questions: func() []*pb.QuestionAssignment {
+			var qs []*pb.QuestionAssignment
+			for _, q := range req.Questions {
+				qs = append(qs, &pb.QuestionAssignment{
+					QuestionId: q.QuestionId,
+					Points:     q.Points,
+				})
+			}
+			return qs
+		}(),
 		Settings: &pb.ExamSettings{
 			DurationMinutes:       int32(req.Settings.DurationMinutes),
 			MaxAttempts:           int32(req.Settings.MaxAttempts),

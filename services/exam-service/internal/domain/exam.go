@@ -69,6 +69,7 @@ type QuestionModel struct {
 	DeletedAt     gorm.DeletedAt          `gorm:"index" json:"-"`
 	Choices       []ChoiceModel           `gorm:"foreignKey:QuestionID" json:"choices"`
 	AttachmentURL string                  `gorm:"size:255" json:"attachment_url"`
+	Points        float64                 `gorm:"-" json:"points"`
 }
 
 type QuestionListItem struct {
@@ -115,7 +116,8 @@ type ExamModel struct {
 type ExamQuestionModel struct {
 	ExamID     int64 `gorm:"primaryKey"`
 	QuestionID int64 `gorm:"primaryKey"`
-	Sequence   int   `gorm:"default:0"`
+	Sequence   int     `gorm:"default:0"`
+	Points     float64 `gorm:"default:1.0"`
 }
 
 func (ExamQuestionModel) TableName() string {
@@ -169,6 +171,7 @@ type UserAnswerModel struct {
 	Choice         ChoiceModel   `gorm:"foreignKey:ChosenChoiceID"`
 	Question       QuestionModel `gorm:"foreignKey:QuestionID"`
 	IsCorrect      *bool
+	AwardedPoints  *float64
 	CreatedAt      time.Time
 }
 
@@ -215,14 +218,14 @@ type ExamRepository interface {
 	DeleteQuestion(ctx context.Context, tx *gorm.DB, questionID int64) error
 
 	CreateExam(ctx context.Context, tx *gorm.DB, exam *ExamModel) (*ExamModel, error)
-	LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error
+	LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questions []*ExamQuestionModel) error
 	GetExamDetails(ctx context.Context, examID int64) (*ExamModel, error)
 	UpdateExam(ctx context.Context, tx *gorm.DB, examID int64, updates map[string]interface{}) error
 	DeleteExam(ctx context.Context, tx *gorm.DB, examID int64) error
 	UpdateExamStatus(ctx context.Context, tx *gorm.DB, examID int64, status string) error
 	GetExams(ctx context.Context, limit, offset int, creatorID int64, status string) ([]*ExamModel, int64, error)
 	CountExams(ctx context.Context) (int64, error)
-	ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error
+	ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questions []*ExamQuestionModel) error
 
 	CreateAccessRequest(ctx context.Context, req *ExamAccessRequestModel) error
 	GetAccessRequest(ctx context.Context, examID, userID int64) (*ExamAccessRequestModel, error)

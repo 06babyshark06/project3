@@ -155,26 +155,15 @@ func (r *examRepository) CreateExam(ctx context.Context, tx *gorm.DB, exam *doma
 	}
 	return exam, nil
 }
-func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
-	if len(questionIDs) == 0 {
+func (r *examRepository) LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questions []*domain.ExamQuestionModel) error {
+	if len(questions) == 0 {
 		return nil
 	}
 
-	// Loại bỏ duplicate question IDs
-	seen := make(map[int64]bool)
-	var uniqueIDs []int64
-	for _, qid := range questionIDs {
-		if !seen[qid] {
-			seen[qid] = true
-			uniqueIDs = append(uniqueIDs, qid)
-		}
+	for _, q := range questions {
+		q.ExamID = examID
 	}
-
-	var examQuestions []*domain.ExamQuestionModel
-	for i, qid := range uniqueIDs {
-		examQuestions = append(examQuestions, &domain.ExamQuestionModel{ExamID: examID, QuestionID: qid, Sequence: i})
-	}
-	return tx.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&examQuestions).Error
+	return tx.WithContext(ctx).Clauses(clause.OnConflict{DoNothing: true}).Create(&questions).Error
 }
 func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*domain.ExamModel, error) {
 	var exam domain.ExamModel
@@ -187,26 +176,34 @@ func (r *examRepository) GetExamDetails(ctx context.Context, examID int64) (*dom
 	if err != nil {
 		return nil, err
 	}
-	type ExamQuestionOrder struct {
+
+	type ExamQuestionInfo struct {
 		QuestionID int64
 		Sequence   int
+		Points     float64
 	}
-	var orders []ExamQuestionOrder
+	var infos []ExamQuestionInfo
 	database.DB.WithContext(ctx).
 		Table("exam_questions").
-		Select("question_id, sequence").
+		Select("question_id, sequence, points").
 		Where("exam_id = ?", examID).
-		Scan(&orders)
+		Scan(&infos)
 
-	if len(orders) > 0 {
-		orderMap := make(map[int64]int)
-		for _, o := range orders {
-			orderMap[o.QuestionID] = o.Sequence
+	if len(infos) > 0 {
+		infoMap := make(map[int64]ExamQuestionInfo)
+		for _, info := range infos {
+			infoMap[info.QuestionID] = info
 		}
 
 		sort.Slice(exam.Questions, func(i, j int) bool {
-			return orderMap[exam.Questions[i].Id] < orderMap[exam.Questions[j].Id]
+			return infoMap[exam.Questions[i].Id].Sequence < infoMap[exam.Questions[j].Id].Sequence
 		})
+
+		for _, q := range exam.Questions {
+			if info, ok := infoMap[q.Id]; ok {
+				q.Points = info.Points
+			}
+		}
 	}
 	return &exam, err
 }
@@ -303,8 +300,42 @@ func (r *examRepository) UpdateSubmission(ctx context.Context, tx *gorm.DB, sub 
 func (r *examRepository) GetSubmissionByID(ctx context.Context, id int64) (*domain.ExamSubmissionModel, error) {
 	var sub domain.ExamSubmissionModel
 	err := database.DB.WithContext(ctx).Preload("Exam").Preload("Status").
-		Preload("UserAnswers").Preload("UserAnswers.Question").Preload("UserAnswers.Choice").First(&sub, id).Error
-	return &sub, err
+		Preload("UserAnswers").
+		Preload("UserAnswers.Question").
+		Preload("UserAnswers.Question.Choices").
+		Preload("UserAnswers.Choice").
+		First(&sub, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch points from exam_questions for this exam
+	type QuestionPoint struct {
+		QuestionID int64
+		Points     float64
+	}
+	var points []QuestionPoint
+	database.DB.WithContext(ctx).
+		Table("exam_questions").
+		Select("question_id, points").
+		Where("exam_id = ?", sub.ExamID).
+		Scan(&points)
+
+	pointMap := make(map[int64]float64)
+	for _, p := range points {
+		pointMap[p.QuestionID] = p.Points
+	}
+
+	// Populate points into UserAnswer.Question DTOs
+	for i := range sub.UserAnswers {
+		if pts, ok := pointMap[sub.UserAnswers[i].QuestionID]; ok {
+			sub.UserAnswers[i].Question.Points = pts
+		} else {
+			sub.UserAnswers[i].Question.Points = 1.0 // Default
+		}
+	}
+
+	return &sub, nil
 }
 func (r *examRepository) CountSubmissionsByUserID(ctx context.Context, userID int64) (int64, error) {
 	var count int64
@@ -461,13 +492,13 @@ func (r *examRepository) CountUniqueParticipants(ctx context.Context, examID int
 	return count, err
 }
 
-func (r *examRepository) ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questionIDs []int64) error {
+func (r *examRepository) ReplaceExamQuestions(ctx context.Context, tx *gorm.DB, examID int64, questions []*domain.ExamQuestionModel) error {
 	if err := tx.WithContext(ctx).Where("exam_id = ?", examID).Delete(&domain.ExamQuestionModel{}).Error; err != nil {
 		return err
 	}
 
-	if len(questionIDs) > 0 {
-		return r.LinkQuestionsToExam(ctx, tx, examID, questionIDs)
+	if len(questions) > 0 {
+		return r.LinkQuestionsToExam(ctx, tx, examID, questions)
 	}
 
 	return nil
