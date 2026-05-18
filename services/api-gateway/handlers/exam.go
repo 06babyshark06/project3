@@ -1378,8 +1378,9 @@ func (h *ExamHandler) GradeEssay(c *gin.Context) {
 	submissionID, _ := strconv.ParseInt(submissionIDStr, 10, 64)
 
 	var body struct {
-		QuestionID int64 `json:"question_id"`
-		IsCorrect  bool  `json:"is_correct"`
+		QuestionID int64   `json:"question_id"`
+		IsCorrect  bool    `json:"is_correct"`
+		ScoreRatio float32 `json:"score_ratio"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -1391,6 +1392,7 @@ func (h *ExamHandler) GradeEssay(c *gin.Context) {
 		SubmissionId: submissionID,
 		QuestionId:   body.QuestionID,
 		IsCorrect:    body.IsCorrect,
+		ScoreRatio:   body.ScoreRatio,
 	})
 
 	if err != nil {

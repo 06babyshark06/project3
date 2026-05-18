@@ -3305,6 +3305,7 @@ type SubmissionDetail struct {
 	TextAnswer      string                 `protobuf:"bytes,8,opt,name=text_answer,json=textAnswer,proto3" json:"text_answer,omitempty"`
 	AwardedPoints   float32                `protobuf:"fixed32,9,opt,name=awarded_points,json=awardedPoints,proto3" json:"awarded_points,omitempty"`
 	Points          float32                `protobuf:"fixed32,10,opt,name=points,proto3" json:"points,omitempty"`
+	IsGraded        bool                   `protobuf:"varint,11,opt,name=is_graded,json=isGraded,proto3" json:"is_graded,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -3407,6 +3408,13 @@ func (x *SubmissionDetail) GetPoints() float32 {
 		return x.Points
 	}
 	return 0
+}
+
+func (x *SubmissionDetail) GetIsGraded() bool {
+	if x != nil {
+		return x.IsGraded
+	}
+	return false
 }
 
 type ChoiceReview struct {
@@ -7173,7 +7181,7 @@ const file_exam_proto_rawDesc = "" +
 	"\x0ftotal_questions\x18\x04 \x01(\x05R\x0etotalQuestions\"T\n" +
 	"\x14GetSubmissionRequest\x12#\n" +
 	"\rsubmission_id\x18\x01 \x01(\x03R\fsubmissionId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\xf9\x02\n" +
+	"\auser_id\x18\x02 \x01(\x03R\x06userId\"\x96\x03\n" +
 	"\x10SubmissionDetail\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\x03R\n" +
 	"questionId\x12)\n" +
@@ -7188,7 +7196,8 @@ const file_exam_proto_rawDesc = "" +
 	"textAnswer\x12%\n" +
 	"\x0eawarded_points\x18\t \x01(\x02R\rawardedPoints\x12\x16\n" +
 	"\x06points\x18\n" +
-	" \x01(\x02R\x06points\"\xa3\x01\n" +
+	" \x01(\x02R\x06points\x12\x1b\n" +
+	"\tis_graded\x18\v \x01(\bR\bisGraded\"\xa3\x01\n" +
 	"\fChoiceReview\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\tR\acontent\x12\x1d\n" +

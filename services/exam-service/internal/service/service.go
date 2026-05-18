@@ -340,9 +340,13 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 		if i == 0 {
 			continue
 		}
-		if len(row) < 9 {
+		if len(row) < 3 {
 			errorCount++
 			continue
+		}
+		
+		for len(row) < 8 {
+			row = append(row, "")
 		}
 
 		topicName := row[0]
@@ -689,6 +693,17 @@ func (s *examService) GetExamPreview(ctx context.Context, req *pb.GetExamPreview
 	pbQuestions := []*pb.QuestionDetails{}
 
 	if examModel.IsDynamic {
+		uniqueMap := make(map[int64]bool)
+		
+		// 1. First, include fixed questions (for Hybrid exams)
+		for _, q := range examModel.Questions {
+			if !uniqueMap[q.Id] {
+				uniqueMap[q.Id] = true
+				pbQuestions = append(pbQuestions, s.convertToPBQuestion(q))
+			}
+		}
+
+		// 2. Then, include preview of random questions
 		var configs []struct {
 			SectionId  int64  `json:"section_id"`
 			Count      int    `json:"count"`
@@ -701,19 +716,23 @@ func (s *examService) GetExamPreview(ctx context.Context, req *pb.GetExamPreview
 		}
 
 		for _, cfg := range configs {
-			// Correct signature: (sectionID int64, difficulty string, limit int, topicID int64)
 			questionIDs, err := s.repo.GetRandomQuestionsBySection(ctx, cfg.SectionId, cfg.Difficulty, cfg.Count, examModel.TopicID)
 			if err != nil {
 				continue
 			}
 			for _, qID := range questionIDs {
+				if uniqueMap[qID] {
+					continue
+				}
 				q, err := s.repo.GetQuestionByID(ctx, qID)
 				if err == nil {
+					uniqueMap[qID] = true
 					pbQuestions = append(pbQuestions, s.convertToPBQuestion(q))
 				}
 			}
 		}
 	} else {
+
 		for _, q := range examModel.Questions {
 			pbQuestions = append(pbQuestions, s.convertToPBQuestion(q))
 		}
@@ -1071,9 +1090,8 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 	}
 
 	userSelections := make(map[int64]map[int64]bool)
-	questionIsCorrectMap := make(map[int64]bool)
-	questionAwardedPointsMap := make(map[int64]float32)
 	userTextAnswers := make(map[int64]string)
+	uaMap := make(map[int64]*domain.UserAnswerModel)
 
 	for _, ua := range submission.UserAnswers {
 		if _, exists := userSelections[ua.QuestionID]; !exists {
@@ -1083,39 +1101,35 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			userSelections[ua.QuestionID][*ua.ChosenChoiceID] = true
 		}
 
-		if ua.IsCorrect != nil && *ua.IsCorrect {
-			questionIsCorrectMap[ua.QuestionID] = true
-		}
-		
-		if ua.AwardedPoints != nil {
-			questionAwardedPointsMap[ua.QuestionID] = float32(*ua.AwardedPoints)
-		} else if ua.IsCorrect != nil && *ua.IsCorrect {
-			questionAwardedPointsMap[ua.QuestionID] = 1.0
-		} else {
-			questionAwardedPointsMap[ua.QuestionID] = 0.0
-		}
-
 		if ua.TextAnswer != nil {
 			userTextAnswers[ua.QuestionID] = *ua.TextAnswer
+		}
+		// Save the first answer model for points/correctness check
+		if _, exists := uaMap[ua.QuestionID]; !exists {
+			uaMap[ua.QuestionID] = &ua
 		}
 	}
 
 	var questions []*domain.QuestionModel
+	qPointsMap := make(map[int64]float64)
+
 	if examFull.IsDynamic {
 		sExam, err := s.repo.GetStudentExam(ctx, submission.ExamID, submission.UserID)
 		if err == nil {
-			var qIDs []int64
-			if err := json.Unmarshal([]byte(sExam.QuestionIDs), &qIDs); err == nil {
-				for _, qID := range qIDs {
-					q, err := s.repo.GetQuestionByID(ctx, qID)
-					if err == nil {
-						questions = append(questions, q)
-					}
+			dynamicQs := parseStudentExamQuestions(sExam.QuestionIDs)
+			for _, dq := range dynamicQs {
+				q, err := s.repo.GetQuestionByID(ctx, dq.ID)
+				if err == nil {
+					questions = append(questions, q)
+					qPointsMap[dq.ID] = dq.Points
 				}
 			}
 		}
 	} else {
 		questions = examFull.Questions
+		for _, q := range questions {
+			qPointsMap[q.Id] = q.Points
+		}
 	}
 
 	var pbDetails []*pb.SubmissionDetail
@@ -1138,11 +1152,30 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			qType = q.Type.Type
 		}
 
-		qPoints := float64(1.0)
-		for _, ua := range submission.UserAnswers {
-			if ua.QuestionID == q.Id {
-				qPoints = ua.Question.Points
-				break
+		qPoints := qPointsMap[q.Id]
+		if qPoints <= 0 {
+			qPoints = 1.0
+		}
+
+		var awardedPoints float32 = 0
+		isCorrect := false
+
+		if ua, ok := uaMap[q.Id]; ok {
+			if ua.AwardedPoints != nil {
+				awardedPoints = float32(*ua.AwardedPoints)
+			} else if ua.IsCorrect != nil && *ua.IsCorrect {
+				awardedPoints = float32(qPoints)
+			}
+
+			if ua.IsCorrect != nil {
+				isCorrect = *ua.IsCorrect
+			}
+		}
+
+		isGraded := true
+		if qType == "essay" {
+			if ua, ok := uaMap[q.Id]; ok && ua.TextAnswer != nil && *ua.TextAnswer != "" {
+				isGraded = ua.IsCorrect != nil
 			}
 		}
 
@@ -1151,21 +1184,23 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 			QuestionContent: q.Content,
 			Explanation:     q.Explanation,
 			QuestionType:    qType,
-			IsCorrect:       questionIsCorrectMap[q.Id],
+			IsCorrect:       isCorrect,
 			Choices:         pbChoices,
 			AttachmentUrl:   q.AttachmentURL,
 			TextAnswer:      userTextAnswers[q.Id],
-			AwardedPoints:   questionAwardedPointsMap[q.Id],
+			AwardedPoints:   awardedPoints,
 			Points:          float32(qPoints),
+			IsGraded:        isGraded,
 		})
 	}
 
 	correctCount := 0
-	for _, v := range questionIsCorrectMap {
-		if v {
+	for _, d := range pbDetails {
+		if d.IsCorrect {
 			correctCount++
 		}
 	}
+
 
 	return &pb.GetSubmissionResponse{
 		Id:             submission.Id,
@@ -1874,18 +1909,21 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
 
 	// --- ANTI CHEAT: Lưu Session Lock ---
-	sessionKey := fmt.Sprintf("exam:%d:user:%d:session_lock", req.ExamId, req.UserId)
-	sessionHash := generateSessionHash(req.IpAddress, req.UserAgent)
-	ttl := time.Duration(examDetails.DurationMinutes) * time.Minute
-	if ttl <= 0 {
-		ttl = 120 * time.Minute
-	}
-	
-	// Cẩn thận: Chỉ lock session khi Start. Nếu đã thi dở thì ta vẫn ghi đè Hash hiện tại để họ học tiếp trên máy này
-	if err := database.RedisClient.Set(ctx, sessionKey, sessionHash, ttl).Err(); err != nil {
-		fmt.Printf("Warning: Failed to set session lock for exam %d user %d: %v\n", req.ExamId, req.UserId, err)
+	if database.RedisClient != nil {
+		sessionKey := fmt.Sprintf("exam:%d:user:%d:session_lock", req.ExamId, req.UserId)
+		sessionHash := generateSessionHash(req.IpAddress, req.UserAgent)
+		ttl := time.Duration(examDetails.DurationMinutes) * time.Minute
+		if ttl <= 0 {
+			ttl = 120 * time.Minute
+		}
+		
+		// Cẩn thận: Chỉ lock session khi Start. Nếu đã thi dở thì ta vẫn ghi đè Hash hiện tại để họ học tiếp trên máy này
+		if err := database.RedisClient.Set(ctx, sessionKey, sessionHash, ttl).Err(); err != nil {
+			fmt.Printf("Warning: Failed to set session lock for exam %d user %d: %v\n", req.ExamId, req.UserId, err)
+		}
 	}
 	// ------------------------------------
+
 
 	var submission domain.ExamSubmissionModel
 	err = database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
