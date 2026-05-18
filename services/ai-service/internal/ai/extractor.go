@@ -11,8 +11,6 @@ import (
 	"github.com/ledongthuc/pdf"
 )
 
-// ExtractTextFromFile takes a byte slice and a filename, identifies the file type,
-// and extracts all possible text from it to be fed into an LLM.
 func ExtractTextFromFile(fileBytes []byte, filename string) (string, error) {
 	ext := strings.ToLower(filepath.Ext(filename))
 	switch ext {
@@ -25,11 +23,10 @@ func ExtractTextFromFile(fileBytes []byte, filename string) (string, error) {
 	case ".txt", ".md", ".csv":
 		return string(fileBytes), nil
 	default:
-		return string(fileBytes), nil // Try as plain text
+		return string(fileBytes), nil
 	}
 }
 
-// extractTextFromPDF uses ledongthuc/pdf to parse simple PDF text
 func extractTextFromPDF(fileBytes []byte) (string, error) {
 	reader, err := pdf.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
 	if err != nil {
@@ -44,7 +41,7 @@ func extractTextFromPDF(fileBytes []byte) (string, error) {
 		}
 		text, err := page.GetPlainText(nil)
 		if err != nil {
-			continue // Skip problematic pages
+			continue
 		}
 		textBuilder.WriteString(text)
 		textBuilder.WriteString("\n")
@@ -53,7 +50,6 @@ func extractTextFromPDF(fileBytes []byte) (string, error) {
 	return textBuilder.String(), nil
 }
 
-// extractTextFromDocx extracts XML content from docx (since it's a zip file)
 func extractTextFromDocx(fileBytes []byte) (string, error) {
 	reader, err := zip.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
 	if err != nil {
@@ -72,24 +68,21 @@ func extractTextFromDocx(fileBytes []byte) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			
-			// Extremely naive XML to Text fallback
-			// Since we just need the text for LLM, strip the XML tags.
+
 			text := string(content)
 			text = stripXMLTags(text)
 			textBuilder.WriteString(text)
 			break
 		}
 	}
-	
+
 	if textBuilder.Len() == 0 {
 		return "", fmt.Errorf("could not find document.xml in docx")
 	}
-	
+
 	return textBuilder.String(), nil
 }
 
-// Helper to strip XML tags quickly
 func stripXMLTags(content string) string {
 	var builder strings.Builder
 	inTag := false
@@ -100,7 +93,7 @@ func stripXMLTags(content string) string {
 		}
 		if char == '>' {
 			inTag = false
-			builder.WriteString(" ") // Add space to prevent word joining
+			builder.WriteString(" ")
 			continue
 		}
 		if !inTag {
@@ -110,7 +103,6 @@ func stripXMLTags(content string) string {
 	return builder.String()
 }
 
-// extractTextFromPptx extracts text from pptx files by reading ppt/slides/slide*.xml
 func extractTextFromPptx(fileBytes []byte) (string, error) {
 	reader, err := zip.NewReader(bytes.NewReader(fileBytes), int64(len(fileBytes)))
 	if err != nil {
@@ -118,8 +110,7 @@ func extractTextFromPptx(fileBytes []byte) (string, error) {
 	}
 
 	var textBuilder strings.Builder
-	
-	// Collect all slides
+
 	for _, f := range reader.File {
 		if strings.HasPrefix(f.Name, "ppt/slides/slide") && strings.HasSuffix(f.Name, ".xml") {
 			rc, err := f.Open()
@@ -131,18 +122,17 @@ func extractTextFromPptx(fileBytes []byte) (string, error) {
 			if err != nil {
 				continue
 			}
-			
-			// Basic XML to Text fallback
+
 			text := string(content)
 			text = stripXMLTags(text)
 			textBuilder.WriteString(text)
 			textBuilder.WriteString("\n\n")
 		}
 	}
-	
+
 	if textBuilder.Len() == 0 {
 		return "", fmt.Errorf("could not find any presentation slides in pptx")
 	}
-	
+
 	return textBuilder.String(), nil
 }

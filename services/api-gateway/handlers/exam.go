@@ -51,7 +51,6 @@ func (h *ExamHandler) GetTopics(c *gin.Context) {
 		return
 	}
 
-	// Enrichment Logic
 	type TopicWithCreator struct {
 		*pb.Topic
 		CreatorName string `json:"creator_name"`
@@ -105,7 +104,7 @@ func (h *ExamHandler) CreateTopic(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	// Strip hidden ID from response if present (although repo should strictly return clean name if it follows logic, but to be safe)
+
 	if strings.Contains(resp.Topic.Name, "|cid:") {
 		resp.Topic.Name = strings.Split(resp.Topic.Name, "|cid:")[0]
 	}
@@ -416,7 +415,6 @@ func (h *ExamHandler) GetExamPreview(c *gin.Context) {
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp})
 }
 
-
 func (h *ExamHandler) SubmitExam(c *gin.Context) {
 	var req pb.SubmitExamRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -491,7 +489,6 @@ func (h *ExamHandler) GetExams(c *gin.Context) {
 		return
 	}
 
-	// Enrich with Creator Names
 	creatorIDs := make([]int64, 0)
 	uniqueMap := make(map[int64]bool)
 	for _, e := range resp.Exams {
@@ -538,10 +535,6 @@ func (h *ExamHandler) GetExams(c *gin.Context) {
 			CreatorName:  name,
 		})
 	}
-
-	// We need to reconstruct the response structure to keep 'exams', 'total', 'page', 'total_pages'
-	// But 'resp' is a proto struct, we can't easily add fields to it.
-	// The frontend expects res.data.data.exams.
 
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{
 		"exams":       enrichedExams,
@@ -679,7 +672,6 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 		return
 	}
 
-	// Cập nhật struct hứng dữ liệu JSON để bao gồm Settings
 	var req struct {
 		Title       string  `json:"title"`
 		Description string  `json:"description"`
@@ -692,7 +684,7 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 			DurationMinutes       int    `json:"duration_minutes"`
 			MaxAttempts           int    `json:"max_attempts"`
 			Password              string `json:"password"`
-			StartTime             string `json:"start_time"` // Format: RFC3339 (e.g., "2023-10-01T08:00:00Z")
+			StartTime             string `json:"start_time"`
 			EndTime               string `json:"end_time"`
 			ShuffleQuestions      bool   `json:"shuffle_questions"`
 			ShowResultImmediately bool   `json:"show_result_immediately"`
@@ -894,7 +886,6 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
 		return
 	}
 
-	// Enrichment Logic: Extract creator_id from TopicName and fetch Teacher Name
 	type QuestionWithCreator struct {
 		*pb.QuestionListItem
 		CreatorName string `json:"creator_name"`
@@ -906,7 +897,7 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
 		var creatorID int64
 		if strings.Contains(q.TopicName, "|cid:") {
 			parts := strings.Split(q.TopicName, "|cid:")
-			q.TopicName = parts[0] // Restore clean topic name
+			q.TopicName = parts[0]
 			if len(parts) > 1 {
 				creatorID, _ = strconv.ParseInt(parts[1], 10, 64)
 			}
@@ -914,7 +905,7 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
 
 		if creatorID > 0 {
 			if _, exists := userNames[creatorID]; !exists {
-				// Fetch user profile
+
 				userProfile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: creatorID})
 				if err == nil {
 					userNames[creatorID] = userProfile.FullName
@@ -923,8 +914,7 @@ func (h *ExamHandler) GetQuestions(c *gin.Context) {
 				}
 			}
 		} else {
-			// If no creatorID found (e.g. old data), try to get from context if it's the caller?
-			// No, for admin view we need the real creator. If 0, it stays unknown.
+
 		}
 
 		enrichedQuestions = append(enrichedQuestions, QuestionWithCreator{
@@ -1039,7 +1029,6 @@ func (h *ExamHandler) GetAccessRequests(c *gin.Context) {
 		return
 	}
 
-	// Enrich with user names
 	userIDs := make([]int64, 0)
 	for _, req := range resp.Requests {
 		if req.FullName == "" && req.UserId > 0 {
@@ -1049,7 +1038,7 @@ func (h *ExamHandler) GetAccessRequests(c *gin.Context) {
 
 	if len(userIDs) > 0 {
 		userMap := make(map[int64]string)
-		// Basic deduplication
+
 		uniqueIDs := make(map[int64]bool)
 		var dedupedIDs []int64
 		for _, id := range userIDs {
@@ -1148,7 +1137,6 @@ func (h *ExamHandler) GetExamSubmissions(c *gin.Context) {
 		return
 	}
 
-	// Enrichment: If search is provided, try to find matching user IDs from User Service
 	if search != "" {
 		usersResp, err := h.userClient.GetAllUsers(c.Request.Context(), &pbUser.GetAllUsersRequest{
 			Page:     1,
@@ -1166,12 +1154,11 @@ func (h *ExamHandler) GetExamSubmissions(c *gin.Context) {
 		if len(targetUserIDs) > 0 {
 			search = "uids:" + strings.Join(targetUserIDs, ",")
 		} else {
-			// Search term yielded no users, so force a filter that matches nothing
+
 			search = "uids:-1"
 		}
 	}
 
-	// 1. Call Exam Service
 	resp, err := h.examClient.GetExamSubmissions(c.Request.Context(), &pb.GetExamSubmissionsRequest{
 		ExamId:       examID,
 		Page:         int32(page),
@@ -1184,7 +1171,6 @@ func (h *ExamHandler) GetExamSubmissions(c *gin.Context) {
 		return
 	}
 
-	// 2. Enrich with User Names
 	userIDs := make([]int64, 0)
 	uniqueMap := make(map[int64]bool)
 	for _, sub := range resp.Submissions {
@@ -1261,7 +1247,6 @@ func (h *ExamHandler) GetRecentSubmissions(c *gin.Context) {
 		return
 	}
 
-	// Enrich with User Names
 	userIDs := make([]int64, 0)
 	uniqueMap := make(map[int64]bool)
 	for _, sub := range resp.Submissions {

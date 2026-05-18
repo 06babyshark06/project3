@@ -14,7 +14,7 @@ type CourseServiceClient struct {
 
 func NewCourseServiceClient() (*CourseServiceClient, error) {
 	courseServiceURL := env.GetString("COURSE_SERVICE_URL", "course-service:9003")
-	conn, err := grpc.NewClient("dns:///"+courseServiceURL, 
+	conn, err := grpc.NewClient("dns:///"+courseServiceURL,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
 		grpc.WithBlock(),

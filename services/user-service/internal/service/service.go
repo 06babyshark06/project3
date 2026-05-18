@@ -47,7 +47,7 @@ func (s *userService) invalidateUserCache(ctx context.Context, userID int64) {
 }
 
 func (s *userService) GetProfile(ctx context.Context, req *pb.GetProfileRequest) (*pb.GetProfileResponse, error) {
-	// Try to get from cache
+
 	version := s.getUserVersion(ctx, req.UserId)
 	cacheKey := fmt.Sprintf("user:profile:%d:v:%s", req.UserId, version)
 
@@ -74,7 +74,6 @@ func (s *userService) GetProfile(ctx context.Context, req *pb.GetProfileRequest)
 		Role:     user.Role.Name,
 	}
 
-	// Save to cache
 	if database.RedisClient != nil {
 		data, _ := json.Marshal(resp)
 		database.RedisClient.Set(ctx, cacheKey, data, 1*time.Hour)
@@ -218,7 +217,7 @@ func (s *userService) UpdateUserRole(ctx context.Context, req *pb.UpdateUserRole
 	}
 
 	user.RoleId = role.Id
-	user.Role = domain.Role{} // Clear preloaded association to ensure RoleId update persists
+	user.Role = domain.Role{}
 	user.UpdatedAt = time.Now().UTC()
 
 	if _, err := s.repo.UpdateUser(ctx, user); err != nil {
@@ -297,13 +296,12 @@ func (s *userService) UpdateClass(ctx context.Context, req *pb.UpdateClassReques
 	if err != nil {
 		return nil, errors.New("class not found")
 	}
-	// Check requester permission
+
 	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
 	if err != nil {
 		return nil, errors.New("requester not found")
 	}
 
-	// Validate: must be Owner OR Admin
 	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
@@ -325,13 +323,12 @@ func (s *userService) DeleteClass(ctx context.Context, req *pb.DeleteClassReques
 	if err != nil {
 		return nil, errors.New("class not found")
 	}
-	// Check requester permission
+
 	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
 	if err != nil {
 		return nil, errors.New("requester not found")
 	}
 
-	// Validate: must be Owner OR Admin
 	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
@@ -377,13 +374,11 @@ func (s *userService) AddMembers(ctx context.Context, req *pb.AddMembersRequest)
 		return nil, errors.New("class not found")
 	}
 
-	// Check requester permission
 	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
 	if err != nil {
 		return nil, errors.New("requester not found")
 	}
 
-	// Validate: must be Owner OR Admin
 	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
@@ -415,18 +410,15 @@ func (s *userService) AddMembersBulk(ctx context.Context, req *pb.AddMembersRequ
 		return nil, errors.New("class not found")
 	}
 
-	// Check requester permission
 	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
 	if err != nil {
 		return nil, errors.New("requester not found")
 	}
 
-	// Validate: must be Owner OR Admin
 	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}
 
-	// 1. Lấy tất cả user có email trong danh sách (Bulk fetch)
 	users, err := s.repo.GetUsersByEmails(ctx, req.Emails)
 	if err != nil {
 		return nil, err
@@ -441,7 +433,6 @@ func (s *userService) AddMembersBulk(ctx context.Context, req *pb.AddMembersRequ
 	membersToAdd := []*domain.ClassMemberModel{}
 	now := time.Now().UTC()
 
-	// 2. Phân loại email tìm thấy và không tìm thấy
 	for _, email := range req.Emails {
 		if id, ok := foundEmails[email]; ok {
 			membersToAdd = append(membersToAdd, &domain.ClassMemberModel{
@@ -455,7 +446,6 @@ func (s *userService) AddMembersBulk(ctx context.Context, req *pb.AddMembersRequ
 		}
 	}
 
-	// 3. Thực hiện Bulk Insert vào Class Members
 	if len(membersToAdd) > 0 {
 		err = s.repo.AddClassMembersBulk(ctx, membersToAdd)
 		if err != nil {
@@ -475,13 +465,11 @@ func (s *userService) RemoveMember(ctx context.Context, req *pb.RemoveMemberRequ
 		return nil, errors.New("class not found")
 	}
 
-	// Check requester permission
 	requester, err := s.repo.GetUserById(ctx, req.TeacherId)
 	if err != nil {
 		return nil, errors.New("requester not found")
 	}
 
-	// Validate: must be Owner OR Admin
 	if class.TeacherID != req.TeacherId && requester.Role.Name != "admin" {
 		return nil, errors.New("unauthorized")
 	}

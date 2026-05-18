@@ -47,7 +47,7 @@ type NotificationRepository interface {
 	GetStatusByName(ctx context.Context, status string) (*NotificationStatusModel, error)
 
 	CreateNotificationLog(ctx context.Context, tx *gorm.DB, log *NotificationModel) (*NotificationModel, error)
-	
+
 	UpdateLogStatus(ctx context.Context, tx *gorm.DB, logID int64, statusID int64, errorMessage string) error
 }
 

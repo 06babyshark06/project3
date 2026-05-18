@@ -59,7 +59,6 @@ func main() {
 	notificationHandler := handlers.NewNotificationHandler()
 	healthHandler := handlers.NewHealthHandler(userClient.Client, courseClient.Client, examClient.Client)
 
-	// Tạo router
 	r := gin.Default()
 
 	r.Use(cors.New(cors.Config{
@@ -167,7 +166,7 @@ func main() {
 				instructorOnly.PUT("/exams/access/approve", examHandler.ApproveAccess)
 				instructorOnly.GET("/exams/:id/stats", examHandler.GetExamStats)
 				instructorOnly.GET("/exams/:id/export", examHandler.ExportExamResults)
-				instructorOnly.GET("/exams/:id/submissions", examHandler.GetExamSubmissions) // NEW ROUTE
+				instructorOnly.GET("/exams/:id/submissions", examHandler.GetExamSubmissions)
 				instructorOnly.GET("/exams/:id/violations", examHandler.GetExamViolations)
 				instructorOnly.GET("/exams/:id/monitor/ws", examHandler.MonitorExamViolationsWS)
 				instructorOnly.GET("/exams/:id/access-requests", examHandler.GetAccessRequests)

@@ -30,8 +30,8 @@ func NewKafkaConsumer(service domain.NotificationService) (*KafkaConsumer, error
 		"sasl.mechanisms":   "PLAIN",
 		"sasl.username":     apiKey,
 		"sasl.password":     apiSecret,
-		"group.id":          "notification_service_group_v1", 
-		"auto.offset.reset": "earliest", 
+		"group.id":          "notification_service_group_v1",
+		"auto.offset.reset": "earliest",
 	}
 
 	c, err := kafka.NewConsumer(config)
@@ -67,13 +67,13 @@ func (kc *KafkaConsumer) StartConsuming(ctx context.Context) {
 			return
 		default:
 			msg, err := kc.consumer.ReadMessage(1 * time.Second)
-		
+
 			if err == nil {
 				topic := *msg.TopicPartition.Topic
 				log.Printf("Nhận được message từ topic: %s\n", topic)
 
 				kc.routeEvent(ctx, topic, msg.Value)
-				
+
 			} else if !err.(kafka.Error).IsTimeout() {
 				log.Printf("Lỗi Kafka Consumer: %v (%v)\n", err, msg)
 			}
@@ -83,14 +83,14 @@ func (kc *KafkaConsumer) StartConsuming(ctx context.Context) {
 
 func (kc *KafkaConsumer) routeEvent(ctx context.Context, topic string, value []byte) {
 	var err error
-	
+
 	switch topic {
 	case "user_events":
 		err = kc.service.HandleUserRegisteredEvent(ctx, value)
-	
+
 	case "exam_events":
 		err = kc.service.HandleExamSubmittedEvent(ctx, value)
-		
+
 	case "course_events":
 		err = kc.service.HandleCourseEnrolledEvent(ctx, value)
 

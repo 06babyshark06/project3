@@ -12,7 +12,6 @@ type kafkaProducer struct {
 	producer *kafka.Producer
 }
 
-// NewKafkaProducer tạo một producer mới và kết nối tới Confluent
 func NewKafkaProducer() (domain.EventProducer, error) {
 	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "")
 	apiKey := env.GetString("KAFKA_API_KEY", "")
@@ -28,7 +27,7 @@ func NewKafkaProducer() (domain.EventProducer, error) {
 		"sasl.mechanisms":   "PLAIN",
 		"sasl.username":     apiKey,
 		"sasl.password":     apiSecret,
-		
+
 		"acks": "all",
 	}
 
@@ -64,7 +63,6 @@ func (kp *kafkaProducer) Produce(topic string, key []byte, message []byte) error
 	}, nil)
 }
 
-// Close dọn dẹp producer
 func (kp *kafkaProducer) Close() {
 	kp.producer.Flush(5 * 1000)
 	kp.producer.Close()

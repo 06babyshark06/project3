@@ -22,8 +22,6 @@ func NewClassHandler(userClient *grpcclients.UserServiceClient, examClient *grpc
 	return &ClassHandler{userClient: userClient.Client, examClient: examClient.Client}
 }
 
-// --- QUẢN LÝ LỚP HỌC ---
-
 func (h *ClassHandler) CreateClass(c *gin.Context) {
 	var req struct {
 		Name        string `json:"name" binding:"required"`
@@ -111,7 +109,6 @@ func (h *ClassHandler) GetClasses(c *gin.Context) {
 	} else if role == "instructor" {
 		req.TeacherId = userID
 	}
-	// Nếu role là admin, để TeacherId và StudentId = 0 (mặc định) để lấy tất cả
 
 	resp, err := h.userClient.GetClasses(c.Request.Context(), req)
 	if err != nil {
@@ -223,7 +220,6 @@ func (h *ClassHandler) AssignExamToClass(c *gin.Context) {
 		return
 	}
 
-	// Gọi sang Exam Service
 	_, err = h.examClient.AssignExamToClass(c.Request.Context(), &pbExam.AssignExamToClassRequest{
 		ClassId: classID,
 		ExamId:  req.ExamID,
@@ -262,7 +258,6 @@ func (h *ClassHandler) RemoveExamFromClass(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Đã xóa bài thi khỏi lớp"})
 }
 
-// GET /classes/:id/exams
 func (h *ClassHandler) GetClassExams(c *gin.Context) {
 	classID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
@@ -271,7 +266,6 @@ func (h *ClassHandler) GetClassExams(c *gin.Context) {
 	}
 	userID, _ := getUserIDFromContext(c)
 
-	// Gọi sang Exam Service
 	resp, err := h.examClient.GetExamsByClass(c.Request.Context(), &pbExam.GetExamsByClassRequest{
 		ClassId:   classID,
 		Status:    "published",
@@ -289,7 +283,6 @@ func (h *ClassHandler) GetClassExams(c *gin.Context) {
 func (h *ClassHandler) GetClassGradebook(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 
-	// 1. Lấy thông tin thành viên từ User Service
 	classDetail, err := h.userClient.GetClassDetails(c.Request.Context(), &pbUser.GetClassDetailsRequest{ClassId: id})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Không thể lấy thông tin thành viên lớp: " + err.Error()})
@@ -311,7 +304,6 @@ func (h *ClassHandler) GetClassGradebook(c *gin.Context) {
 		studentMap[m.UserId] = m.FullName
 	}
 
-	// 2. Lấy bảng điểm từ Exam Service
 	resp, err := h.examClient.GetClassGradebook(c.Request.Context(), &pbExam.GetClassGradebookRequest{
 		ClassId:    id,
 		StudentIds: studentIDs,
@@ -321,11 +313,10 @@ func (h *ClassHandler) GetClassGradebook(c *gin.Context) {
 		return
 	}
 
-	// 3. Mapping lại kết quả để frontend dễ dùng
 	type GradeInfo struct {
 		StudentID int64             `json:"student_id"`
 		FullName  string            `json:"full_name"`
-		Scores    map[int64]float32 `json:"scores"` // exam_id -> score
+		Scores    map[int64]float32 `json:"scores"`
 		Completed map[int64]bool    `json:"completed"`
 	}
 

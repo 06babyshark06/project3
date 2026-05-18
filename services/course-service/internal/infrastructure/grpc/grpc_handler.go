@@ -25,7 +25,7 @@ func NewGRPCHandler(server *grpc.Server, service domain.CourseService) *gRPCHand
 func (h *gRPCHandler) CreateCourse(ctx context.Context, req *pb.CreateCourseRequest) (*pb.CreateCourseResponse, error) {
 	resp, err := h.service.CreateCourse(ctx, req)
 	if err != nil {
-		return nil, err 
+		return nil, err
 	}
 	return resp, nil
 }

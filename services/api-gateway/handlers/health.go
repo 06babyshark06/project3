@@ -33,7 +33,6 @@ func (h *HealthHandler) Check(c *gin.Context) {
 	statuses := make(map[string]string)
 	var mu sync.Mutex
 
-	// 1. Check User Service
 	go func() {
 		defer wg.Done()
 		_, err := h.userClient.GetUserCount(ctx, &userpb.GetUserCountRequest{})
@@ -42,7 +41,6 @@ func (h *HealthHandler) Check(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 2. Check Course Service
 	go func() {
 		defer wg.Done()
 		_, err := h.courseClient.GetCourseCount(ctx, &coursepb.GetCourseCountRequest{})
@@ -51,7 +49,6 @@ func (h *HealthHandler) Check(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 3. Check Exam Service
 	go func() {
 		defer wg.Done()
 		_, err := h.examClient.GetExamCount(ctx, &exampb.GetExamCountRequest{})
@@ -60,7 +57,6 @@ func (h *HealthHandler) Check(c *gin.Context) {
 		mu.Unlock()
 	}()
 
-	// 4. Check Redis
 	go func() {
 		defer wg.Done()
 		err := redis.Rdb.Ping(ctx).Err()

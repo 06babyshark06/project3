@@ -155,7 +155,7 @@ func (r *userRepository) AddClassMembersBulk(ctx context.Context, members []*dom
 	if len(members) == 0 {
 		return nil
 	}
-	// Sử dụng Clause OnConflict để tránh lỗi khi user đã tồn tại trong lớp
+
 	return database.DB.WithContext(ctx).Create(members).Error
 }
 

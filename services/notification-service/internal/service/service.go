@@ -91,7 +91,7 @@ func (s *notificationService) HandleUserRegisteredEvent(ctx context.Context, eve
 	errUpdate := database.DB.Transaction(func(tx *gorm.DB) error {
 		return s.repo.UpdateLogStatus(ctx, tx, notificationLog.Id, statusToUpdate, errMsg)
 	})
-	
+
 	if errUpdate != nil {
 		log.Printf("LỖI CẬP NHẬT LOG: %v", errUpdate)
 		return err
@@ -122,7 +122,6 @@ func (s *notificationService) HandleExamSubmittedEvent(ctx context.Context, even
 	if pendingStatus == nil || sentStatus == nil || failedStatus == nil {
 		return errors.New("không thể lấy các status ID từ CSDL")
 	}
-
 
 	var notificationLog *domain.NotificationModel
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
@@ -160,7 +159,7 @@ func (s *notificationService) HandleExamSubmittedEvent(ctx context.Context, even
 	errUpdate := database.DB.Transaction(func(tx *gorm.DB) error {
 		return s.repo.UpdateLogStatus(ctx, tx, notificationLog.Id, statusToUpdate, errMsg)
 	})
-	
+
 	if errUpdate != nil {
 		log.Printf("LỖI CẬP NHẬT LOG: %v", errUpdate)
 		return err
@@ -228,7 +227,7 @@ func (s *notificationService) HandleCourseEnrolledEvent(ctx context.Context, eve
 	errUpdate := database.DB.Transaction(func(tx *gorm.DB) error {
 		return s.repo.UpdateLogStatus(ctx, tx, notificationLog.Id, statusToUpdate, errMsg)
 	})
-	
+
 	if errUpdate != nil {
 		log.Printf("LỖI CẬP NHẬT LOG: %v", errUpdate)
 		return err

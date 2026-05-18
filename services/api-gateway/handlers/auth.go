@@ -97,7 +97,6 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// ===== Lưu refresh token vào Redis =====
 	if err := redis.SetRefreshToken(fmt.Sprint(resp.Id), refreshTokenStr, 7*24*time.Hour); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save refresh token"})
 		return

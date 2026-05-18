@@ -290,7 +290,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 			}
 		}
 
-		newSec := &domain.SectionModel{Name: name, Description: "Auto imported", TopicID: topicID} // Section doesn't have CreatorID in model yet? Let's check.
+		newSec := &domain.SectionModel{Name: name, Description: "Auto imported", TopicID: topicID}
 		created, err := s.repo.CreateSection(ctx, database.DB, newSec)
 		if err != nil {
 			return 0, err
@@ -344,7 +344,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 			errorCount++
 			continue
 		}
-		
+
 		for len(row) < 8 {
 			row = append(row, "")
 		}
@@ -409,7 +409,7 @@ func (s *examService) ImportQuestions(ctx context.Context, req *pb.ImportQuestio
 					QuestionID: createdQ.Id, Content: val, IsCorrect: isCorrect, AttachmentURL: "",
 				})
 			}
-			// Chỉ bắt buộc có >= 2 lựa chọn cho câu hỏi trắc nghiệm
+
 			isObjective := row[3] == "single_choice" || row[3] == "multiple_choice" || row[3] == "multiple"
 			if isObjective && len(choices) < 2 {
 				return errors.New("cần ít nhất 2 lựa chọn cho câu hỏi trắc nghiệm")
@@ -445,7 +445,7 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 				b, _ := json.Marshal(req.SectionConfigs)
 				dynamicConfig = string(b)
 			}
-			// Map Fixed Questions
+
 			for i, q := range req.FixedQuestions {
 				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
 					QuestionID: q.QuestionId,
@@ -454,7 +454,7 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 				})
 			}
 		} else {
-			// STATIC RANDOM CASE: Bốc câu hỏi ngay bây giờ
+
 			allQuestionIDs := []int64{}
 			uniqueMap := make(map[int64]bool)
 
@@ -475,15 +475,14 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 				return errors.New("không tìm thấy câu hỏi nào phù hợp với cấu hình")
 			}
 
-			// Map Generated + Fixed Questions
 			for i, qID := range allQuestionIDs {
 				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
 					QuestionID: qID,
 					Sequence:   i + 1,
-					Points:     1.0, // Default for random
+					Points:     1.0,
 				})
 			}
-			// Thêm cả fixed questions nếu có trong static mode
+
 			offset := len(allQuestionIDs)
 			for i, q := range req.FixedQuestions {
 				examQuestions = append(examQuestions, &domain.ExamQuestionModel{
@@ -694,8 +693,7 @@ func (s *examService) GetExamPreview(ctx context.Context, req *pb.GetExamPreview
 
 	if examModel.IsDynamic {
 		uniqueMap := make(map[int64]bool)
-		
-		// 1. First, include fixed questions (for Hybrid exams)
+
 		for _, q := range examModel.Questions {
 			if !uniqueMap[q.Id] {
 				uniqueMap[q.Id] = true
@@ -703,7 +701,6 @@ func (s *examService) GetExamPreview(ctx context.Context, req *pb.GetExamPreview
 			}
 		}
 
-		// 2. Then, include preview of random questions
 		var configs []struct {
 			SectionId  int64  `json:"section_id"`
 			Count      int    `json:"count"`
@@ -791,13 +788,10 @@ func (s *examService) convertToPBQuestion(q *domain.QuestionModel) *pb.QuestionD
 	}
 }
 
-
 func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest) (*pb.SubmitExamResponse, error) {
-	// --- ANTI CHEAT: Kiểm tra Session Lock ---
 	if err := s.validateSessionLock(ctx, req.ExamId, req.UserId, req.IpAddress, req.UserAgent); err != nil {
 		return nil, err
 	}
-	// ------------------------------------------
 
 	var submission domain.ExamSubmissionModel
 	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
@@ -819,7 +813,7 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		if err != nil {
 			return nil, errors.New("lỗi lấy đề thi cá nhân hóa")
 		}
-		
+
 		dynamicQs := parseStudentExamQuestions(sExam.QuestionIDs)
 		for _, dq := range dynamicQs {
 			q, err := s.repo.GetQuestionByID(ctx, dq.ID)
@@ -834,7 +828,7 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 			qPointsMap[eq.Id] = eq.Points
 		}
 	}
-	
+
 	totalQuestions := int32(len(questions))
 
 	userAnswerMap := make(map[int64][]int64)
@@ -857,31 +851,30 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 		for _, q := range questions {
 			userChoices := userAnswerMap[q.Id]
 			textAnswer := userTextAnswerMap[q.Id]
-			
+
 			qPoints := 1.0
 			if pts, ok := qPointsMap[q.Id]; ok {
 				qPoints = pts
 			}
-			
+
 			totalMaxPoints += qPoints
-			
+
 			isCorrect := false
-			
+
 			qType := ""
 			if q.Type.Type != "" {
 				qType = q.Type.Type
 			}
 
 			if qType == "short_answer" {
-				// Check text answer
+
 				for _, c := range q.Choices {
 					if c.IsCorrect && strings.EqualFold(strings.TrimSpace(c.Content), strings.TrimSpace(textAnswer)) {
 						isCorrect = true
 						break
 					}
 				}
-				
-				// Check choices if student clicked an option
+
 				if !isCorrect {
 					for _, cID := range userChoices {
 						for _, c := range q.Choices {
@@ -954,7 +947,6 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 
 		tx.Where("submission_id = ?", submission.Id).Delete(&domain.UserAnswerModel{})
 
-		// Lưu đáp án mới
 		if len(userAnswerModels) > 0 {
 			if err := s.repo.CreateUserAnswers(ctx, tx, userAnswerModels); err != nil {
 				return err
@@ -1006,16 +998,9 @@ func (s *examService) SubmitExam(ctx context.Context, req *pb.SubmitExamRequest)
 	key := []byte(strconv.FormatInt(submission.Id, 10))
 	s.producer.Produce("exam_events", key, eventBytes)
 
-	// Check if we should hide results in the immediate response
 	respScore := float32(finalScore)
 	respCorrectCount := correctCount
 	respTotalQuestions := totalQuestions
-
-	if examModel != nil && !examModel.ShowResultImmediately {
-		respScore = 0
-		respCorrectCount = 0
-		respTotalQuestions = 0
-	}
 
 	return &pb.SubmitExamResponse{
 		SubmissionId:   submission.Id,
@@ -1054,7 +1039,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 
 	isInstructor := false
 	if submission.UserID != req.UserId {
-		// Check if requester is the creator of the exam
+
 		exam, err := s.repo.GetExamDetails(ctx, submission.ExamID)
 		if err != nil {
 			return nil, errors.New("không thể kiểm tra quyền truy cập")
@@ -1075,20 +1060,6 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		submittedAt = submission.SubmittedAt.Format(time.RFC3339)
 	}
 
-	// Nếu không cho xem kết quả ngay và KHÔNG PHẢI giáo viên thì ẩn bớt
-	if !examFull.ShowResultImmediately && !isInstructor {
-		return &pb.GetSubmissionResponse{
-			Id:             submission.Id,
-			ExamTitle:      submission.Exam.Title,
-			Status:         submission.Status.Status,
-			SubmittedAt:    submittedAt,
-			Score:          0,
-			CorrectCount:   0,
-			TotalQuestions: 0,
-			Details:        nil,
-		}, nil
-	}
-
 	userSelections := make(map[int64]map[int64]bool)
 	userTextAnswers := make(map[int64]string)
 	uaMap := make(map[int64]*domain.UserAnswerModel)
@@ -1104,7 +1075,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		if ua.TextAnswer != nil {
 			userTextAnswers[ua.QuestionID] = *ua.TextAnswer
 		}
-		// Save the first answer model for points/correctness check
+
 		if _, exists := uaMap[ua.QuestionID]; !exists {
 			uaMap[ua.QuestionID] = &ua
 		}
@@ -1201,6 +1172,10 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		}
 	}
 
+	var finalDetails []*pb.SubmissionDetail = pbDetails
+	if !examFull.ShowResultImmediately && !isInstructor {
+		finalDetails = nil
+	}
 
 	return &pb.GetSubmissionResponse{
 		Id:             submission.Id,
@@ -1210,7 +1185,7 @@ func (s *examService) GetSubmission(ctx context.Context, req *pb.GetSubmissionRe
 		TotalQuestions: int32(len(questions)),
 		Status:         submission.Status.Status,
 		SubmittedAt:    submittedAt,
-		Details:        pbDetails,
+		Details:        finalDetails,
 	}, nil
 }
 
@@ -1415,11 +1390,10 @@ func (s *examService) GetUserExamStats(ctx context.Context, req *pb.GetUserExamS
 }
 
 func (s *examService) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest) (*pb.SaveAnswerResponse, error) {
-	// --- ANTI CHEAT: Kiểm tra Session Lock ---
+
 	if err := s.validateSessionLock(ctx, req.ExamId, req.UserId, req.IpAddress, req.UserAgent); err != nil {
 		return nil, err
 	}
-	// ------------------------------------------
 
 	var sub domain.ExamSubmissionModel
 	err := database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).First(&sub).Error
@@ -1434,9 +1408,7 @@ func (s *examService) SaveAnswer(ctx context.Context, req *pb.SaveAnswerRequest)
 
 	if req.TextAnswer != "" {
 		ans.TextAnswer = &req.TextAnswer
-		// Text answers (essay, short_answer) are not immediately graded as correct/incorrect
-		// unless we add automatic string matching for short_answer here.
-		// For now, we just save it.
+
 		ans.IsCorrect = nil
 	} else if req.ChosenChoiceId != 0 {
 		correctMap, _ := s.repo.GetCorrectAnswers(ctx, req.ExamId)
@@ -1468,7 +1440,7 @@ func (s *examService) LogViolation(ctx context.Context, req *pb.LogViolationRequ
 		ViolationTime: time.Now().UTC(),
 	}
 	err := s.repo.LogViolation(ctx, v)
-	
+
 	if err == nil {
 		exam, _ := s.repo.GetExamDetails(ctx, req.ExamId)
 		if exam != nil {
@@ -1653,7 +1625,6 @@ func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequ
 		limit = 10
 	}
 
-	// Parse search hijacking for creator_id
 	search := req.Search
 	var creatorID int64
 	if strings.HasPrefix(search, "creator:") {
@@ -1710,13 +1681,12 @@ func (s *examService) GetQuestions(ctx context.Context, req *pb.GetQuestionsRequ
 }
 
 func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionRequest) (*pb.GetQuestionResponse, error) {
-	// 1. Gọi Repository để lấy câu hỏi kèm các quan hệ (Preload)
+
 	q, err := s.repo.GetQuestionByID(ctx, req.QuestionId)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. Map danh sách đáp án (Choices) sang Proto
 	var pbChoices []*pb.ChoiceDetails
 	for _, c := range q.Choices {
 		pbChoices = append(pbChoices, &pb.ChoiceDetails{
@@ -1727,7 +1697,6 @@ func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionReques
 		})
 	}
 
-	// 3. Xử lý các giá trị mặc định để tránh null/empty
 	qType := "single_choice"
 	if q.Type.Type != "" {
 		qType = q.Type.Type
@@ -1738,7 +1707,6 @@ func (s *examService) GetQuestion(ctx context.Context, req *pb.GetQuestionReques
 		difficulty = q.Difficulty.Difficulty
 	}
 
-	// 4. Trả về response đầy đủ
 	return &pb.GetQuestionResponse{
 		Question: &pb.QuestionDetails{
 			Id:            q.Id,
@@ -1887,7 +1855,7 @@ func (s *examService) validateSessionLock(ctx context.Context, examID, userID in
 	sessionKey := fmt.Sprintf("exam:%d:user:%d:session_lock", examID, userID)
 	expectedHash, err := database.RedisClient.Get(ctx, sessionKey).Result()
 	if err == redis.Nil {
-		// Chưa có session lock (có thể dev xoá cache hoặc lỗi luồng StartExam), ta cho qua hoặc cấp mới
+
 		return nil
 	} else if err != nil {
 		return fmt.Errorf("lỗi kiểm tra phiên làm bài: %v", err)
@@ -1908,7 +1876,6 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 
 	check, _ := s.CheckExamAccess(ctx, &pb.CheckExamAccessRequest{ExamId: req.ExamId, UserId: req.UserId})
 
-	// --- ANTI CHEAT: Lưu Session Lock ---
 	if database.RedisClient != nil {
 		sessionKey := fmt.Sprintf("exam:%d:user:%d:session_lock", req.ExamId, req.UserId)
 		sessionHash := generateSessionHash(req.IpAddress, req.UserAgent)
@@ -1916,14 +1883,11 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 		if ttl <= 0 {
 			ttl = 120 * time.Minute
 		}
-		
-		// Cẩn thận: Chỉ lock session khi Start. Nếu đã thi dở thì ta vẫn ghi đè Hash hiện tại để họ học tiếp trên máy này
+
 		if err := database.RedisClient.Set(ctx, sessionKey, sessionHash, ttl).Err(); err != nil {
 			fmt.Printf("Warning: Failed to set session lock for exam %d user %d: %v\n", req.ExamId, req.UserId, err)
 		}
 	}
-	// ------------------------------------
-
 
 	var submission domain.ExamSubmissionModel
 	err = database.DB.Where("exam_id = ? AND user_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'in_progress')", req.ExamId, req.UserId).
@@ -1987,14 +1951,13 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 	if examDetails.IsDynamic {
 		sExam, err := s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
 		if err != nil {
-			// --- FIX: Tự động sinh đề nếu chưa có (On-demand generation) ---
+
 			log.Printf("Bắt đầu sinh đề tự động cho User %d tại Exam %d", req.UserId, req.ExamId)
 			errGen := s.GeneratePersonalizedExamForStudents(ctx, req.ExamId, []int64{req.UserId})
 			if errGen != nil {
 				return nil, fmt.Errorf("không thể tự động sinh đề thi: %v", errGen)
 			}
-			
-			// Thử lấy lại sau khi sinh
+
 			sExam, err = s.repo.GetStudentExam(ctx, req.ExamId, req.UserId)
 			if err != nil {
 				return nil, fmt.Errorf("đề thi đang được sinh, vui lòng quay lại sau giây lát")
@@ -2016,11 +1979,10 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 			orderMap[id] = i
 		}
 	}
-	
+
 	if len(qIDsToFetch) == 0 {
 		return nil, errors.New("đề thi chưa có câu hỏi nào (vui lòng liên hệ giáo viên)")
 	}
-
 
 	if len(qIDsToFetch) > 0 {
 		pbQuestions = make([]*pb.QuestionDetails, len(qIDsToFetch))
@@ -2038,7 +2000,7 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 					if val != nil {
 						var pbQ pb.QuestionDetails
 						if err := json.Unmarshal([]byte(val.(string)), &pbQ); err == nil {
-							// Override points if dynamic
+
 							if pts, ok := qPointsMap[pbQ.Id]; ok {
 								pbQ.Points = float32(pts)
 							} else if !examDetails.IsDynamic {
@@ -2145,17 +2107,16 @@ func (s *examService) StartExam(ctx context.Context, req *pb.StartExamRequest) (
 			}
 		}
 
-		// Lọc lại phòng trường hợp missing DB và Xáo trộn đáp án nếu được cấu hình
 		var finalPbQs []*pb.QuestionDetails
 		for _, q := range pbQuestions {
 			if q != nil {
-				// --- ANTI CHEAT: Shuffle Choices (Đảo vị trí ABCD) ---
+
 				if examDetails.ShuffleQuestions && len(q.Choices) > 0 {
 					rand.Shuffle(len(q.Choices), func(i, j int) {
 						q.Choices[i], q.Choices[j] = q.Choices[j], q.Choices[i]
 					})
 				}
-				// -----------------------------------------------------
+
 				finalPbQs = append(finalPbQs, q)
 			}
 		}
@@ -2316,7 +2277,7 @@ func (s *examService) GetInstructorExams(ctx context.Context, req *pb.GetInstruc
 }
 
 func (s *examService) GetExamSubmissions(ctx context.Context, req *pb.GetExamSubmissionsRequest) (*pb.GetExamSubmissionsResponse, error) {
-	// 1. Verify ownership if instructor_id is provided
+
 	if req.InstructorId > 0 {
 		exam, err := s.repo.GetExamDetails(ctx, req.ExamId)
 		if err != nil {
@@ -2327,7 +2288,6 @@ func (s *examService) GetExamSubmissions(ctx context.Context, req *pb.GetExamSub
 		}
 	}
 
-	// 2. Get Submissions
 	page := int(req.Page)
 	if page < 1 {
 		page = 1
@@ -2342,7 +2302,6 @@ func (s *examService) GetExamSubmissions(ctx context.Context, req *pb.GetExamSub
 		return nil, err
 	}
 
-	// 3. Convert to Proto
 	var pbSubs []*pb.SubmissionSummary
 	for _, sub := range subs {
 		submittedAt := ""
@@ -2355,25 +2314,15 @@ func (s *examService) GetExamSubmissions(ctx context.Context, req *pb.GetExamSub
 			status = sub.Status.Status
 		}
 
-		// Calculate correct count
-		// Note: Repository currently doesn't count correct answer in GetExamSubmissionsByExamID query for performance?
-		// We might need to load it or just trust score.
-		// Actually score is stored. Correct Count might need calculation or storage.
-		// For summary list, maybe we don't need exact correct count if it's expensive.
-		// Or we can count if we preload UserAnswers.
-		// Let's check repository query... it preloads Status but not UserAnswers.
-		// So correct_count will be 0 unless we change repo.
-		// For list view, Score is most important.
-
 		pbSubs = append(pbSubs, &pb.SubmissionSummary{
 			SubmissionId:   sub.Id,
 			UserId:         sub.UserID,
-			StudentName:    "", // Gateway will fill this
+			StudentName:    "",
 			Score:          float32(sub.Score),
 			SubmittedAt:    submittedAt,
 			Status:         status,
-			CorrectCount:   0, // Not available in summary list for performance
-			TotalQuestions: 0, // Not available
+			CorrectCount:   0,
+			TotalQuestions: 0,
 		})
 	}
 
@@ -2410,7 +2359,7 @@ func (s *examService) GetRecentSubmissions(ctx context.Context, req *pb.GetRecen
 			ExamId:       sub.ExamID,
 			ExamTitle:    sub.Exam.Title,
 			StudentId:    sub.UserID,
-			StudentName:  "", // Fill by caller if needed
+			StudentName:  "",
 			Score:        float32(sub.Score),
 			SubmittedAt:  submittedAt,
 			Status:       sub.Status.Status,
@@ -2498,7 +2447,6 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 		dynamicConfig = "{}"
 	}
 
-	// Parse JSON config
 	var configs []struct {
 		SectionId  int64   `json:"section_id"`
 		Count      int     `json:"count"`
@@ -2510,8 +2458,6 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 		return errors.New("cấu hình sinh đề không hợp lệ")
 	}
 
-	// BƯỚC 1: LẤY SẴN TẤT CẢ CÁC QUESTION IDs THEO TỪNG CẤU HÌNH ĐỂ TRÊN RAM (IN-MEMORY)
-	// Map key là Index của config để phân biệt (phòng khi 1 exam có nhiều rules trùng SectionId)
 	configPools := make(map[int][]int64)
 	for i, cfg := range configs {
 		ids, err := s.repo.GetQuestionIDsForSection(ctx, cfg.SectionId, cfg.Difficulty, examDetails.TopicID)
@@ -2523,22 +2469,18 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 		configPools[i] = ids
 	}
 
-	// BƯỚC 2: SINH ĐỀ TRÊN RAM CHO TỪNG HỌC SINH VÀ GOM VÀO BATCH
 	var batchInserts []*domain.StudentExamModel
 
 	for _, studentID := range studentIDs {
 		allQuestions := []DynamicQuestion{}
 		uniqueMap := make(map[int64]bool)
 
-		// --- HYBRID CASE: Thêm các câu hỏi cố định (Fixed Questions) ---
-		// Các câu hỏi này đã được Preload trong GetExamDetails
 		for _, q := range examDetails.Questions {
 			if !uniqueMap[q.Id] {
 				uniqueMap[q.Id] = true
 				allQuestions = append(allQuestions, DynamicQuestion{ID: q.Id, Points: q.Points})
 			}
 		}
-		// -----------------------------------------------------------
 
 		for i, cfg := range configs {
 			pool := configPools[i]
@@ -2546,17 +2488,14 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 				continue
 			}
 
-			// Tạo 1 bản sao của pool để shuffle
 			shuffledPool := make([]int64, len(pool))
 			copy(shuffledPool, pool)
 
-			// Shuffle (Fisher-Yates)
 			for idx := len(shuffledPool) - 1; idx > 0; idx-- {
 				j := rand.Intn(idx + 1)
 				shuffledPool[idx], shuffledPool[j] = shuffledPool[j], shuffledPool[idx]
 			}
 
-			// Bốc đủ số lượng Count
 			collectedCount := 0
 			pts := cfg.Points
 			if pts <= 0 {
@@ -2585,7 +2524,6 @@ func (s *examService) GeneratePersonalizedExamForStudents(ctx context.Context, e
 		}
 	}
 
-	// BƯỚC 3: UPSERT VÀO DATABASE
 	if len(batchInserts) > 0 {
 		err := database.DB.Transaction(func(tx *gorm.DB) error {
 			return tx.WithContext(ctx).Clauses(clause.OnConflict{
@@ -2637,7 +2575,7 @@ func (s *examService) GetMySubmissions(ctx context.Context, req *pb.GetMySubmiss
 }
 
 func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest) (*pb.GradeEssayResponse, error) {
-	// 1. Cập nhật trạng thái câu trả lời
+
 	updates := map[string]interface{}{
 		"is_correct": req.IsCorrect,
 		"awarded_points": req.ScoreRatio,
@@ -2647,13 +2585,11 @@ func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest)
 		return nil, status.Errorf(codes.Internal, "Lỗi cập nhật câu trả lời: %v", err)
 	}
 
-	// 2. Lấy lại toàn bộ bài nộp để tính lại điểm
 	submission, err := s.repo.GetSubmissionByID(ctx, req.SubmissionId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Lỗi lấy thông tin bài nộp: %v", err)
 	}
 
-	// 2.5 Lấy map điểm cá nhân hóa nếu là đề động
 	qPointsMap := make(map[int64]float64)
 	if submission.Exam.Id != 0 {
 		if submission.Exam.IsDynamic {
@@ -2671,7 +2607,6 @@ func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest)
 		}
 	}
 
-	// 3. Tính toán lại correct_count và score
 	var totalMaxPoints float64 = 0
 	var totalEarnedPoints float64 = 0
 
@@ -2702,7 +2637,6 @@ func (s *examService) GradeEssay(ctx context.Context, req *pb.GradeEssayRequest)
 		}
 	}
 
-	// 4. Cập nhật lại submission
 	submission.Score = newScore
 	_, err = s.repo.UpdateSubmission(ctx, nil, submission)
 	if err != nil {
@@ -2717,7 +2651,6 @@ func (s *examService) GetClassGradebook(ctx context.Context, req *pb.GetClassGra
 		return nil, status.Error(codes.InvalidArgument, "Mã lớp không hợp lệ")
 	}
 
-	// 1. Lấy danh sách bài thi đã giao cho lớp
 	exams, err := s.repo.GetExamsByClass(ctx, req.ClassId)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Lỗi lấy danh sách bài thi của lớp: %v", err)
@@ -2742,13 +2675,11 @@ func (s *examService) GetClassGradebook(ctx context.Context, req *pb.GetClassGra
 		}, nil
 	}
 
-	// 2. Lấy điểm của các học sinh
 	scoreMap, err := s.repo.GetBestScoresForGradebook(ctx, examIDs, req.StudentIds)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Lỗi lấy bảng điểm: %v", err)
 	}
 
-	// 3. Format response
 	var grades []*pb.StudentGrade
 	for _, studentID := range req.StudentIds {
 		var studentScores []*pb.ExamScore

@@ -21,7 +21,7 @@ func NewExamRepository() domain.ExamRepository {
 }
 
 func (r *examRepository) CreateTopic(ctx context.Context, tx *gorm.DB, topic *domain.TopicModel) (*domain.TopicModel, error) {
-	// Hijack Logic: Check if CreatorID is embedded in Name
+
 	if strings.Contains(topic.Name, "|cid:") {
 		parts := strings.Split(topic.Name, "|cid:")
 		if len(parts) > 1 {
@@ -40,7 +40,7 @@ func (r *examRepository) GetTopics(ctx context.Context) ([]*domain.TopicModel, e
 	if err := database.DB.WithContext(ctx).Order("created_at DESC").Find(&topics).Error; err != nil {
 		return nil, err
 	}
-	// Enrich with hijacked creator ID
+
 	for _, t := range topics {
 		if t.CreatorID > 0 {
 			t.Name = fmt.Sprintf("%s|cid:%d", t.Name, t.CreatorID)
@@ -116,7 +116,7 @@ func (r *examRepository) DeleteQuestion(ctx context.Context, tx *gorm.DB, questi
 func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int, topicID int64) ([]int64, error) {
 	var questionIDs []int64
 	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("id")
-	
+
 	if sectionID > 0 {
 		query = query.Where("section_id = ?", sectionID)
 	} else if topicID > 0 {
@@ -134,7 +134,7 @@ func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectio
 func (r *examRepository) GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string, topicID int64) ([]int64, error) {
 	var questionIDs []int64
 	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("id")
-	
+
 	if sectionID > 0 {
 		query = query.Where("section_id = ?", sectionID)
 	} else if topicID > 0 {
@@ -226,7 +226,7 @@ func (r *examRepository) GetExams(ctx context.Context, limit, offset int, creato
 	if creatorID > 0 {
 		query = query.Where("creator_id = ?", creatorID)
 	} else if status == "all" {
-		// No status filter
+
 	} else if status != "" {
 		query = query.Where("status = ?", status)
 	} else {
@@ -309,7 +309,6 @@ func (r *examRepository) GetSubmissionByID(ctx context.Context, id int64) (*doma
 		return nil, err
 	}
 
-	// Fetch points from exam_questions for this exam
 	type QuestionPoint struct {
 		QuestionID int64
 		Points     float64
@@ -326,12 +325,11 @@ func (r *examRepository) GetSubmissionByID(ctx context.Context, id int64) (*doma
 		pointMap[p.QuestionID] = p.Points
 	}
 
-	// Populate points into UserAnswer.Question DTOs
 	for i := range sub.UserAnswers {
 		if pts, ok := pointMap[sub.UserAnswers[i].QuestionID]; ok {
 			sub.UserAnswers[i].Question.Points = pts
 		} else {
-			sub.UserAnswers[i].Question.Points = 1.0 // Default
+			sub.UserAnswers[i].Question.Points = 1.0
 		}
 	}
 
@@ -391,12 +389,6 @@ func (r *examRepository) GetExamSubmissionsByExamID(ctx context.Context, examID 
 		Model(&domain.ExamSubmissionModel{}).
 		Where("exam_id = ? AND status_id = (SELECT id FROM submission_status_models WHERE status = 'completed')", examID)
 
-	// Since we don't have user names in this service easily accessible for search unless we join,
-	// and we decided to handle name enrichment in Gateway or Frontend.
-	// We will skip search by name here for now, or if we have ExamAccessRequest we could join.
-	// However, standard requirement usually implies searching by student name.
-
-	// Let's try to join with ExamAccessRequest if available to search by student_name
 	if search != "" {
 		if strings.HasPrefix(search, "uids:") {
 			idsStr := strings.TrimPrefix(search, "uids:")
@@ -430,7 +422,7 @@ func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topi
 		Table("question_models q").
 		Select(`
             q.id, q.content, qt.type as question_type, qd.difficulty,
-            q.section_id, s.name as section_name, 
+            q.section_id, s.name as section_name,
             s.topic_id, t.name as topic_name,
             q.attachment_url,
             q.creator_id,

@@ -17,10 +17,9 @@ import (
 	grpcserver "google.golang.org/grpc"
 )
 
-
 func main() {
 	addr := env.GetString("COURSE_GRPC_ADDR", ":9003")
-	
+
 	database.Connect()
 	database.InitRedis()
 	lis, err := net.Listen("tcp", addr)
@@ -34,7 +33,7 @@ func main() {
 		log.Fatalf("Không thể khởi tạo Kafka Producer: %v", err)
 	}
 	defer kafkaProducer.Close()
-	
+
 	service := service.NewCourseService(repo, kafkaProducer)
 	grpcServer := grpcserver.NewServer()
 	grpc.NewGRPCHandler(grpcServer, service)
@@ -52,7 +51,6 @@ func main() {
 	sig := <-sigChan
 	log.Printf("Received signal: %v. Shutting down gracefully...", sig)
 
-	// Graceful stop
 	stopped := make(chan struct{})
 	go func() {
 		grpcServer.GracefulStop()

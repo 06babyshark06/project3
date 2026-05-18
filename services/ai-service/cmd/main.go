@@ -38,7 +38,6 @@ func main() {
 	aiServer := server.NewAIServiceServer(geminiApiKey)
 	pb.RegisterAIServiceServer(s, aiServer)
 
-	// Register reflection service on gRPC server for evans / postman testing
 	reflection.Register(s)
 
 	go func() {
@@ -48,13 +47,11 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutting down gRPC server...")
 
-	// Graceful stop
 	s.GracefulStop()
 	log.Println("Server exiting")
 }

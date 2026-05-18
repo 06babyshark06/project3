@@ -10,8 +10,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// InitRedis initializes a Redis client with configuration from environment variables
-// and verifies the connection with a Ping.
 func InitRedis() (*redis.Client, error) {
 	addr := env.GetString("REDIS_ADDR", "redis:6379")
 	password := env.GetString("REDIS_PASSWORD", "")

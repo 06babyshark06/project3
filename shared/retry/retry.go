@@ -1,7 +1,4 @@
-/*
-Package retry provides a simple retry mechanism with exponential backoff.
-It is as abstract as possible to allow for different retry strategies.
-*/
+
 package retry
 
 import (
@@ -16,7 +13,6 @@ type Config struct {
 	MaxWait     time.Duration
 }
 
-// DefaultConfig returns a Config with sensible default values
 func DefaultConfig() Config {
 	return Config{
 		MaxRetries:  3,
@@ -25,7 +21,6 @@ func DefaultConfig() Config {
 	}
 }
 
-// WithBackoff executes the given operation with exponential backoff retry logic
 func WithBackoff(ctx context.Context, cfg Config, operation func() error) error {
 	var err error
 	wait := cfg.InitialWait
@@ -40,7 +35,6 @@ func WithBackoff(ctx context.Context, cfg Config, operation func() error) error 
 			case <-time.After(wait):
 			}
 
-			// Exponential backoff with max wait cap
 			wait *= 2
 			if wait > cfg.MaxWait {
 				wait = cfg.MaxWait

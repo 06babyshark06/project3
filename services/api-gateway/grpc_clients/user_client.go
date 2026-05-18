@@ -14,7 +14,7 @@ type UserServiceClient struct {
 
 func NewUserServiceClient() (*UserServiceClient, error) {
 	userServiceURL := env.GetString("USER_SERVICE_URL", "user-service:9001")
-	conn, err := grpc.NewClient("dns:///"+userServiceURL, 
+	conn, err := grpc.NewClient("dns:///"+userServiceURL,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
 		grpc.WithBlock(),

@@ -199,7 +199,6 @@ func (r *courseRepository) GetCoursesProgress(ctx context.Context, userID int64,
 	}
 	var results []ProgressResult
 
-	// Query tính toán total lessons và completed lessons cho danh sách courseIDs
 	err := database.DB.WithContext(ctx).
 		Table("course_models c").
 		Select("c.id as course_id, COUNT(DISTINCT l.id) as total, COUNT(DISTINCT lp.lesson_id) as completed").

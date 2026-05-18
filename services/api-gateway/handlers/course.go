@@ -37,7 +37,6 @@ func (h *CourseHandler) GetCourses(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "9"))
 
-	// 1. Chỉ Cache trang 1 mặc định (Public home)
 	isCacheable := page == 1 && search == "" && minPrice == 0 && maxPrice == 0
 	cacheKey := "public_courses_page1"
 
@@ -66,7 +65,6 @@ func (h *CourseHandler) GetCourses(c *gin.Context) {
 		return
 	}
 
-	// Tối ưu hóa: Lấy thông tin Instructor đồng thời dùng WaitGroup
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	instructorNames := make(map[int64]string)
@@ -92,7 +90,6 @@ func (h *CourseHandler) GetCourses(c *gin.Context) {
 	}
 	wg.Wait()
 
-	// Gắn tên Instructor vào response
 	type CourseWithInstructor struct {
 		*pb.Course
 		InstructorName string `json:"instructor_name"`
@@ -117,7 +114,6 @@ func (h *CourseHandler) GetCourses(c *gin.Context) {
 		"total_pages": resp.TotalPages,
 	}
 
-	// 3. Cache kết quả
 	if isCacheable {
 		if jsonData, err := json.Marshal(responseData); err == nil {
 			redis.SetCache(cacheKey, string(jsonData), 5*time.Minute)

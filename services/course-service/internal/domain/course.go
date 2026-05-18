@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	pb "github.com/06babyshark06/JQKStudy/shared/proto/course" 
+	pb "github.com/06babyshark06/JQKStudy/shared/proto/course"
 	"gorm.io/gorm"
 )
 

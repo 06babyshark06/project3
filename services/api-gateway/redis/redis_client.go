@@ -32,7 +32,6 @@ func DeleteRefreshToken(userID string) error {
 	return Rdb.Del(ctx, "refresh:"+userID).Err()
 }
 
-// Caching Helpers
 func SetCache(key string, value interface{}, ttl time.Duration) error {
 	return Rdb.Set(ctx, "cache:"+key, value, ttl).Err()
 }
@@ -45,7 +44,6 @@ func DeleteCache(key string) error {
 	return Rdb.Del(ctx, "cache:"+key).Err()
 }
 
-// Rate Limiting
 func CheckRateLimit(key string, limit int, window time.Duration) (int, bool, error) {
 	fullKey := "ratelimit:" + key
 	count, err := Rdb.Incr(ctx, fullKey).Result()

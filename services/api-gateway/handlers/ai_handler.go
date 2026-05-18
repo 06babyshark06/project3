@@ -18,10 +18,9 @@ func NewAIHandler(aiClient *grpcclients.AIServiceClient) *AIHandler {
 	return &AIHandler{aiClient: aiClient}
 }
 
-// GenerateQuestions handles multipart/form-data upload, extracts file, and calls AI service
 func (h *AIHandler) GenerateQuestions(c *gin.Context) {
-	// Parse multipart form
-	err := c.Request.ParseMultipartForm(10 << 20) // 10 MB limit
+
+	err := c.Request.ParseMultipartForm(10 << 20)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse form data"})
 		return
@@ -48,12 +47,12 @@ func (h *AIHandler) GenerateQuestions(c *gin.Context) {
 
 	questionCount, err := strconv.Atoi(questionCountStr)
 	if err != nil || questionCount <= 0 {
-		questionCount = 5 // default
+		questionCount = 5
 	}
 
 	maxOptions, err := strconv.Atoi(maxOptionsStr)
 	if err != nil || maxOptions < 2 {
-		maxOptions = 4 // default
+		maxOptions = 4
 	}
 
 	file, header, err := c.Request.FormFile("document")
@@ -63,7 +62,6 @@ func (h *AIHandler) GenerateQuestions(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Read file into bytes
 	fileBytes := make([]byte, header.Size)
 	_, err = file.Read(fileBytes)
 	if err != nil {
@@ -84,7 +82,6 @@ func (h *AIHandler) GenerateQuestions(c *gin.Context) {
 		MaxOptions:    int32(maxOptions),
 	}
 
-	// Call AI gRPC Service
 	resp, err := h.aiClient.Client.GenerateQuestionsFromAI(c.Request.Context(), req)
 	if err != nil {
 		log.Printf("AI Service Error: %v", err)
@@ -95,7 +92,6 @@ func (h *AIHandler) GenerateQuestions(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-// ExplainAnswer accepts JSON payload to request AI explanation for an answer
 func (h *AIHandler) ExplainAnswer(c *gin.Context) {
 	var reqBody struct {
 		QuestionContent string   `json:"question_content"`
@@ -131,7 +127,6 @@ func (h *AIHandler) ExplainAnswer(c *gin.Context) {
 	})
 }
 
-// ChatWithTutor handles subsequent questions in a chat-like manner
 func (h *AIHandler) ChatWithTutor(c *gin.Context) {
 	var body struct {
 		QuestionContent string   `json:"question_content"`

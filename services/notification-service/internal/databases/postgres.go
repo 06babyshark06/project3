@@ -53,7 +53,7 @@ func seedNotificationData(db *gorm.DB) {
 		{Type: "push"},
 	}
 	for _, t := range defaultTypes {
-		// FirstOrCreate sẽ kiểm tra nếu tồn tại thì không tạo
+
 		db.FirstOrCreate(&t, domain.ChannelTypeModel{Type: t.Type})
 	}
 
@@ -90,7 +90,7 @@ func seedNotificationData(db *gorm.DB) {
 					<a href="http://localhost:3000" style="%s">JQK Study</a>
 				</div>
 				<div style="%s">
-					%%s 
+					%%s
 				</div>
 				<div style="%s">
 					<p>&copy; 2025 JQK Study. Nền tảng học tập trực tuyến hàng đầu.</p>

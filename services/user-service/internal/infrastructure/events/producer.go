@@ -62,7 +62,6 @@ func (kp *kafkaProducer) Produce(topic string, key []byte, message []byte) error
 	}, nil)
 }
 
-// Close dọn dẹp producer
 func (kp *kafkaProducer) Close() {
 	kp.producer.Flush(5 * 1000)
 	kp.producer.Close()

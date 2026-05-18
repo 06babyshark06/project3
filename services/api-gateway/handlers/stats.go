@@ -30,7 +30,7 @@ func NewStatsHandler(u *grpcclients.UserServiceClient, c *grpcclients.CourseServ
 }
 
 func (h *StatsHandler) GetAdminStats(c *gin.Context) {
-	// 1. Kiểm tra Cache trước
+
 	cacheKey := "admin_stats"
 	if cachedData, err := redis.GetCache(cacheKey); err == nil {
 		var data gin.H
@@ -89,7 +89,6 @@ func (h *StatsHandler) GetAdminStats(c *gin.Context) {
 		"total_exams":   examCount,
 	}
 
-	// 2. Lưu vào Cache (TTL 1 phút cho stats)
 	if jsonData, err := json.Marshal(statsData); err == nil {
 		redis.SetCache(cacheKey, string(jsonData), 1*time.Minute)
 	}

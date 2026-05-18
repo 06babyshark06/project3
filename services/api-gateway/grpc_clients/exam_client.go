@@ -14,7 +14,7 @@ type ExamServiceClient struct {
 
 func NewExamServiceClient() (*ExamServiceClient, error) {
 	examServiceURL := env.GetString("EXAM_SERVICE_URL", "exam-service:9002")
-	conn, err := grpc.NewClient("dns:///"+examServiceURL, 
+	conn, err := grpc.NewClient("dns:///"+examServiceURL,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`),
 		grpc.WithBlock(),

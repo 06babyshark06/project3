@@ -11,12 +11,12 @@ import (
 )
 
 func RateLimiter() gin.HandlerFunc {
-	// Load config
+
 	limit := env.GetInt("RATE_LIMIT_MAX", 100)
 	window := time.Duration(env.GetInt("RATE_LIMIT_WINDOW_SECONDS", 60)) * time.Second
 
 	return func(c *gin.Context) {
-		// Identify user (by User ID if authenticated, else by IP)
+
 		var key string
 		userID, exists := c.Get("userID")
 		if exists {
@@ -27,14 +27,12 @@ func RateLimiter() gin.HandlerFunc {
 
 		count, ok, err := redis.CheckRateLimit(key, limit, window)
 		if err != nil {
-			// In case of Redis error, we usually allow the request to pass 
-			// but log the error (Fail-open strategy)
+
 			fmt.Printf("Rate limit error: %v\n", err)
 			c.Next()
 			return
 		}
 
-		// Add headers for visibility
 		c.Header("X-RateLimit-Limit", fmt.Sprintf("%d", limit))
 		c.Header("X-RateLimit-Remaining", fmt.Sprintf("%d", max(0, limit-count)))
 

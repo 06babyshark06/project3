@@ -40,8 +40,8 @@ func main() {
 
 	go func() {
 		log.Println("🚀 Kafka consumer is running...")
-		kafkaConsumer.StartConsuming(ctx) 
-		close(stopped) 
+		kafkaConsumer.StartConsuming(ctx)
+		close(stopped)
 	}()
 
 	sig := <-sigChan

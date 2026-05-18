@@ -23,9 +23,8 @@ func NewGeminiClient(apiKey string) *GeminiClient {
 	return &GeminiClient{apiKey: apiKey}
 }
 
-// GenerateQuestions formats the prompt and calls Gemini SDK
 func (c *GeminiClient) GenerateQuestions(ctx context.Context, req *pb.GenerateQuestionsFromAIRequest, text string) ([]*pb.GeneratedAIQuestion, error) {
-	// Try to get from cache
+
 	cacheKey := c.generateCacheKey(req, text)
 	if database.RedisClient != nil {
 		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
@@ -78,7 +77,7 @@ func (c *GeminiClient) GenerateQuestions(ctx context.Context, req *pb.GenerateQu
 	model.ResponseSchema = schema
 
 	basePrompt := fmt.Sprintf(`
-Bạn là một chuyên gia giáo dục. Từ tài liệu được cung cấp, hãy tạo ra %d câu hỏi với độ khó %s. 
+Bạn là một chuyên gia giáo dục. Từ tài liệu được cung cấp, hãy tạo ra %d câu hỏi với độ khó %s.
 Thể loại câu hỏi: %s.
 Yêu cầu về ngôn ngữ: TRẢ LỜI VÀ SINH CÂU HỎI BẰNG %s.
 Trọng tâm đặc biệt / Yêu cầu thêm từ giáo viên: %s.
@@ -153,7 +152,6 @@ Hãy soạn thảo cực kỳ cẩn thận, theo sát ngữ cảnh và đảm b�
 		})
 	}
 
-	// Save to cache
 	if database.RedisClient != nil {
 		data, _ := json.Marshal(grpcQuestions)
 		database.RedisClient.Set(ctx, cacheKey, data, 24*time.Hour)
@@ -163,21 +161,20 @@ Hãy soạn thảo cực kỳ cẩn thận, theo sát ngữ cảnh và đảm b�
 }
 
 func (c *GeminiClient) generateCacheKey(req *pb.GenerateQuestionsFromAIRequest, text string) string {
-	// Key includes all parameters that affect the output
+
 	keyData := fmt.Sprintf("%v|%v|%v|%v|%v|%v|%s",
 		req.QuestionCount, req.QuestionType, req.Difficulty,
 		req.Language, req.MaxOptions, req.FocusTopic, text)
-	
+
 	if req.MimeType == "application/pdf" && len(req.FileBytes) > 0 {
 		fileHash := md5.Sum(req.FileBytes)
 		keyData += fmt.Sprintf("|%x", fileHash)
 	}
-	
+
 	hash := md5.Sum([]byte(keyData))
 	return "ai:questions:" + hex.EncodeToString(hash[:])
 }
 
-// ExplainAnswer provides an explanation for why a specific choice is correct/incorrect
 func (c *GeminiClient) ExplainAnswer(ctx context.Context, req *pb.ExplainAnswerRequest) (string, error) {
 	cacheKey := c.generateExplainCacheKey(req)
 	if database.RedisClient != nil {
@@ -199,8 +196,7 @@ func (c *GeminiClient) ExplainAnswer(ctx context.Context, req *pb.ExplainAnswerR
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-2.5-flash")
-	
-	// Format choices
+
 	choicesContext := "Các lựa chọn:\n"
 	for i, choice := range req.Choices {
 		choicesContext += fmt.Sprintf("- Lựa chọn %d: %s\n", i+1, choice)
@@ -241,7 +237,7 @@ Yêu cầu:
 	explanation := string(textResponse)
 
 	if database.RedisClient != nil {
-		database.RedisClient.Set(ctx, cacheKey, explanation, 7*24*time.Hour) // Cache for 7 days
+		database.RedisClient.Set(ctx, cacheKey, explanation, 7*24*time.Hour)
 	}
 
 	return explanation, nil
@@ -253,9 +249,8 @@ func (c *GeminiClient) generateExplainCacheKey(req *pb.ExplainAnswerRequest) str
 	return "ai:explain:" + hex.EncodeToString(hash[:])
 }
 
-// ChatWithTutor handles subsequent questions from the student about a specific answer
 func (c *GeminiClient) ChatWithTutor(ctx context.Context, req *pb.ChatWithTutorRequest) (string, error) {
-	// Generate cache key for the whole conversation history + new message
+
 	cacheKey := c.generateChatCacheKey(req)
 	if database.RedisClient != nil {
 		cachedData, err := database.RedisClient.Get(ctx, cacheKey).Result()
@@ -276,12 +271,9 @@ func (c *GeminiClient) ChatWithTutor(ctx context.Context, req *pb.ChatWithTutorR
 	defer client.Close()
 
 	model := client.GenerativeModel("gemini-2.5-flash")
-	
-	// Create the chat session with history
+
 	chat := model.StartChat()
-	
-	// Prepare system context / initial history if not present
-	// We want the AI to remember it's a tutor for a specific question
+
 	choicesContext := "Các lựa chọn:\n"
 	for i, choice := range req.Choices {
 		choicesContext += fmt.Sprintf("- Lựa chọn %d: %s\n", i+1, choice)
@@ -295,19 +287,14 @@ Câu hỏi: %s
 Đáp án đúng: %s
 Học sinh đã trả lời: %s
 
-Nhiệm vụ: Trả lời các thắc mắc tiếp theo của sinh viên về câu hỏi này. 
-Hãy giữ văn phong gia sư, giải thích cặn kẽ, khích lệ. 
+Nhiệm vụ: Trả lời các thắc mắc tiếp theo của sinh viên về câu hỏi này.
+Hãy giữ văn phong gia sư, giải thích cặn kẽ, khích lệ.
 Nếu sinh viên hỏi lạc đề, hãy nhắc sinh viên quay lại nội dung kiến thức của câu hỏi.
 Trả về định dạng Markdown.
 `, req.QuestionContent, choicesContext, req.CorrectChoice, req.UserChoice)
 
-	// In the Go SDK, we can't easily set a "System Instruction" for individual StartChat calls 
-	// unless we set it on the model. To keep it per-request, we'll prepend it to the history 
-	// or use the first user message. 
-	// Actually, the best way for genai Go SDK is model.SystemInstruction = ... before StartChat()
 	model.SystemInstruction = genai.NewUserContent(genai.Text(systemContext))
 
-	// Convert pb.ChatMessage history to genai.Content
 	var history []*genai.Content
 	for _, msg := range req.History {
 		history = append(history, &genai.Content{
@@ -342,15 +329,15 @@ Trả về định dạng Markdown.
 }
 
 func (c *GeminiClient) generateChatCacheKey(req *pb.ChatWithTutorRequest) string {
-	// History content + original context + new message
+
 	historyStr := ""
 	for _, h := range req.History {
 		historyStr += h.Role + ":" + h.Content + "|"
 	}
-	keyData := fmt.Sprintf("%v|%v|%v|%v|%v|%v", 
-		req.QuestionContent, req.CorrectChoice, req.UserChoice, 
-		historyStr, req.NewMessage, "v1") // v1 for busting cache if needed
-	
+	keyData := fmt.Sprintf("%v|%v|%v|%v|%v|%v",
+		req.QuestionContent, req.CorrectChoice, req.UserChoice,
+		historyStr, req.NewMessage, "v1")
+
 	hash := md5.Sum([]byte(keyData))
 	return "ai:chat:" + hex.EncodeToString(hash[:])
 }
