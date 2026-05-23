@@ -1,0 +1,85 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+Chương này trình bày chi tiết về quá trình khảo sát hiện trạng, phân tích các yêu cầu nghiệp vụ và đặc tả chức năng của hệ thống JQK Study. Từ những phân tích này, đồ án xác định được các tác nhân tham gia và quy trình nghiệp vụ cần thiết để xây dựng phần mềm.
+
+\section{Khảo sát hiện trạng}
+\label{section:2.1}
+Qua quá trình khảo sát các hệ thống giáo dục trực tuyến hiện hành (như Moodle, Canvas) và nhu cầu thực tế từ các trung tâm đào tạo, có thể nhận thấy các hạn chế phổ biến sau:
+\begin{itemize}
+    \item Các hệ thống thường tách biệt giữa tính năng học tập (e-learning) và tính năng thi cử (online testing), khiến quá trình quản lý bị phân mảnh.
+    \item Việc sinh đề thi thường đòi hỏi thao tác thủ công phức tạp, chưa hỗ trợ tốt việc tự động hóa lấy câu hỏi ngẫu nhiên theo chủ đề.
+    \item Thiếu các công cụ giám sát thi cử tích hợp sẵn, đặc biệt là theo dõi hành vi gian lận như chuyển tab, rời khỏi màn hình thi.
+\end{itemize}
+Từ những hạn chế đó, yêu cầu đặt ra cho nền tảng JQK Study là phải tích hợp đồng bộ giữa việc học và thi, đồng thời nâng cao khả năng quản lý ngân hàng câu hỏi, sinh đề tự động và giám sát bảo mật.
+
+\section{Tổng quan chức năng}
+\label{section:2.2}
+Hệ thống JQK Study được thiết kế phục vụ ba nhóm người dùng (tác nhân) chính: Admin (Quản trị viên), Instructor (Giảng viên) và Student (Học viên).
+
+\subsection{Biểu đồ use case tổng quát}
+\label{subsection:2.2.1}
+Các tác nhân tham gia vào hệ thống và vai trò của họ bao gồm:
+\begin{itemize}
+    \item \textbf{Admin}: Có toàn quyền quản lý hệ thống, quản lý tài khoản người dùng, xem thống kê và có quyền xóa các khóa học không hợp lệ.
+    \item \textbf{Instructor}: Giảng viên chịu trách nhiệm về nội dung. Họ có thể tạo khóa học, tạo ngân hàng câu hỏi, sinh đề thi, thiết lập cấu hình bài thi và quản lý lớp học.
+    \item \textbf{Student}: Học viên có thể đăng ký khóa học, tham gia lớp học qua mã code, học các bài giảng video và thực hiện bài thi trắc nghiệm.
+\end{itemize}
+
+\subsection{Quy trình nghiệp vụ}
+\label{subsection:2.2.3}
+Hai quy trình nghiệp vụ quan trọng nhất của hệ thống là quy trình \textbf{Tổ chức thi} và quy trình \textbf{Làm bài thi}.
+
+\textbf{1. Quy trình Tổ chức thi (dành cho Giảng viên):}
+\begin{itemize}
+    \item Giảng viên tạo Chủ đề (Topic) và Phần (Section) cho ngân hàng câu hỏi.
+    \item Giảng viên thêm câu hỏi thủ công hoặc Import từ file Excel.
+    \item Giảng viên cấu hình Đề thi (thời gian làm bài, số lượt thi, mật khẩu, thuật toán sinh tự động).
+    \item Giảng viên gán đề thi cho một Lớp học cụ thể và phát hành đề thi.
+\end{itemize}
+
+\textbf{2. Quy trình Làm bài thi \& Giám sát (dành cho Học viên):}
+\begin{itemize}
+    \item Học viên tham gia lớp học và chọn bài thi. Hệ thống kiểm tra điều kiện (mật khẩu, số lượt thi còn lại).
+    \item Khi học viên bắt đầu làm bài, đồng hồ tính giờ (server-side) được kích hoạt.
+    \item Trong quá trình thi, nếu học viên chuyển tab hoặc rời khỏi màn hình, hệ thống sẽ ghi nhận "Vi phạm" và gửi cảnh báo về máy chủ.
+    \item Hết giờ hoặc khi học viên nộp bài, hệ thống tự động chấm điểm, lưu lịch sử vi phạm và hiển thị kết quả.
+\end{itemize}
+
+\section{Đặc tả chức năng}
+\label{section:2.3}
+
+\subsection{Đặc tả Use case Sinh đề thi tự động}
+\textbf{Tiền điều kiện:} Giảng viên đã đăng nhập và có sẵn câu hỏi trong ngân hàng. \\
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Giảng viên chọn chức năng "Tạo đề thi tự động".
+    \item Hệ thống yêu cầu nhập các tham số: Chủ đề, số lượng câu hỏi, mức độ khó, thời gian thi.
+    \item Giảng viên xác nhận yêu cầu.
+    \item Hệ thống chạy thuật toán chọn ngẫu nhiên các câu hỏi thỏa mãn điều kiện và tạo thành đề thi mới.
+    \item Hệ thống thông báo tạo thành công.
+\end{enumerate}
+\textbf{Hậu điều kiện:} Đề thi mới được lưu vào cơ sở dữ liệu ở trạng thái Nháp.
+
+\subsection{Đặc tả Use case Giám sát và Nộp bài thi}
+\textbf{Tiền điều kiện:} Học viên đang trong phiên làm bài thi. \\
+\textbf{Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Học viên chọn đáp án cho các câu hỏi, hệ thống tự động lưu nháp (auto-save).
+    \item Trình duyệt phát hiện sự kiện 'blur' (chuyển tab), tự động gửi log vi phạm về server.
+    \item Khi học viên bấm "Nộp bài", hệ thống tính toán điểm số dựa trên đáp án đúng.
+    \item Hệ thống lưu trạng thái hoàn thành và danh sách các vi phạm trong quá trình thi.
+\end{enumerate}
+\textbf{Hậu điều kiện:} Điểm số được cập nhật, học viên không thể tiếp tục làm bài thi này.
+
+\section{Yêu cầu phi chức năng}
+\label{section:2.4}
+Để đảm bảo hệ thống vận hành trơn tru và hỗ trợ hàng ngàn sinh viên thi cùng lúc, hệ thống yêu cầu:
+\begin{itemize}
+    \item \textbf{Hiệu năng:} Hệ thống phải có khả năng mở rộng nhanh chóng (scale-out) khi có lượng truy cập tăng đột biến (sử dụng Kubernetes và Microservices).
+    \item \textbf{Bảo mật:} Các API phải được bảo vệ bằng JWT Token. Mật khẩu người dùng được mã hóa an toàn. Quá trình thi cử yêu cầu cơ chế chống gian lận (giám sát thao tác trình duyệt).
+    \item \textbf{Tính sẵn sàng:} Sử dụng Message Queue (Kafka) và Caching (Redis) để đảm bảo không mất mát dữ liệu khi server quá tải.
+\end{itemize}
+
+Tóm lại, Chương 2 đã đặc tả chi tiết các yêu cầu và chức năng nghiệp vụ thiết yếu của hệ thống, làm nền tảng cho việc thiết kế kiến trúc và lựa chọn công nghệ ở các chương tiếp theo.
+\end{document}

@@ -1,0 +1,54 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+Chương này trình bày các giải pháp nghiệp vụ và đóng góp chính của đề tài. Quá trình thiết kế và xây dựng hệ thống JQK Study đã tập trung giải quyết hai bài toán cốt lõi trong việc thi trực tuyến: tạo đề thi tự động đảm bảo tính công bằng và xây dựng cơ chế giám sát thi cử nghiêm ngặt.
+
+\section{Giải pháp sinh đề thi tự động}
+
+\subsection{Giới thiệu bài toán}
+Trong các hệ thống quản lý đào tạo thông thường, việc tạo đề thi thường được thực hiện hoàn toàn thủ công. Giảng viên phải tự lựa chọn từng câu hỏi từ ngân hàng đề, điều này tốn rất nhiều thời gian, đặc biệt đối với các kỳ thi có hàng trăm câu hỏi hoặc cần tạo ra nhiều mã đề khác nhau để chống gian lận.
+
+\subsection{Giải pháp đề xuất}
+Hệ thống JQK Study cung cấp giải pháp \textbf{Sinh đề thi tự động} dựa trên các thiết lập cấu hình của giảng viên. Cụ thể:
+\begin{itemize}
+    \item \textbf{Cấu hình nguồn câu hỏi:} Giảng viên chọn các Chủ đề (Topic) hoặc Phần (Section) cụ thể để lấy câu hỏi.
+    \item \textbf{Cấu hình độ khó:} Tỉ lệ các câu hỏi Dễ, Trung bình, Khó được thiết lập theo phần trăm.
+    \item \textbf{Cơ chế lấy ngẫu nhiên:} Thuật toán trên server (Exam Service) sẽ xáo trộn (shuffle) ngân hàng câu hỏi phù hợp với điều kiện và bốc ngẫu nhiên số lượng câu hỏi cần thiết. Đồng thời, các đáp án (Choices) bên trong mỗi câu hỏi cũng được xáo trộn để tạo ra các mã đề khác nhau cho mỗi học viên (nếu được cấu hình).
+\end{itemize}
+
+\subsection{Kết quả đạt được}
+Giải pháp này giúp giảng viên tiết kiệm đến 80\% thời gian ra đề so với phương pháp thủ công. Nhờ cơ chế chọn ngẫu nhiên, các đề thi sinh ra vừa bám sát cấu trúc yêu cầu vừa có độ khác biệt cao, góp phần đảm bảo tính công bằng, khách quan trong kiểm tra.
+
+\section{Cơ chế giám sát thi cử (Anti-Cheat Monitoring)}
+
+\subsection{Giới thiệu bài toán}
+Một trong những thách thức lớn nhất của hình thức thi trực tuyến là việc học viên có thể dễ dàng gian lận bằng cách tra cứu tài liệu trên internet, trao đổi qua ứng dụng chat, hoặc sao chép đáp án từ nguồn khác.
+
+\subsection{Giải pháp đề xuất}
+Hệ thống áp dụng cơ chế giám sát chặt chẽ theo hai lớp:
+\begin{itemize}
+    \item \textbf{Lớp Client-side (Frontend):} Tận dụng các API của trình duyệt (Page Visibility API, Clipboard API), hệ thống lắng nghe các sự kiện:
+    \begin{itemize}
+        \item \textit{Chuyển tab hoặc thu nhỏ trình duyệt} (blur/visibilitychange).
+        \item \textit{Thao tác Copy/Paste} trong màn hình thi.
+    \end{itemize}
+    Mỗi khi xảy ra sự kiện bất thường, giao diện lập tức cảnh báo học viên, đồng thời gọi API ghi nhận sự kiện vi phạm về máy chủ cùng với thời gian thực (timestamp).
+    \item \textbf{Lớp Server-side (Backend):} Exam Service có trách nhiệm lưu trữ lịch sử vi phạm của từng lượt thi. Bên cạnh đó, thời gian thi được đếm ngược dựa trên thời gian bắt đầu lưu tại server, tránh tình trạng học viên can thiệp vào đồng hồ của trình duyệt để kéo dài thời gian làm bài.
+\end{itemize}
+
+\subsection{Kết quả đạt được}
+Thông qua cơ chế giám sát này, giảng viên có thể xem chi tiết nhật ký vi phạm của mỗi học viên sau khi nộp bài. Hệ thống cung cấp minh chứng rõ ràng về các hành vi bất thường, từ đó nâng cao tính nghiêm túc và độ tin cậy của kết quả thi trực tuyến.
+
+\section{Quản lý luồng học và thi tích hợp}
+
+\subsection{Giới thiệu bài toán}
+Nhiều trung tâm giáo dục gặp khó khăn khi phải dùng một phần mềm để lưu trữ video bài giảng và một phần mềm khác để tổ chức thi, dẫn đến việc quản lý tiến độ học tập và điểm số bị rời rạc.
+
+\subsection{Giải pháp đề xuất}
+JQK Study kết hợp cả \textbf{Course Management} (Quản lý khóa học) và \textbf{Exam Management} (Quản lý thi cử) vào chung một nền tảng. Hệ thống sử dụng mô hình Lớp học (Class) làm cầu nối: 
+Giảng viên có thể mở một Lớp học, cấp mã tham gia (Join Code) cho học viên. Trong Lớp học đó, giảng viên gán các Đề thi tương ứng. Học viên vừa có thể xem bài giảng trong Khóa học liên kết, vừa truy cập bài thi ngay trên cùng một hệ thống.
+
+\subsection{Kết quả đạt được}
+Quy trình nghiệp vụ được chuẩn hóa và khép kín. Dữ liệu về tiến độ học tập (hoàn thành các bài giảng) và kết quả kiểm tra (điểm số) được tập trung tại một nơi, giúp giảng viên dễ dàng đánh giá tổng quan chất lượng đào tạo và năng lực của từng học viên.
+
+\end{document}

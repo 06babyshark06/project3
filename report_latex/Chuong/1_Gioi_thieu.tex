@@ -1,0 +1,47 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+Chương này giới thiệu tổng quan về đề tài "Hệ thống thi trắc nghiệm trực tuyến JQK Study". Nội dung tập trung trình bày lý do chọn đề tài, mục tiêu, phạm vi nghiên cứu, cũng như định hướng giải pháp và bố cục của báo cáo.
+
+\section{Đặt vấn đề}
+\label{section:1.1}
+Trong thời đại công nghệ số hóa hiện nay, việc học tập và thi cử trực tuyến đang trở thành một xu hướng tất yếu. Tại các trường đại học, trung tâm đào tạo, cũng như các cơ sở giáo dục khác, nhu cầu có một hệ thống cho phép tổ chức thi trắc nghiệm trực tuyến linh hoạt, bảo mật và hiệu quả là rất lớn. Các phương pháp thi truyền thống thường tiêu tốn nhiều thời gian và nguồn lực trong khâu ra đề, coi thi và chấm điểm. Hơn nữa, với các nền tảng học tập trực tuyến hiện tại, thường xảy ra tình trạng thiếu sự giám sát chặt chẽ, dẫn đến gian lận trong thi cử.
+
+Xuất phát từ thực tế đó, bài toán đặt ra là làm thế nào để xây dựng một hệ thống học tập và thi trắc nghiệm trực tuyến toàn diện, không chỉ giúp giảng viên quản lý ngân hàng câu hỏi, tạo đề thi tự động mà còn cung cấp cơ chế giám sát vi phạm trong quá trình thi. Việc giải quyết bài toán này sẽ mang lại lợi ích to lớn cho cả giảng viên và học viên, giúp tối ưu hóa quá trình kiểm tra đánh giá, đồng thời đảm bảo tính công bằng và minh bạch.
+
+\section{Mục tiêu và phạm vi đề tài}
+\label{section:1.2}
+Hiện nay trên thị trường đã có một số nền tảng hỗ trợ thi trực tuyến, tuy nhiên nhiều hệ thống vẫn còn hạn chế ở khả năng giám sát tự động, tính linh hoạt trong cấu trúc khóa học hoặc khả năng tích hợp đa chức năng (vừa học vừa thi). 
+
+Trên cơ sở phân tích đó, đồ án này hướng tới mục tiêu xây dựng nền tảng \textbf{JQK Study} - hệ thống thi trắc nghiệm trực tuyến hiện đại. Hệ thống được phát triển với các nhóm chức năng chính như sau:
+\begin{itemize}
+    \item \textbf{Quản lý Bài thi \& Câu hỏi}: Cho phép tạo, quản lý ngân hàng câu hỏi, import từ Excel, cấu hình sinh đề thi tự động và xáo trộn đáp án.
+    \item \textbf{Giám sát \& Thống kê}: Theo dõi hành vi vi phạm (chuyển tab, copy/paste) trong thời gian thực, thống kê điểm số và xuất báo cáo.
+    \item \textbf{Quản lý Khóa học \& Lớp học}: Hỗ trợ giảng viên tạo khóa học, bài giảng video, quản lý mã tham gia lớp học và gán đề thi cho lớp.
+\end{itemize}
+
+Phạm vi của đề tài tập trung vào việc đáp ứng nghiệp vụ quản lý đào tạo, kiểm tra đánh giá cho ba nhóm người dùng chính là Quản trị viên (Admin), Giảng viên (Instructor) và Học viên (Student).
+
+\section{Định hướng giải pháp}
+\label{section:1.3}
+Để giải quyết bài toán đặt ra, hệ thống JQK Study áp dụng kiến trúc Microservices để đảm bảo tính mở rộng, khả năng chịu tải tốt và dễ dàng bảo trì trong tương lai. 
+
+Về mặt giải pháp nghiệp vụ, đồ án xây dựng cơ chế giám sát thi cử chặt chẽ bằng cách ghi nhận các sự kiện vi phạm từ phía người dùng (client-side) và kiểm soát tính hợp lệ của bài nộp trên máy chủ (server-side). Bên cạnh đó, thuật toán sinh đề tự động được thiết kế nhằm phân bổ câu hỏi ngẫu nhiên theo cấu hình (chủ đề, độ khó) mà giảng viên đã định sẵn, đảm bảo các bài thi có chất lượng đồng đều.
+
+Đóng góp chính của đồ án là mang lại một giải pháp phần mềm hoàn chỉnh, tích hợp chặt chẽ giữa tính năng học tập (courses) và kiểm tra (exams), kết hợp với quy trình quản lý giám sát nghiêm ngặt, đáp ứng nhu cầu thực tế của các cơ sở giáo dục.
+
+\section{Bố cục đồ án}
+\label{section:1.4}
+Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau:
+
+Chương 2 trình bày về khảo sát hiện trạng, phân tích yêu cầu nghiệp vụ và đặc tả các chức năng của hệ thống. 
+
+Trong Chương 3, đồ án giới thiệu về các công nghệ, nền tảng lý thuyết được sử dụng để xây dựng hệ thống JQK Study.
+
+Chương 4 mô tả thiết kế kiến trúc hệ thống, thiết kế cơ sở dữ liệu và một số kết quả thực nghiệm nổi bật.
+
+Chương 5 trình bày các giải pháp và đóng góp chính của đề tài, tập trung vào nghiệp vụ sinh đề thi tự động và giám sát chống gian lận.
+
+Cuối cùng, Chương 6 tóm tắt lại các kết quả đã đạt được, đồng thời đưa ra những hạn chế và hướng phát triển của đề tài trong tương lai.
+
+\end{document}

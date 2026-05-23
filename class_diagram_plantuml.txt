@@ -1,0 +1,157 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+package "User Service Domain" {
+    class UserModel {
+        + Id: int64
+        + FullName: string
+        + Email: string
+        + Password: string
+        + RoleId: int64
+        + CreatedAt: time.Time
+        + UpdatedAt: time.Time
+    }
+    class ClassModel {
+        + Id: int64
+        + Name: string
+        + Code: string
+        + TeacherID: int64
+    }
+
+    interface UserRepository {
+        + CreateUser(ctx, user: UserModel): UserModel, error
+        + GetUserByEmail(ctx, email: string): UserModel, error
+        + UpdateUser(ctx, user: UserModel): UserModel, error
+        + DeleteUser(ctx, id: int64): error
+        + CreateClass(ctx, class: ClassModel): error
+        + GetClasses(ctx, limit, offset): []ClassModel, error
+        + AddClassMember(ctx, member: ClassMemberModel): error
+    }
+
+    interface UserService {
+        + Register(ctx, req): Response, error
+        + Login(ctx, req): Response, error
+        + GetProfile(ctx, req): Response, error
+        + CreateClass(ctx, req): Response, error
+        + GetClasses(ctx, req): Response, error
+        + AddMembers(ctx, req): Response, error
+    }
+
+    UserService ..> UserRepository : "uses"
+    UserRepository ..> UserModel : "manages"
+    UserRepository ..> ClassModel : "manages"
+}
+
+package "Course Service Domain" {
+    class CourseModel {
+        + Id: int64
+        + Title: string
+        + InstructorID: int64
+        + Price: float64
+        + IsPublished: bool
+    }
+    
+    class LessonModel {
+        + Id: int64
+        + SectionID: int64
+        + Title: string
+        + ContentURL: string
+    }
+
+    interface CourseRepository {
+        + CreateCourse(ctx, tx, course: CourseModel): CourseModel, error
+        + GetCourses(ctx, search, page, limit): []CourseModel, error
+        + GetCourseDetails(ctx, id: int64): CourseModel, error
+        + CreateLesson(ctx, tx, lesson: LessonModel): LessonModel, error
+        + UpdateCourse(ctx, tx, id, updates): error
+        + DeleteCourse(ctx, tx, id): error
+        + CreateEnrollment(ctx, tx, enrollment): error
+    }
+
+    interface CourseService {
+        + CreateCourse(ctx, req): Response, error
+        + GetCourses(ctx, req): Response, error
+        + GetCourseDetails(ctx, req): Response, error
+        + EnrollCourse(ctx, req): Response, error
+        + CreateLesson(ctx, req): Response, error
+        + PublishCourse(ctx, req): Response, error
+    }
+
+    CourseService ..> CourseRepository : "uses"
+    CourseRepository ..> CourseModel : "manages"
+    CourseRepository ..> LessonModel : "manages"
+}
+
+package "Exam Service Domain" {
+    class ExamModel {
+        + Id: int64
+        + Title: string
+        + DurationMinutes: int
+        + StartTime: time.Time
+        + EndTime: time.Time
+        + Status: string
+    }
+    class QuestionModel {
+        + Id: int64
+        + Content: string
+        + TypeID: int64
+        + DifficultyID: int64
+        + Points: float64
+    }
+    class ExamSubmissionModel {
+        + Id: int64
+        + ExamID: int64
+        + UserID: int64
+        + Score: float64
+    }
+
+    interface ExamRepository {
+        + CreateExam(ctx, tx, exam: ExamModel): ExamModel, error
+        + GetExamDetails(ctx, id: int64): ExamModel, error
+        + GetExams(ctx, limit, offset, creatorID, status): []ExamModel, error
+        + CreateQuestion(ctx, tx, q: QuestionModel): QuestionModel, error
+        + LinkQuestionsToExam(ctx, tx, examID, questions): error
+        + CreateSubmission(ctx, tx, sub: ExamSubmissionModel): ExamSubmissionModel, error
+        + SaveUserAnswer(ctx, tx, ans: UserAnswerModel): error
+        + GetExamSubmissions(ctx, examID): []ExamSubmissionModel, error
+    }
+
+    interface ExamService {
+        + CreateExam(ctx, req): Response, error
+        + GetExams(ctx, req): Response, error
+        + GetExamDetails(ctx, req): Response, error
+        + CreateQuestion(ctx, req): Response, error
+        + SubmitExam(ctx, req): Response, error
+        + GradeEssay(ctx, req): Response, error
+        + GetExamSubmissions(ctx, req): Response, error
+    }
+
+    ExamService ..> ExamRepository : "uses"
+    ExamRepository ..> ExamModel : "manages"
+    ExamRepository ..> QuestionModel : "manages"
+    ExamRepository ..> ExamSubmissionModel : "manages"
+}
+
+package "Notification Service Domain" {
+    class NotificationModel {
+        + Id: int64
+        + RecipientID: int64
+        + RenderedContent: string
+        + StatusID: int64
+    }
+
+    interface NotificationRepository {
+        + GetTemplateByName(ctx, name): TemplateModel, error
+        + CreateNotificationLog(ctx, tx, log: NotificationModel): NotificationModel, error
+    }
+
+    interface NotificationService {
+        + HandleUserRegisteredEvent(ctx, eventBytes): error
+        + HandleExamSubmittedEvent(ctx, eventBytes): error
+        + HandleCourseEnrolledEvent(ctx, eventBytes): error
+    }
+
+    NotificationService ..> NotificationRepository : "uses"
+    NotificationRepository ..> NotificationModel : "manages"
+}
+@enduml
