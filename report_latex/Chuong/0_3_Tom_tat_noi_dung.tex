@@ -5,7 +5,13 @@
     \Large{\textbf{TÓM TẮT NỘI DUNG ĐỒ ÁN}}\\
 \end{center}
 \vspace{1cm}
-Sinh viên viết tóm tắt ĐATN của mình trong mục này, với 200 đến 350 từ. Theo trình tự, các nội dung tóm tắt cần có: (i) Giới thiệu vấn đề (tại sao có vấn đề đó, hiện tại được giải quyết chưa, có những hướng tiếp cận nào, các hướng này giải quyết như thế nào, hạn chế là gì), (ii) Hướng tiếp cận sinh viên lựa chọn là gì, vì sao chọn hướng đó, (iii) Tổng quan giải pháp của sinh viên theo hướng tiếp cận đã chọn, và (iv) Đóng góp chính của ĐATN là gì, kết quả đạt được sau cùng là gì. Sinh viên cần viết thành đoạn văn, không được viết ý hoặc gạch đầu dòng.
+
+Đồ án tốt nghiệp này tập trung vào việc nghiên cứu, thiết kế và xây dựng **JQK Study** - một hệ thống học tập và thi trắc nghiệm trực tuyến toàn diện, áp dụng kiến trúc Microservices hiện đại. Trong bối cảnh chuyển đổi số giáo dục ngày nay, các hình thức kiểm tra trực tuyến ngày càng phổ biến nhưng vẫn gặp nhiều hạn chế lớn như: khó kiểm soát gian lận khi học viên làm bài từ xa, quy trình sinh đề thi thủ công mất thời gian, và sự phân mảnh giữa các hệ thống quản lý học tập (LMS) với các công cụ tổ chức thi độc lập. 
+
+Để giải quyết các thách thức trên, đề tài đề xuất giải pháp tích hợp đồng bộ hai quy trình học tập và kiểm tra trên cùng một nền tảng JQK Study. Hệ thống được triển khai dựa trên kiến trúc Microservices sử dụng ngôn ngữ **Go** hiệu năng cao cho phần Backend, kết hợp với framework **Next.js** và **TailwindCSS** cho phần Frontend. Điểm nổi bật của giải pháp là cơ chế giám sát chống gian lận (Anti-Cheat) đa lớp trong thời gian thực: ở phía Client-side, hệ thống bắt các sự kiện chuyển tab, blur màn hình hay sao chép dữ liệu thông qua Page Visibility API và Clipboard API để ghi nhận nhật ký vi phạm; ở phía Server-side, hệ thống duy trì bộ đếm ngược thời gian độc lập để tránh can thiệp cục bộ từ trình duyệt. Bên cạnh đó, hệ thống tích hợp thuật toán sinh đề tự động ngẫu nhiên theo cấu hình tỷ lệ độ khó và chủ đề do giảng viên thiết lập sẵn.
+
+Kết quả đạt được của đồ án là một phần mềm hoàn chỉnh chạy trên môi trường container hóa (Docker và Kubernetes) với các dịch vụ lõi bao gồm API Gateway, User Service, Course Service, Exam Service và Notification Service. Hệ thống không chỉ giúp giảng viên tiết kiệm phần lớn thời gian biên soạn đề thi, tổ chức đánh giá lớp học mà còn cung cấp cơ sở dữ liệu giám sát trực quan, đảm bảo tính công bằng và nghiêm túc cho kỳ thi.
+
 \begin{flushright}
 Sinh viên thực hiện\\
 \begin{tabular}{@{}c@{}}

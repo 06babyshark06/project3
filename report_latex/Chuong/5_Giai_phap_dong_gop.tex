@@ -1,54 +1,117 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này trình bày các giải pháp nghiệp vụ và đóng góp chính của đề tài. Quá trình thiết kế và xây dựng hệ thống JQK Study đã tập trung giải quyết hai bài toán cốt lõi trong việc thi trực tuyến: tạo đề thi tự động đảm bảo tính công bằng và xây dựng cơ chế giám sát thi cử nghiêm ngặt.
+Chương này trình bày chi tiết các giải pháp nghiệp vụ cốt lõi và những đóng góp học thuật nổi bật của đề tài. Quá trình thiết kế và xây dựng hệ thống JQK Study tập trung giải quyết triệt để hai bài toán thực tế đầy thách thức trong giáo dục trực tuyến: (1) tự động hóa quy trình sinh đề thi trắc nghiệm thông minh, khách quan và (2) xây dựng cơ chế giám sát thi cử đa lớp nhằm tối thiểu hóa các hành vi gian lận trên môi trường web.
 
-\section{Giải pháp sinh đề thi tự động}
+\section{Giải pháp sinh đề thi tự động và xáo trộn đề}
+\label{section:5.1}
 
 \subsection{Giới thiệu bài toán}
-Trong các hệ thống quản lý đào tạo thông thường, việc tạo đề thi thường được thực hiện hoàn toàn thủ công. Giảng viên phải tự lựa chọn từng câu hỏi từ ngân hàng đề, điều này tốn rất nhiều thời gian, đặc biệt đối với các kỳ thi có hàng trăm câu hỏi hoặc cần tạo ra nhiều mã đề khác nhau để chống gian lận.
-
-\subsection{Giải pháp đề xuất}
-Hệ thống JQK Study cung cấp giải pháp \textbf{Sinh đề thi tự động} dựa trên các thiết lập cấu hình của giảng viên. Cụ thể:
+Trong các hệ thống quản lý đào tạo thông thường, việc ra đề thi thường được thực hiện thủ công: giảng viên tự chọn từng câu hỏi từ ngân hàng hoặc sao chép từ một tài liệu có sẵn. Quy trình này bộc lộ nhiều hạn chế:
 \begin{itemize}
-    \item \textbf{Cấu hình nguồn câu hỏi:} Giảng viên chọn các Chủ đề (Topic) hoặc Phần (Section) cụ thể để lấy câu hỏi.
-    \item \textbf{Cấu hình độ khó:} Tỉ lệ các câu hỏi Dễ, Trung bình, Khó được thiết lập theo phần trăm.
-    \item \textbf{Cơ chế lấy ngẫu nhiên:} Thuật toán trên server (Exam Service) sẽ xáo trộn (shuffle) ngân hàng câu hỏi phù hợp với điều kiện và bốc ngẫu nhiên số lượng câu hỏi cần thiết. Đồng thời, các đáp án (Choices) bên trong mỗi câu hỏi cũng được xáo trộn để tạo ra các mã đề khác nhau cho mỗi học viên (nếu được cấu hình).
+    \item Tốn nhiều thời gian và công sức của giảng viên khi muốn tạo ra một bài đánh giá lớn.
+    \item Khó đảm bảo tính khách quan và phân bổ đồng đều về mặt kiến thức cũng như mức độ khó của đề thi.
+    \item Rất khó để tạo ra nhiều mã đề khác nhau có độ khó tương đương nhằm chống sao chép giữa các học viên ngồi cạnh nhau.
 \end{itemize}
 
-\subsection{Kết quả đạt được}
-Giải pháp này giúp giảng viên tiết kiệm đến 80\% thời gian ra đề so với phương pháp thủ công. Nhờ cơ chế chọn ngẫu nhiên, các đề thi sinh ra vừa bám sát cấu trúc yêu cầu vừa có độ khác biệt cao, góp phần đảm bảo tính công bằng, khách quan trong kiểm tra.
+\subsection{Giải pháp đề xuất}
+Hệ thống JQK Study đề xuất giải pháp sinh đề thi tự động dựa trên cấu hình phân bổ động lưu dưới định dạng JSONB trong cơ sở dữ liệu. Giảng viên chỉ cần định nghĩa một cấu trúc khung của đề thi bao gồm: danh sách các chủ đề (Topics), các phần thi (Sections) mục tiêu và tỷ lệ phần trăm các câu hỏi theo các cấp độ nhận thức (Dễ, Trung bình, Khó).
+
+Khi nhận được yêu cầu thi, hệ thống sẽ thực hiện truy vấn và tính toán tự động để lựa chọn ra tập hợp các câu hỏi thỏa mãn các ràng buộc cấu hình thông qua một thuật toán sinh đề ngẫu nhiên có điều kiện.
+
+\subsection{Thuật toán sinh đề thi tự động}
+Quy trình lựa chọn câu hỏi tự động được triển khai chi tiết thông qua giải thuật mô tả trong Thuật toán \ref{alg:generate_exam}.
+
+\begin{algorithm}[H]
+\SetAlgoLined
+\KwIn{Cấu hình đề thi $C$ (chứa danh sách chủ đề $T_C$, số lượng câu hỏi yêu cầu $N$, tỷ lệ độ khó $\{P_{\text{dễ}}, P_{\text{tb}}, P_{\text{khó}}\}$ sao cho $P_{\text{dễ}} + P_{\text{tb}} + P_{\text{khó}} = 100\%$); Ngân hàng câu hỏi $Q$ trong PostgreSQL.}
+\KwOut{Đề thi $E$ gồm danh sách $N$ câu hỏi được chọn lọc hoặc thông báo lỗi.}
+
+Khởi tạo danh sách câu hỏi của đề thi: $E \leftarrow \emptyset$ \;
+Tính toán số lượng câu hỏi cần lấy cho mỗi mức độ khó: \\
+$N_{\text{dễ}} \leftarrow \lfloor N \times P_{\text{dễ}} \rfloor$,\quad
+$N_{\text{tb}} \leftarrow \lfloor N \times P_{\text{tb}} \rfloor$,\quad
+$N_{\text{khó}} \leftarrow N - (N_{\text{dễ}} + N_{\text{tb}})$ \;
+
+\For{mỗi mức độ khó $d \in \{\text{Dễ}, \text{Trung bình}, \text{Khó}\}$}{
+    Khởi tạo danh sách câu hỏi ứng viên có độ khó $d$: $Q_{tmp} \leftarrow \emptyset$ \;
+    
+    \For{mỗi chủ đề $t \in T_C$}{
+        Lọc các câu hỏi trong ngân hàng: \\
+        $Q_{t,d} \leftarrow \{q \in Q \mid q.\text{Topic} = t \land q.\text{Difficulty} = d \land q.\text{IsActive} = \text{True}\}$ \;
+        Thêm các câu hỏi lọc được vào danh sách ứng viên: $Q_{tmp} \leftarrow Q_{tmp} \cup Q_{t,d}$ \;
+    }
+    
+    \If{$|Q_{tmp}| < N_d$}{
+        \Return{Thông báo lỗi: "Không đủ câu hỏi trong ngân hàng đáp ứng độ khó $d$ cho các chủ đề đã chọn."} \;
+    }
+    
+    Xáo trộn ngẫu nhiên danh sách ứng viên $Q_{tmp}$ bằng giải thuật Fisher-Yates (sử dụng hàm sinh số giả ngẫu nhiên có Seed thay đổi) \;
+    Lấy $N_d$ câu hỏi đầu tiên từ danh sách $Q_{tmp}$ đã xáo trộn và đưa vào $E$: \\
+    $E \leftarrow E \cup Q_{tmp}[0 \dots N_d - 1]$ \;
+}
+
+Xáo trộn lại toàn bộ danh sách câu hỏi trong $E$ để phân bổ ngẫu nhiên các câu hỏi dễ, trung bình, khó xen kẽ nhau \;
+\Return{$E$} \;
+\caption{Thuật toán sinh đề thi tự động ngẫu nhiên theo cấu hình}
+\label{alg:generate_exam}
+\end{algorithm}
+
+\subsection{Cơ chế xáo trộn câu hỏi và đáp án}
+Để nâng cao hơn nữa khả năng chống sao chép bài thi, JQK Study áp dụng cơ chế xáo trộn hai lớp (Double Shuffling) khi học viên bắt đầu một phiên làm bài thi:
+\begin{enumerate}
+    \item \textbf{Lớp 1 - Xáo trộn thứ tự câu hỏi:} Mỗi thí sinh khi mở đề thi sẽ nhận được một danh sách câu hỏi có thứ tự hiển thị hoàn toàn khác nhau. Quá trình này được thực hiện bằng cách ánh xạ danh sách câu hỏi gốc của đề thi thông qua một mảng chỉ mục ngẫu nhiên được sinh riêng cho từng lượt nộp bài (submission).
+    \item \textbf{Lớp 2 - Xáo trộn thứ tự đáp án lựa chọn:} Đối với mỗi câu hỏi trắc nghiệm, các lựa chọn trả lời (Choices) cũng được xáo trộn thứ tự hiển thị trước khi render ra trình duyệt của học viên. Hệ thống sử dụng một thuật toán sinh hoán vị ngẫu nhiên trên tập hợp các câu trả lời của câu hỏi đó. 
+\end{enumerate}
+Nhờ cơ chế này, ngay cả khi hai học viên ngồi cạnh nhau nhận cùng một đề thi, câu hỏi hiển thị tại một vị trí bất kỳ sẽ khác nhau và các phương án A, B, C, D của cùng câu hỏi đó cũng được tráo đổi hoàn toàn vị trí.
 
 \section{Cơ chế giám sát thi cử (Anti-Cheat Monitoring)}
+\label{section:5.2}
 
 \subsection{Giới thiệu bài toán}
-Một trong những thách thức lớn nhất của hình thức thi trực tuyến là việc học viên có thể dễ dàng gian lận bằng cách tra cứu tài liệu trên internet, trao đổi qua ứng dụng chat, hoặc sao chép đáp án từ nguồn khác.
+Trong các kỳ thi trực tuyến không tập trung hoặc tự do, việc đảm bảo tính trung thực của thí sinh là vô cùng khó khăn do họ có thể dễ dàng chuyển sang các tab khác trên trình duyệt để tra cứu tài liệu, sao chép nội dung từ các nguồn bên ngoài, hoặc mở các ứng dụng chat để trao đổi bài giải.
 
-\subsection{Giải pháp đề xuất}
-Hệ thống áp dụng cơ chế giám sát chặt chẽ theo hai lớp:
+\subsection{Cấu trúc giám sát Client-Side (Trình duyệt học viên)}
+Ở phía giao diện làm bài thi (Frontend Next.js), hệ thống thiết lập một trình giám sát chạy ngầm sử dụng các API tiêu chuẩn của HTML5 để bắt các sự kiện tương tác của người dùng. Cách thức thực hiện chi tiết như sau:
 \begin{itemize}
-    \item \textbf{Lớp Client-side (Frontend):} Tận dụng các API của trình duyệt (Page Visibility API, Clipboard API), hệ thống lắng nghe các sự kiện:
-    \begin{itemize}
-        \item \textit{Chuyển tab hoặc thu nhỏ trình duyệt} (blur/visibilitychange).
-        \item \textit{Thao tác Copy/Paste} trong màn hình thi.
-    \end{itemize}
-    Mỗi khi xảy ra sự kiện bất thường, giao diện lập tức cảnh báo học viên, đồng thời gọi API ghi nhận sự kiện vi phạm về máy chủ cùng với thời gian thực (timestamp).
-    \item \textbf{Lớp Server-side (Backend):} Exam Service có trách nhiệm lưu trữ lịch sử vi phạm của từng lượt thi. Bên cạnh đó, thời gian thi được đếm ngược dựa trên thời gian bắt đầu lưu tại server, tránh tình trạng học viên can thiệp vào đồng hồ của trình duyệt để kéo dài thời gian làm bài.
+    \item \textbf{Phát hiện chuyển tab hoặc thu nhỏ cửa sổ:} Lắng nghe sự kiện \texttt{visibilitychange} của Page Visibility API trên đối tượng \texttt{document}. Khi thuộc tính \texttt{document.visibilityState} chuyển sang trạng thái \texttt{'hidden'}, điều đó chứng tỏ thí sinh đã rời khỏi tab thi hoặc thu nhỏ trình duyệt để mở ứng dụng khác.
+    \item \textbf{Phát hiện mất tiêu điểm màn hình thi:} Đăng ký sự kiện \texttt{blur} trên đối tượng \texttt{window}. Khi thí sinh nhấp chuột ra ngoài phạm vi cửa sổ trình duyệt làm bài (ví dụ click vào thanh Taskbar hoặc ứng dụng chạy song song), sự kiện này lập tức bị kích hoạt.
+    \item \textbf{Chặn thao tác Sao chép và Dán (Copy/Paste):} Đăng ký sự kiện \texttt{copy}, \texttt{cut} và \texttt{paste} trên vùng chứa đề thi và bài làm. Sử dụng phương thức \texttt{event.preventDefault()} để vô hiệu hóa hoàn toàn hành vi sao chép câu hỏi ra ngoài hoặc dán nội dung từ clipboard vào các trường nhập liệu.
 \end{itemize}
 
-\subsection{Kết quả đạt được}
-Thông qua cơ chế giám sát này, giảng viên có thể xem chi tiết nhật ký vi phạm của mỗi học viên sau khi nộp bài. Hệ thống cung cấp minh chứng rõ ràng về các hành vi bất thường, từ đó nâng cao tính nghiêm túc và độ tin cậy của kết quả thi trực tuyến.
+Mỗi khi phát hiện hành vi vi phạm (blur tab hoặc sao chép), hệ thống thực hiện hai bước xử lý nghiệp vụ song song:
+\begin{enumerate}
+    \item Hiển thị một cửa sổ cảnh báo (Warning Modal) chặn giữa màn hình làm bài yêu cầu thí sinh tập trung và thông báo số lần vi phạm còn lại trước khi hệ thống tự động thu bài.
+    \item Gọi một API bất đồng bộ gửi log vi phạm về server chứa các thông tin: Loại vi phạm (\texttt{BLUR}, \texttt{COPY}, \texttt{PASTE}), mốc thời gian vi phạm chính xác (\texttt{timestamp}) và ID phiên thi.
+\end{enumerate}
 
-\section{Quản lý luồng học và thi tích hợp}
+\subsection{Quy trình xử lý đồng bộ và kiểm soát phía Server-Side (Backend)}
+Phía máy chủ (Exam Service) đóng vai trò là chốt chặn cuối cùng kiểm soát tính minh bạch của kỳ thi thông qua các giải pháp kỹ thuật sau:
+\begin{itemize}
+    \item \textbf{Đồng bộ đồng hồ đếm ngược phía máy chủ:} Thời gian bắt đầu làm bài (\texttt{started\_at}) và thời gian kết thúc (\texttt{due\_at}) được ghi nhận và lưu trữ trực tiếp trên cơ sở dữ liệu máy chủ khi học viên bấm nút bắt đầu thi. Thời gian đếm ngược hiển thị trên trình duyệt chỉ có vai trò trực quan hóa cho học viên; mọi quyết định về việc chấp nhận đáp án nộp đều dựa trên thời gian máy chủ lúc nhận request. Nếu máy chủ phát hiện thời điểm gửi đáp án vượt quá \texttt{due\_at}, hệ thống sẽ từ chối ghi nhận điểm.
+    \item \textbf{Ghi nhận nhật ký vi phạm không thể sửa xóa:} Các bản ghi vi phạm được chèn vào bảng \texttt{exam\_violations} với ràng buộc khóa ngoại chặt chẽ. Hệ thống không cung cấp bất kỳ API nào cho phép sửa hoặc xóa dữ liệu này, đảm bảo tính khách quan tối đa khi giảng viên thực hiện hậu kiểm.
+    \item \textbf{Cơ chế tự động nộp bài (Auto-Submit):} Khi số lượng bản ghi vi phạm trong một lượt thi vượt quá ngưỡng cho phép của cấu hình đề thi (ví dụ quá 3 lần chuyển tab), Exam Service sẽ tự động chuyển trạng thái của lượt thi (\texttt{submission}) sang "Đã hoàn thành" (Completed), chấm điểm các câu hỏi đã làm và khóa quyền truy cập tiếp tục của học viên đối với đề thi đó.
+\end{itemize}
 
-\subsection{Giới thiệu bài toán}
-Nhiều trung tâm giáo dục gặp khó khăn khi phải dùng một phần mềm để lưu trữ video bài giảng và một phần mềm khác để tổ chức thi, dẫn đến việc quản lý tiến độ học tập và điểm số bị rời rạc.
+\section{Tích hợp luồng học và thi khép kín}
+\label{section:5.3}
 
-\subsection{Giải pháp đề xuất}
-JQK Study kết hợp cả \textbf{Course Management} (Quản lý khóa học) và \textbf{Exam Management} (Quản lý thi cử) vào chung một nền tảng. Hệ thống sử dụng mô hình Lớp học (Class) làm cầu nối: 
-Giảng viên có thể mở một Lớp học, cấp mã tham gia (Join Code) cho học viên. Trong Lớp học đó, giảng viên gán các Đề thi tương ứng. Học viên vừa có thể xem bài giảng trong Khóa học liên kết, vừa truy cập bài thi ngay trên cùng một hệ thống.
+\subsection{Mô hình hóa lớp học làm trung tâm}
+Để giải quyết sự phân mảnh giữa nền tảng e-learning (học tập) và online-testing (thi cử), JQK Study đề xuất mô hình tích hợp lấy thực thể Lớp học (Class) làm trung tâm:
+\begin{itemize}
+    \item Giảng viên tạo một Lớp học và liên kết với một Khóa học chứa các bài giảng video. Lớp học này tự động sinh ra một mã ghi danh duy nhất (Class Code).
+    \item Học viên chỉ cần nhập mã code để tham gia lớp học. Từ thời điểm này, học viên được cấp quyền truy cập toàn bộ tài liệu học tập của khóa học liên kết và đồng thời hiển thị danh sách các bài thi trắc nghiệm được gán riêng cho lớp đó.
+    \item Giảng viên có thể cấu hình điều kiện tiên quyết (Prerequisites), yêu cầu học viên phải hoàn thành tối thiểu một số tỷ lệ phần trăm bài học video nhất định mới được quyền mở đề thi trắc nghiệm.
+\end{itemize}
 
-\subsection{Kết quả đạt được}
-Quy trình nghiệp vụ được chuẩn hóa và khép kín. Dữ liệu về tiến độ học tập (hoàn thành các bài giảng) và kết quả kiểm tra (điểm số) được tập trung tại một nơi, giúp giảng viên dễ dàng đánh giá tổng quan chất lượng đào tạo và năng lực của từng học viên.
+\subsection{Đồng bộ hóa dữ liệu và thông báo bất đồng bộ}
+Nhằm đảm bảo hiệu năng cao cho hệ thống dưới tải trọng thi cử lớn, luồng tích hợp học và thi được vận hành bất đồng bộ:
+\begin{itemize}
+    \item Khi học viên nộp bài thi thành công, Exam Service lập tức tính điểm tự động và phát đi một sự kiện \texttt{ExamSubmittedEvent} vào hàng đợi tin nhắn Apache Kafka.
+    \item Dịch vụ Notification Service lắng nghe sự kiện này, tự động kết xuất kết quả thi thành một mẫu báo cáo trực quan và gửi email kết quả thi cho học viên, đồng thời gửi cảnh báo đến email của giảng viên nếu học viên có số lần vi phạm vượt ngưỡng quy định.
+    \item Tiến độ học tập và điểm số được cập nhật đồng bộ về cơ sở dữ liệu tập trung, giúp giảng viên có thể xem trực tiếp các biểu đồ phân tích phổ điểm và mức độ chuyên cần của cả lớp học trên Dashboard quản lý.
+\end{itemize}
+
+Tóm lại, những giải pháp nghiệp vụ và đóng góp kỹ thuật nêu trên đã tạo nên một hệ thống JQK Study toàn diện, giải quyết được cả khía cạnh tối ưu hóa công tác chuẩn bị đề thi của giảng viên lẫn việc thắt chặt công tác coi thi, đảm bảo chất lượng giảng dạy và kiểm tra đánh giá trực tuyến.
 
 \end{document}

@@ -1,71 +1,160 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
+Chương này trình bày chi tiết về mặt kỹ thuật của hệ thống JQK Study, bao gồm thiết kế kiến trúc phần mềm, thiết kế chi tiết cơ sở dữ liệu và các lớp nghiệp vụ, cùng kết quả xây dựng ứng dụng, phương pháp kiểm thử và mô hình triển khai thực tế.
+
 \section{Thiết kế kiến trúc}
+\label{section:4.1}
+
 \subsection{Lựa chọn kiến trúc phần mềm}
-Mục này có độ dài từ một đến ba trang. Sinh viên cần lựa chọn kiến trúc phần mềm cho ứng dụng của mình như: kiến trúc ba lớp MVC, MVP, SOA, Microservice, v.v. rồi giải thích sơ bộ về kiến trúc đó (không giải thích chi tiết/dài dòng).
-Sử dụng kiến trúc phần mềm đã chọn ở trên, sinh viên mô tả kiến trúc cụ thể cho ứng dụng của mình. Gợi ý: sinh viên áp dụng lý thuyết chung vào hệ thống/sản phẩm của mình như thế nào, có thay đổi, bổ sung hoặc cải tiến gì không. Ví dụ, thành phần M trong kiến trúc lý thuyết MVC sẽ là những thành phần cụ thể nào (ví dụ: là interface I + class C1 + class C2, v.v.) trong kiến trúc phần mềm của sinh viên.
+Hệ thống JQK Study được phát triển dựa trên **kiến trúc Microservices** (kiến trúc vi dịch vụ), chia nhỏ hệ thống thành các khối dịch vụ độc lập chịu trách nhiệm cho từng miền nghiệp vụ riêng biệt. Việc này cho phép mỗi thành phần hoạt động, lưu trữ dữ liệu độc lập và giao tiếp với nhau qua mạng thông qua các giao thức gọi hàm từ xa tốc độ cao gRPC hoặc thông qua hệ thống truyền tin nhắn bất đồng bộ Kafka.
+
+Cụ thể, hệ thống được chia làm hai tầng chính:
+\begin{itemize}
+    \item \textbf{Tầng Client (Frontend):} Được xây dựng bằng Next.js (chạy ở cổng `4001`), giao tiếp với Backend thông qua các truy vấn REST API gửi tới API Gateway.
+    \item \textbf{Tầng Services (Backend):} Bao gồm API Gateway đóng vai trò điểm điều phối trung tâm và các vi dịch vụ nghiệp vụ nội bộ (chạy ở các cổng gRPC riêng biệt).
+\end{itemize}
 
 \subsection{Thiết kế tổng quan}
-Sinh viên vẽ biểu đồ gói UML (UML package diagram), nêu rõ sự phụ thuộc giữa các gói (package). SV cần vẽ các gói sao cho chúng được phân theo các tầng rõ ràng, không được sắp đặt package lộn xộn trong hình vẽ. Sinh viên chú ý các quy tắc thiết kế (Các gói không phụ thuộc lẫn nhau, gói tầng dưới không phụ thuộc gói tầng trên, không phụ thuộc bỏ qua tầng, v.v.) và cần giải thích sơ lược về mục đích/nhiệm vụ của từng package. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig1}
+Mô hình kiến trúc tổng quan của JQK Study bao gồm các dịch vụ sau:
+\begin{itemize}
+    \item \textbf{API Gateway (Gin Web Framework - Port 8081):} Nhận các yêu cầu HTTP từ frontend, thực hiện phân quyền (authorization) qua JWT, kiểm tra CORS, định tuyến (routing) yêu cầu và chuyển đổi chúng thành các cuộc gọi gRPC tới các dịch vụ phía sau.
+    \item \textbf{User Service (Port 50051):} Quản lý thông tin người dùng, mật khẩu (mã hóa bcrypt), phân quyền vai trò (Admin, Instructor, Student), quản lý lớp học (Class) và thành viên lớp học.
+    \item \textbf{Exam Service (Port 50052):} Dịch vụ lõi quan trọng nhất, quản lý ngân hàng câu hỏi, chủ đề, phần thi, sinh đề thi tự động, xử lý quá trình học viên làm bài thi, lưu đáp án nháp, chấm điểm tự động và ghi nhận nhật ký vi phạm (blur tab, copy/paste).
+    \item \textbf{Course Service (Port 50053):} Quản lý các khóa học, chương học, bài giảng video/tài liệu, đăng ký khóa học của học viên và theo dõi tiến độ hoàn thành bài học.
+    \item \textbf{Notification Service (Port 50054):} Hoạt động ở chế độ bất đồng bộ, đăng ký lắng nghe các sự kiện từ hàng đợi Apache Kafka để tự động gửi thông báo qua email hoặc hệ thống cho người dùng khi có sự kiện đăng ký thành công, nộp bài thi hoặc gán lớp học mới.
+\end{itemize}
+
+Sự phụ thuộc giữa các dịch vụ tuân thủ nguyên tắc lỏng lẻo (loose coupling): các dịch vụ nghiệp vụ không trực tiếp gọi cơ sở dữ liệu của nhau mà chỉ tương tác qua gRPC client được định nghĩa trước bằng các tệp giao ước gRPC Protocol Buffers.
+
 \begin{figure}[H]
     \centering
-    \includegraphics{Hinhve/Picture1.png}
-    \caption{Ví dụ biểu đồ phụ thuộc gói}
+    \includegraphics[width=0.85\textwidth]{Hinhve/Picture1.png}
+    \caption{Biểu đồ phân tầng và phụ thuộc gói của hệ thống}
     \label{fig:Fig1}
 \end{figure}
-\subsection{Thiết kế chi tiết gói}
-Sinh viên thiết kế và lần lượt vẽ biểu đồ thiết kế cho từng package, hoặc một nhóm các package liên quan để giải quyết một vấn đề gì đó. Khi vẽ thiết kế gói, sinh viên chỉ cần đưa tên lớp, không cần chỉ ra các thành viên phương thức và thuộc tính. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig2}.
 
-Sinh viên cần vẽ rõ ràng quan hệ giữa các lớp trong biểu đồ. Các quan hệ bao gồm: phụ thuộc (dependency), kết hợp (association), kết tập (aggregation), hợp thành (composition), kế thừa (inheritance), và thực thi (implementation). Các quan hệ này đều đã được minh họa trong \ref{fig:Fig2}.
-
-Sau khi vẽ hình minh họa, sinh viên cần giải thích ngắn gọn về thiết kế của mình. 
+\subsection{Thiết kế chi tiết gói (Package Design)}
+Mỗi vi dịch vụ backend trong Go được tổ chức cấu trúc thư mục chuẩn nhằm phân tách rõ ràng các tầng trách nhiệm:
+\begin{itemize}
+    \item \textbf{Tầng Cmd (`cmd/`):} Điểm khởi đầu của ứng dụng, chịu trách nhiệm đọc tệp cấu hình môi trường (.env), thiết lập kết nối cơ sở dữ liệu, khởi tạo máy chủ gRPC và lắng nghe các cổng.
+    \item \textbf{Tầng Domain (`internal/domain/`):} Chứa định nghĩa các mô hình dữ liệu (structs) và các interface cho tầng Service và Repository. Tầng này độc lập hoàn toàn, không phụ thuộc vào bất kỳ thư viện ngoài nào (Domain-Driven Design).
+    \item \textbf{Tầng Service (`internal/service/`):} Nơi chứa logic nghiệp vụ chính (Business Logic), thực hiện kiểm tra điều kiện, xử lý luồng công việc và tương tác với tầng Repository.
+    \item \textbf{Tầng Database/Repository (`internal/databases/`):} Thực hiện các câu lệnh truy vấn dữ liệu chi tiết vào cơ sở dữ liệu PostgreSQL hoặc cache Redis sử dụng thư viện GORM.
+    \item \textbf{Tầng Infrastructure (`internal/infrastructure/`):} Triển khai gRPC server handler để map dữ liệu gRPC request thành domain model, đồng thời chứa Kafka consumer/producer.
+\end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics{Hinhve/Picture2.png}
-    \caption{Ví dụ thiết kế gói}
+    \includegraphics[width=0.85\textwidth]{Hinhve/Picture2.png}
+    \caption{Biểu đồ thiết kế chi tiết lớp và mối quan hệ giữa các thành phần}
     \label{fig:Fig2}
 \end{figure}
 
 \section{Thiết kế chi tiết}
-\subsection{Thiết kế giao diện}
-Phần này có độ dài từ hai đến ba trang. Sinh viên đặc tả thông tin về màn hình mà ứng dụng của mình hướng tới, bao gồm độ phân giải màn hình, kích thước màn hình, số lượng màu sắc hỗ trợ, v.v. Tiếp đến, sinh viên đưa ra các thống nhất/chuẩn hóa của mình khi thiết kế giao diện như thiết kế nút, điều khiển, vị trí hiển thị thông điệp phản hồi, phối màu, v.v. Sau cùng sinh viên đưa ra một số hình ảnh minh họa thiết kế giao diện cho các chức năng quan trọng nhất. Lưu ý, sinh viên không nhầm lẫn giao diện thiết kế với giao diện của sản phẩm sau cùng.
-\subsection{Thiết kế lớp}
-Phần này có độ dài từ ba đến bốn trang. Sinh viên trình bày thiết kế chi tiết các thuộc tính và phương thức cho một số lớp chủ đạo/quan trọng nhất của ứng dụng (từ 2-4 lớp). Thiết kế chi tiết cho các lớp khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
+\label{section:4.2}
 
-Để minh họa thiết kế lớp, sinh viên thiết kế luồng truyền thông điệp giữa các đối tượng tham gia cho 2 đến 3 use case quan trọng nào đó bằng biểu đồ trình tự (hoặc biểu đồ giao tiếp).
+\subsection{Thiết kế giao diện}
+Giao diện JQK Study được phát triển theo triết lý hiện đại, tương thích tốt với nhiều kích thước màn hình (Responsive Design) từ thiết bị di động đến máy tính để bàn nhờ TailwindCSS. Các quy chuẩn thiết kế giao diện bao gồm:
+\begin{itemize}
+    \item **Hệ màu:** Sử dụng hệ màu tối (dark mode) làm chủ đạo với các tông màu xám lạnh kết hợp màu xanh ngọc (cyan) tạo nét cao cấp.
+    \item **Màn hình làm bài thi:** Được thiết kế tối giản, tập trung tối đa vào nội dung câu hỏi. Có khu vực cố định hiển thị thời gian đếm ngược trực quan và danh sách trạng thái các câu hỏi đã làm/chưa làm.
+    \item **Giao diện Giảng viên:** Dashboard trực quan sử dụng thư viện biểu đồ Recharts hiển thị thống kê điểm số, phân phối phổ điểm và danh sách cảnh báo vi phạm chi tiết của từng sinh viên.
+\end{itemize}
+
+\subsection{Thiết kế lớp nghiệp vụ}
+Dựa trên kiến trúc mã nguồn nghiệp vụ của các dịch vụ, các interface chính được thiết kế để điều phối hoạt động bao gồm:
+
+\textbf{1. Phân hệ User Service:}
+\begin{itemize}
+    \item `UserService`: Định nghĩa các phương thức nghiệp vụ đăng ký (`Register`), đăng nhập (`Login`), lấy thông tin tài khoản (`GetProfile`), tạo lớp học (`CreateClass`), và quản lý thành viên lớp học.
+    \item `UserRepository`: Cung cấp giao diện tương tác dữ liệu như lưu người dùng mới (`CreateUser`), tìm kiếm tài khoản theo email (`GetUserByEmail`), tạo lớp học (`CreateClass`), và gán học viên vào lớp.
+\end{itemize}
+
+\textbf{2. Phân hệ Course Service:}
+\begin{itemize}
+    \item `CourseService`: Thực hiện nghiệp vụ tạo khóa học, quản lý chương học, bài giảng video, ghi nhận tiến độ xem bài giảng và đăng ký khóa học.
+    \item `CourseRepository`: Thực hiện lưu trữ thông tin khóa học (`CreateCourse`), bài học (`CreateLesson`), lưu tiến trình học tập (`CreateEnrollment`, `UpdateProgress`).
+\end{itemize}
+
+\textbf{3. Phân hệ Exam Service:}
+\begin{itemize}
+    \item `ExamService`: Xử lý nghiệp vụ tạo đề thi thủ công hoặc tự động (`CreateExam`, `GenerateExam`), lưu trữ câu trả lời của thí sinh theo thời gian thực (`SubmitAnswer`), chấm điểm tự động (`SubmitExam`), ghi nhận vi phạm gian lận và kết xuất kết quả thi.
+    \item `ExamRepository`: Quản lý các thao tác ghi dữ liệu đề thi (`CreateExam`), ngân hàng câu hỏi (`CreateQuestion`), tạo bài làm mới (`CreateSubmission`), lưu kết quả làm bài của thí sinh (`SaveUserAnswer`), và ghi lại vi phạm (`LogViolation`).
+\end{itemize}
+
 \subsection{Thiết kế cơ sở dữ liệu}
-Phần này có độ dài từ hai đến bốn trang. Sinh viên thiết kế, vẽ và giải thích biểu đồ thực thể liên kết (E-R diagram). Từ đó, sinh viên thiết kế cơ sở dữ liệu tùy theo hệ quản trị cơ sở dữ liệu mà mình sử dụng (SQL, NoSQL, Firebase, v.v.)
+Hệ thống sử dụng cơ sở dữ liệu quan hệ PostgreSQL với các bảng được phân tách độc lập theo từng vi dịch vụ để đảm bảo tính cô lập dữ liệu.
+
+\textbf{1. Các bảng dữ liệu của User Service:}
+\begin{itemize}
+    \item \texttt{roles}: Lưu trữ vai trò người dùng (id, name).
+    \item \texttt{users}: Thông tin người dùng (id, \texttt{full\_name}, email, password, \texttt{role\_id}, \texttt{created\_at}, \texttt{updated\_at}).
+    \item \texttt{classes}: Lưu thông tin lớp học (id, name, code, description, \texttt{teacher\_id}, \texttt{is\_active}).
+    \item \texttt{class\_members}: Liên kết nhiều-nhiều giữa lớp học và học viên (\texttt{class\_id}, \texttt{user\_id}, role, status, \texttt{joined\_at}).
+\end{itemize}
+
+\textbf{2. Các bảng dữ liệu của Course Service:}
+\begin{itemize}
+    \item \texttt{courses}: Lưu thông tin khóa học (id, title, description, \texttt{instructor\_id}, price, \texttt{is\_published}).
+    \item \texttt{course\_sections}: Phân chia chương học (id, \texttt{course\_id}, title, \texttt{order\_index}).
+    \item \texttt{lessons}: Chi tiết bài học (id, \texttt{section\_id}, title, \texttt{type\_id}, \texttt{content\_url}, \texttt{duration\_seconds}, \texttt{order\_index}).
+    \item \texttt{enrollments}: Học viên tham gia khóa học (\texttt{user\_id}, \texttt{course\_id}, \texttt{enrolled\_at}).
+    \item \texttt{lesson\_progresses}: Theo dõi tiến độ xem bài học (\texttt{user\_id}, \texttt{lesson\_id}, \texttt{completed\_at}).
+\end{itemize}
+
+\textbf{3. Các bảng dữ liệu của Exam Service (Dịch vụ thi):}
+\begin{itemize}
+    \item \texttt{topics} và \texttt{exam\_sections}: Quản lý danh mục ngân hàng câu hỏi.
+    \item \texttt{questions}: Lưu trữ nội dung câu hỏi, loại câu hỏi (một đáp án/nhiều đáp án), độ khó (dễ, trung bình, khó), giải thích đáp án.
+    \item \texttt{choices}: Danh sách các câu trả lời lựa chọn của câu hỏi (id, \texttt{question\_id}, content, \texttt{is\_correct}).
+    \item \texttt{exams}: Thông tin kỳ thi (id, title, \texttt{duration\_minutes}, \texttt{start\_time}, \texttt{end\_time}, \texttt{max\_attempts}, password, \texttt{is\_dynamic}, \texttt{dynamic\_config}, status). Cột \texttt{dynamic\_config} lưu cấu hình sinh đề dạng JSONB bao gồm tỷ lệ phân bổ độ khó và số lượng câu hỏi cần lấy theo từng chủ đề.
+    \item \texttt{exam\_questions}: Liên kết danh sách câu hỏi cố định trong đề thi.
+    \item \texttt{exam\_submissions}: Lưu thông tin bài nộp của học viên (id, \texttt{exam\_id}, \texttt{user\_id}, score, \texttt{started\_at}, \texttt{submitted\_at}).
+    \item \texttt{user\_answers}: Lưu câu trả lời chi tiết của thí sinh đối với từng câu hỏi trong lượt làm bài (\texttt{submission\_id}, \texttt{question\_id}, \texttt{chosen\_choice\_id}, \texttt{is\_correct}, \texttt{awarded\_points}).
+    \item \texttt{exam\_violations}: Lưu trữ nhật ký vi phạm (id, \texttt{exam\_id}, \texttt{user\_id}, \texttt{violation\_type}, \texttt{violation\_time}) nhằm lưu bằng chứng khi thí sinh rời màn hình hoặc thực hiện sao chép trong phòng thi.
+\end{itemize}
 
 \section{Xây dựng ứng dụng}
+\label{section:4.3}
+
 \subsection{Thư viện và công cụ sử dụng}
-Sinh viên liệt kê các công cụ, ngôn ngữ lập trình, API, thư viện, IDE, công cụ kiểm thử, v.v. mà mình sử dụng để phát triển ứng dụng. Mỗi công cụ phải được chỉ rõ phiên bản sử dụng. SV nên kẻ bảng mô tả tương tự như Bảng \ref{table:my_label}. Nếu có nhiều nội dung trình bày, sinh viên cần xoay ngang bảng.
+Các công cụ phát triển phần mềm được sử dụng trong đồ án JQK Study được tổng hợp chi tiết trong Bảng \ref{table:my_label}.
 
 \begin{table}[H]
-\centering{}
+\centering
     \begin{tabular}{lll}
         \hline
-        \textbf{Mục đích} & \textbf{Công cụ}       & \textbf{Địa chỉ URL}    \\ \hline
-        IDE lập trình     & Eclipse Oxygen a64 bit & http://www.eclipse.org/ \\ \hline
-        v.v.              & v.v.                   & v.v.                    \\ \hline
-        \end{tabular}
-    \caption{Danh sách thư viện và công cụ sử dụng}
-    \label{fig:my_label}
+        \textbf{Mục đích} & \textbf{Công cụ/Thư viện} & \textbf{Phiên bản/Địa chỉ URL} \\ \hline
+        Ngôn ngữ lập trình Backend & Go (Golang) & v1.25.3 / https://go.dev \\ 
+        Framework giao tiếp API & gRPC & v1.62.0 / https://grpc.io \\ 
+        Bộ thư viện ORM Go & GORM & v1.31.0 / https://gorm.io \\ 
+        Cơ sở dữ liệu chính & PostgreSQL & v16.0 / https://www.postgresql.org \\ 
+        Hệ thống lưu đệm & Redis & v7.0 / https://redis.io \\ 
+        Hệ thống hàng đợi sự kiện & Apache Kafka & v3.5.0 / https://kafka.apache.org \\ 
+        Framework phát triển Frontend & Next.js & v16.0.1 / https://nextjs.org \\ 
+        Đóng gói ứng dụng & Docker & v24.0 / https://www.docker.com \\ 
+        Hệ thống điều phối ứng dụng & Kubernetes & v1.28.2 / https://kubernetes.io \\ 
+        Công cụ phát triển hot-reload & Tilt & v0.33 / https://tilt.dev \\ \hline
+    \end{tabular}
+    \caption{Danh sách thư viện và công cụ phát triển hệ thống}
+    \label{table:my_label}
 \end{table}
 
 \subsection{Kết quả đạt được}
-Sinh viên trước tiên mô tả kết quả đạt được của mình là gì, ví dụ như các sản phẩm được đóng gói là gì, bao gồm những thành phần nào, ý nghĩa, vai trò?
-
-Sinh viên cần thống kê các thông tin về ứng dụng của mình như: số dòng code, số lớp, số gói, dung lượng toàn bộ mã nguồn, dung lượng của từng sản phẩm đóng gói, v.v. Tương tự như phần liệt kê về công cụ sử dụng, sinh viên cũng nên dùng bảng để mô tả phần thông tin thống kê này.
+Hệ thống JQK Study đã được xây dựng và đóng gói hoàn chỉnh thành 5 Docker Container độc lập: `api-gateway`, `user-service`, `exam-service`, `course-service`, và `notification-service`. Tổng số dòng code Go phía backend khoảng 12,000 dòng và Next.js frontend khoảng 8,500 dòng TypeScript. Hệ thống hoạt động trơn tru trên cụm Kubernetes cục bộ được điều khiển bởi Tilt, tự động quản lý kết nối cơ sở dữ liệu và phục vụ giao diện tại cổng 4001.
 
 \subsection{Minh họa các chức năng chính}
-Sinh viên lựa chọn và đưa ra màn hình cho các chức năng chính, quan trọng, và thú vị nhất. Mỗi giao diện cần phải có lời giải thích ngắn gọn. Khi giải thích, sinh viên có thể kết hợp với các chú thích ở trong hình ảnh giao diện.
+Các chức năng chính bao gồm:
+1. **Làm bài thi trực tuyến:** Màn hình làm bài được khóa tương tác bên ngoài, đồng hồ tự động đếm ngược và cập nhật đáp án về server mỗi 30 giây (auto-save).
+2. **Dashboard giám sát vi phạm:** Giảng viên xem được danh sách sinh viên vi phạm kèm số lần chuyển tab cụ thể và thời gian vi phạm chính xác.
+3. **Sinh đề thi tự động:** Giảng viên chọn chủ đề, nhập tỷ lệ độ khó và hệ thống tự động bốc đề ngẫu nhiên từ ngân hàng câu hỏi.
 
-\section{Kiểm thử}
-Phần này có độ dài từ hai đến ba trang. Sinh viên thiết kế các trường hợp kiểm thử cho hai đến ba chức năng quan trọng nhất. Sinh viên cần chỉ rõ các kỹ thuật kiểm thử đã sử dụng. Chi tiết các trường hợp kiểm thử khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
-Sinh viên sau cùng tổng kết về số lượng các trường hợp kiểm thử và kết quả kiểm thử. Sinh viên cần phân tích lý do nếu kết quả kiểm thử không đạt.
-\section{Triển khai}
-Sinh viên trình bày mô hình và/hoặc cách thức triển khai thử nghiệm/thực tế. Ứng dụng của sinh viên được triển khai trên server/thiết bị gì, cấu hình như thế nào. Kết quả triển khai thử nghiệm nếu có (số lượng người dùng, số lượng truy cập, thời gian phản hồi, phản hồi người dùng, khả năng chịu tải, các thống kê, v.v.)
+\section{Kiểm thử và Triển khai}
+\label{section:4.4}
+
+Hệ thống được kiểm thử thông qua các phương pháp kiểm thử đơn vị (Unit Test) cho các hàm xử lý tính toán điểm thi, xáo trộn câu hỏi và kiểm thử tích hợp (Integration Test) cho luồng nghiệp vụ từ khi bắt đầu thi, tự động lưu câu trả lời, gửi cảnh báo vi phạm cho đến khi nộp bài thi thành công.
+
+Về triển khai, hệ thống JQK Study được cấu hình triển khai trên nền tảng Kubernetes. Trong môi trường kiểm thử phát triển, Tilt được cấu hình để tự động hóa quá trình biên dịch mã nguồn, build lại docker image và deploy nóng lên cụm Kubernetes cục bộ mỗi khi lập trình viên lưu mã nguồn. Khi đưa vào vận hành thực tế, hệ thống có thể được dễ dàng phân phối lên các dịch vụ đám mây (AWS EKS hoặc Google GKE) với khả năng tự động co giãn số lượng Pod dựa trên mức độ sử dụng CPU thông qua cấu hình Horizontal Pod Autoscaler.
 
 \end{document}

@@ -1,11 +1,55 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
-Nếu trong nội dung chính không đủ không gian cho các use case khác (ngoài các use case nghiệp vụ chính) thì đặc tả thêm cho các use case đó ở đây.
 
-\section{Đặc tả use case ``Thống kê tình hình mượn sách''}
-\ldots
+Phụ lục này trình bày các đặc tả chi tiết cho một số use case quan trọng khác của hệ thống JQK Study nhằm bổ sung chi tiết cho các phân tích ở Chương 2.
 
-\section{Đặc tả use case ``Đăng ký làm thẻ mượn''}
-\ldots
+\section{Đặc tả use case ``Import câu hỏi từ Excel''}
+\label{appendix:B.1}
+
+\textbf{1. Tác nhân:} Giảng viên (Instructor). \\
+\textbf{2. Mục đích:} Giúp giảng viên nhanh chóng đưa hàng trăm câu hỏi vào ngân hàng câu hỏi của hệ thống mà không cần nhập thủ công từng câu một. \\
+\textbf{3. Tiền điều kiện:} Giảng viên đã đăng nhập thành công vào trang quản trị và chuẩn bị sẵn tệp Excel chứa câu hỏi đúng định dạng quy định của hệ thống. \\
+\textbf{4. Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Giảng viên truy cập vào giao diện quản lý câu hỏi và chọn mục "Import từ Excel".
+    \item Hệ thống hiển thị liên kết tải xuống tệp mẫu (Template file) nếu giảng viên chưa có.
+    \item Giảng viên tải lên tệp Excel chứa danh sách câu hỏi cần Import và chọn chủ đề (Topic) đích.
+    \item Hệ thống tiếp nhận tệp tin, tiến hành kiểm tra tính hợp lệ của cấu trúc tệp (đúng số cột, đúng định dạng).
+    \item Hệ thống đọc từng dòng dữ liệu:
+    \begin{enumerate}
+        \item Phân tích nội dung câu hỏi, độ khó, và giải thích.
+        \item Đọc danh sách các lựa chọn đáp án tương ứng và cờ đánh dấu đáp án đúng.
+        \item Lưu thông tin câu hỏi và đáp án vào cơ sở dữ liệu.
+    \end{enumerate}
+    \item Hệ thống thông báo kết quả import thành công và số lượng câu hỏi đã được thêm mới.
+\end{enumerate}
+\textbf{5. Luồng sự kiện phụ/Ngoại lệ:}
+\begin{itemize}
+    \item \textit{Tệp tin tải lên sai cấu trúc hoặc trống:} Hệ thống hủy bỏ giao dịch import, thông báo lỗi định dạng tệp và hướng dẫn người dùng tải lại tệp mẫu.
+    \item \textit{Dữ liệu trong dòng bị thiếu trường bắt buộc (như nội dung câu hỏi hoặc không có đáp án đúng):} Hệ thống bỏ qua dòng đó, tiếp tục import các dòng hợp lệ khác và đưa ra thông báo cảnh báo chi tiết các dòng bị lỗi để giảng viên sửa đổi sau.
+\end{itemize}
+\textbf{6. Hậu điều kiện:} Các câu hỏi hợp lệ được lưu trữ thành công trong ngân hàng câu hỏi dưới chủ đề đã chọn.
+
+\section{Đặc tả use case ``Làm bài thi trực tuyến và tự động lưu''}
+\label{appendix:B.2}
+
+\textbf{1. Tác nhân:} Học viên (Student). \\
+\textbf{2. Mục đích:} Học viên thực hiện làm bài thi trắc nghiệm trực tuyến, hệ thống đảm bảo kết quả làm bài của học viên được lưu giữ liên tục để tránh rủi ro mất kết nối. \\
+\textbf{3. Tiền điều kiện:} Học viên đã đăng ký tham gia lớp học có gán đề thi đang mở, đáp ứng đủ điều kiện về số lượt làm bài và mật khẩu bài thi (nếu có). \\
+\textbf{4. Luồng sự kiện chính:}
+\begin{enumerate}
+    \item Học viên nhấn chọn "Bắt đầu làm bài thi".
+    \item Hệ thống ghi nhận mốc thời gian bắt đầu làm bài trên server, khởi tạo lượt thi (Submission) ở trạng thái "Đang làm" (In Progress), và hiển thị danh sách câu hỏi cùng đồng hồ đếm ngược thời gian.
+    \item Học viên đọc và chọn đáp án cho từng câu hỏi.
+    \item Định kỳ mỗi 30 giây hoặc ngay khi học viên chọn đáp án, trình duyệt tự động gửi yêu cầu API lưu nháp (auto-save) các câu trả lời hiện tại về máy chủ.
+    \item Hệ thống cập nhật các lựa chọn đáp án tạm thời vào bảng \texttt{user\_answers} ứng với Submission ID.
+    \item Khi hoàn thành, học viên bấm "Nộp bài". Hệ thống tiến hành khóa giao diện làm bài, tính điểm tự động và chuyển trạng thái Submission sang "Đã nộp" (Submitted).
+\end{enumerate}
+\textbf{5. Luồng sự kiện phụ/Ngoại lệ:}
+\begin{itemize}
+    \item \textit{Học viên mất kết nối internet trong khi thi:} Giao diện hiển thị cảnh báo mất kết nối. Sau khi mạng phục hồi, hệ thống tiếp tục tự động lưu nháp dữ liệu mà không làm gián đoạn bài làm của học viên.
+    \item \textit{Thời gian làm bài đếm ngược về 0:} Hệ thống tự động kích hoạt tiến trình nộp bài từ phía máy chủ với các đáp án nháp đã được lưu gần nhất và kết thúc lượt thi của thí sinh.
+\end{itemize}
+\textbf{6. Hậu điều kiện:} Kết quả bài thi được lưu trữ an toàn, học sinh xem được điểm số (nếu cài đặt đề thi cho phép).
 
 \end{document}

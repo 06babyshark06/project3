@@ -1,15 +1,83 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này có độ dài không quá 10 trang. Nếu cần trình bày dài hơn, sinh viên đưa vào phần phụ lục. Chú ý đây là kiến thức đã có sẵn; SV sau khi tìm hiểu được thì phân tích và tóm tắt lại. Sinh viên không trình bày dài dòng, chi tiết. 
+Chương này trình bày các cơ sở lý thuyết và công nghệ cốt lõi được sử dụng để xây dựng hệ thống JQK Study. Với từng công nghệ được lựa chọn, đồ án sẽ phân tích lý do sử dụng, vai trò của nó trong việc giải quyết các yêu cầu nghiệp vụ ở Chương 2, đồng thời so sánh với các giải pháp thay thế để làm rõ tính khoa học của sự lựa chọn.
 
-Với đồ án ứng dụng, sinh viên để tên chương là “Nền tảng lý thuyết và Công nghệ sử dụng”. Trong chương này, sinh viên giới thiệu về các công nghệ, nền tảng lý thuyết sử dụng trong đồ án. Sinh viên cũng có thể trình bày thêm nền tảng lý thuyết nào đó nếu cần dùng tới.
+\section{Kiến trúc Microservices}
+\label{section:3.1}
+Kiến trúc Microservices (vi dịch vụ) là một hướng tiếp cận phát triển phần mềm trong đó ứng dụng được chia nhỏ thành một tập hợp các dịch vụ có kích thước nhỏ, chạy độc lập và giao tiếp với nhau qua mạng thông qua các giao thức nhẹ như HTTP/REST hoặc gRPC. 
 
-Với từng công nghệ/nền tảng/lý thuyết được trình bày, sinh viên phải phân tích rõ công nghệ/nền tảng/lý thuyết đó dùng để để giải quyết vấn đề/yêu cầu cụ thể nào ở Chương 2. Hơn nữa, với từng vấn đề/yêu cầu, sinh viên phải liệt kê danh sách các công nghệ/hướng tiếp cận tương tự có thể dùng làm lựa chọn thay thế, rồi giải thích rõ sự lựa chọn của mình.
+\textbf{Giải quyết yêu cầu:} Hệ thống thi trắc nghiệm thường có lượng truy cập không đồng đều. Lượng truy cập vào các chức năng học tập thông thường khá thấp, nhưng khi có kỳ thi diễn ra, lượng truy cập vào dịch vụ làm bài thi và ghi nhận vi phạm tăng đột biến. Việc áp dụng Microservices cho phép co giãn (scale-out) riêng biệt dịch vụ thi (\textit{Exam Service}) mà không cần phải nhân bản toàn bộ hệ thống, giúp tối ưu hóa tài nguyên phần cứng.
 
-Lưu ý: Nội dung ĐATN phải có tính chất liên kết, liền mạch, và nhất quán. Vì vậy, các công nghệ/thuật toán trình bày trong chương này phải khớp với nội dung giới thiệu của sinh viên ở phần trước đó. 
+\textbf{So sánh lựa chọn thay thế:}
+\begin{itemize}
+    \item \textit{Kiến trúc Monolithic (Đơn khối)}: Dễ xây dựng ở giai đoạn đầu, tuy nhiên khó mở rộng, mã nguồn ngày càng phình to dẫn đến khó bảo trì, và khi một phần nhỏ gặp sự cố (như rò rỉ bộ nhớ ở module thi) có thể làm sập toàn bộ hệ thống. Do đó, đồ án quyết định chọn Microservices để đảm bảo tính mở rộng bền vững.
+\end{itemize}
 
-Trong chương này, để tăng tính khoa học và độ tin cậy, sinh viên nên chỉ rõ nguồn kiến thức mình thu thập được ở tài liệu nào, đồng thời đưa tài liệu đó vào trong danh sách tài liệu tham khảo rồi tạo các tham chiếu chéo (xem hướng dẫn ở phụ lục A.7).
+\section{Ngôn ngữ lập trình Go (Golang)}
+\label{section:3.2}
+Go là ngôn ngữ biên dịch mã nguồn mở được phát triển bởi Google, nổi bật với hiệu năng thực thi cao gần tương đương C/C++, cấu trúc cú pháp tối giản và hỗ trợ lập trình song song xuất sắc thông qua khái niệm \textit{Goroutines} và \textit{Channels}.
 
+\textbf{Giải quyết yêu cầu:} Trong thời gian diễn ra bài thi, backend phải xử lý đồng thời hàng ngàn yêu cầu ghi nhận đáp án nháp (auto-save) và các sự kiện vi phạm gửi về liên tục từ client. Go cung cấp cơ chế non-blocking I/O mạnh mẽ, cho phép chạy hàng chục ngàn luồng nhẹ (Goroutines) đồng thời với mức tiêu hao bộ nhớ rất thấp (chỉ khoảng vài KB mỗi Goroutine), đáp ứng hoàn hảo yêu cầu hiệu năng cao và thời gian phản hồi nhanh của hệ thống.
+
+\textbf{So sánh lựa chọn thay thế:}
+\begin{itemize}
+    \item \textit{Java / C#}: Hiệu năng rất tốt nhưng thời gian khởi động chậm và tiêu tốn nhiều tài nguyên bộ nhớ RAM (thường cần cấu hình RAM tối thiểu lớn cho mỗi service).
+    \item \textit{Node.js (JavaScript)}: Single-threaded nên xử lý các tác vụ tính toán nặng (như xáo trộn đề thi hoặc tính điểm số lượng lớn) có thể gây nghẽn event loop.
+\end{itemize}
+Do đó, Go là lựa chọn tối ưu về mặt cân bằng giữa hiệu năng và tài nguyên hệ thống.
+
+\section{Framework Next.js}
+\label{section:3.3}
+Next.js là một framework JavaScript được xây dựng trên nền tảng thư viện React, hỗ trợ các chế độ render linh hoạt bao gồm Server-Side Rendering (SSR), Static Site Generation (SSG) và Client-Side Rendering (CSR).
+
+\textbf{Giải quyết yêu cầu:} Next.js giúp tối ưu hiệu năng hiển thị phía client nhờ cơ chế tải trang nhanh, tự động chia nhỏ code (code splitting). Việc sử dụng App Router thế hệ mới giúp quản lý trạng thái chuyển trang mượt mà, đồng thời hỗ trợ SEO tốt cho các trang khóa học công cộng.
+
+\textbf{So sánh lựa chọn thay thế:}
+\begin{itemize}
+    \item \textit{React (Single Page Application - SPA) với Vite}: Tải toàn bộ bundle JS về trình duyệt ở lần đầu truy cập, khiến thời gian tải trang ban đầu (FCP) lâu hơn và khó tối ưu hóa SEO.
+\end{itemize}
+
+\section{Giao thức truyền thông gRPC và Protocol Buffers}
+\label{section:3.4}
+gRPC là một framework gọi hàm từ xa (RPC) hiệu năng cao, mã nguồn mở do Google phát triển, hoạt động trên giao thức truyền tải HTTP/2. gRPC sử dụng Protocol Buffers làm ngôn ngữ định nghĩa giao diện (IDL) và định dạng tuần tự hóa dữ liệu dạng nhị phân siêu nén.
+
+\textbf{Giải quyết yêu cầu:} Trong kiến trúc Microservices, giao tiếp giữa API Gateway và các dịch vụ nội bộ (User, Exam, Course) xảy ra liên tục. Sử dụng gRPC giúp giảm đáng kể kích thước gói tin truyền tải trên mạng và tăng tốc độ xử lý tuần tự hóa dữ liệu so với JSON truyền thống, đảm bảo độ trễ truyền thông liên dịch vụ gần như bằng không.
+
+\textbf{So sánh lựa chọn thay thế:}
+\begin{itemize}
+    \item \textit{REST API (JSON over HTTP/1.1)}: Gói tin dạng text có kích thước lớn, giao thức HTTP/1.1 bị giới hạn bởi vấn đề Head-of-Line blocking và không hỗ trợ kết nối ghép kênh (multiplexing) mạnh mẽ như HTTP/2 của gRPC.
+\end{itemize}
+
+\section{Hệ quản trị cơ sở dữ liệu PostgreSQL}
+\label{section:3.5}
+PostgreSQL là hệ quản trị cơ sở dữ liệu quan hệ (RDBMS) mã nguồn mở mạnh mẽ, tuân thủ nghiêm ngặt các tính chất ACID (Atomicity, Consistency, Isolation, Durability) và hỗ trợ rất tốt kiểu dữ liệu JSONB phi cấu trúc.
+
+\textbf{Giải quyết yêu cầu:} Dữ liệu thi cử đòi hỏi độ chính xác tuyệt đối (không được mất điểm, không được sai lệch câu trả lời). Cơ chế transaction của PostgreSQL bảo đảm an toàn dữ liệu. Đồng thời, cấu hình sinh đề thi tự động dưới dạng linh hoạt (dynamic config) được lưu trữ tối ưu dưới định dạng JSONB trong PostgreSQL mà vẫn đảm bảo tốc độ truy vấn cao.
+
+\textbf{So sánh lựa chọn thay thế:}
+\begin{itemize}
+    \item \textit{MongoDB (NoSQL)}: Rất linh hoạt nhưng không hỗ trợ tốt các mối quan hệ ràng buộc phức tạp giữa các thực thể như User - Class - Exam - Submission, và các giao dịch nhiều bảng khó đảm bảo tính nhất quán tuyệt đối.
+\end{itemize}
+
+\section{Hệ thống lưu trữ đệm Redis}
+\label{section:3.6}
+Redis là một kho lưu trữ cấu trúc dữ liệu trong bộ nhớ (In-memory), mã nguồn mở, được sử dụng làm cơ sở dữ liệu tạm thời, bộ nhớ đệm (cache) và môi giới tin nhắn.
+
+\textbf{Giải quyết yêu cầu:} Redis lưu trữ các phiên đăng nhập (JWT token), thông tin cấu hình kỳ thi đang diễn ra, và lưu trữ trạng thái làm bài tạm thời của học sinh. Việc này giúp giảm tải đến hơn 70\% truy vấn đọc trực tiếp vào cơ sở dữ liệu chính PostgreSQL trong suốt thời gian thi.
+
+\section{Hệ thống hàng đợi thông điệp Apache Kafka}
+\label{section:3.7}
+Apache Kafka là một nền tảng truyền trực tuyến sự kiện phân tán, có khả năng xử lý hàng triệu sự kiện mỗi giây với độ trễ cực thấp và độ tin cậy cao nhờ cơ chế ghi log tuần tự và phân mảnh (partitioning).
+
+\textbf{Giải quyết yêu cầu:} Khi học viên nộp bài thi, ngoài việc tính điểm và lưu cơ sở dữ liệu, hệ thống cần thực hiện nhiều tác vụ phụ như gửi email kết quả, cập nhật tiến độ lớp học, và cập nhật bảng xếp hạng. Thay vì thực hiện đồng bộ gây chậm trễ cho học viên, Exam Service đẩy sự kiện `ExamSubmittedEvent` vào Kafka. Notification Service sẽ tiêu thụ (consume) sự kiện này để gửi thông báo bất đồng bộ, giúp cô lập sự cố và đảm bảo hệ thống không bị quá tải.
+
+\section{Công nghệ Container hóa và Điều phối (Docker \& Kubernetes)}
+\label{section:3.8}
+Docker giúp đóng gói mã nguồn và tất cả các thư viện phụ thuộc của từng service thành một container image duy nhất, đảm bảo tính nhất quán giữa các môi trường lập trình và triển khai thực tế. Kubernetes (K8s) đảm nhận vai trò tự động hóa việc triển khai, co giãn quy mô và quản lý các ứng dụng container hóa này.
+
+\textbf{Giải quyết yêu cầu:} Đảm bảo hệ thống đạt tính sẵn sàng cao (High Availability). Khi số lượng sinh viên truy cập làm bài tăng vọt, Kubernetes sẽ tự động nhân bản (scale-up) số lượng pod của Exam Service thông qua cơ chế Horizontal Pod Autoscaler (HPA), và tự động phân phối tải đều giữa các pod để tránh tắc nghẽn cục bộ.
+
+Tóm lại, sự kết hợp đồng bộ giữa các công nghệ trên tạo nên một hạ tầng vững chắc cho JQK Study, đáp ứng toàn diện cả yêu cầu chức năng lẫn phi chức năng được đề ra.
 
 \end{document}

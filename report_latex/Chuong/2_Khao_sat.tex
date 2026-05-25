@@ -3,15 +3,85 @@
 
 Chương này trình bày chi tiết về quá trình khảo sát hiện trạng, phân tích các yêu cầu nghiệp vụ và đặc tả chức năng của hệ thống JQK Study. Từ những phân tích này, đồ án xác định được các tác nhân tham gia và quy trình nghiệp vụ cần thiết để xây dựng phần mềm.
 
-\section{Khảo sát hiện trạng}
+\section{Khảo sát hiện trạng và các giải pháp liên quan}
 \label{section:2.1}
-Qua quá trình khảo sát các hệ thống giáo dục trực tuyến hiện hành (như Moodle, Canvas) và nhu cầu thực tế từ các trung tâm đào tạo, có thể nhận thấy các hạn chế phổ biến sau:
+
+Để xây dựng một hệ thống học tập và thi cử trực tuyến toàn diện, việc khảo sát các giải pháp hiện hành là vô cùng cần thiết. Quá trình này giúp nhận diện rõ các ưu điểm cần kế thừa và những hạn chế về mặt nghiệp vụ, từ đó định hình các tính năng cốt lõi cho hệ thống đề xuất JQK Study.
+
+\subsection{Khảo sát các hệ thống giáo dục và thi trực tuyến hiện hành}
+\label{subsection:2.1.1}
+
+Hiện nay, trên thị trường giáo dục trực tuyến trong nước và quốc tế có nhiều giải pháp hỗ trợ học tập và tổ chức thi cử. Dưới đây là phân tích chi tiết từ góc độ nghiệp vụ và tính năng của ba hệ thống tiêu biểu:
+
 \begin{itemize}
-    \item Các hệ thống thường tách biệt giữa tính năng học tập (e-learning) và tính năng thi cử (online testing), khiến quá trình quản lý bị phân mảnh.
-    \item Việc sinh đề thi thường đòi hỏi thao tác thủ công phức tạp, chưa hỗ trợ tốt việc tự động hóa lấy câu hỏi ngẫu nhiên theo chủ đề.
-    \item Thiếu các công cụ giám sát thi cử tích hợp sẵn, đặc biệt là theo dõi hành vi gian lận như chuyển tab, rời khỏi màn hình thi.
+    \item \textbf{Moodle (Modular Object-Oriented Dynamic Learning Environment):}
+    \begin{itemize}
+        \item \textit{Giới thiệu:} Là hệ thống quản lý học tập (LMS) mã nguồn mở phổ biến nhất hiện nay, được ứng dụng rộng rãi tại các trường đại học và cơ sở giáo dục lớn.
+        \item \textit{Ưu điểm về nghiệp vụ:} Cung cấp đầy đủ các hoạt động học tập phong phú (bài giảng slide, diễn đàn thảo luận, bài tập nộp, theo dõi tiến độ); sở hữu phân hệ quản lý ngân hàng câu hỏi rất mạnh mẽ, cho phép tổ chức câu hỏi theo nhiều danh mục phân cấp và hỗ trợ đa dạng loại câu hỏi (trắc nghiệm, điền từ, so khớp, tự luận); cho phép cấu hình chi tiết các quy tắc thi (giới hạn thời gian, số lượt làm bài, cách tính điểm thi).
+        \item \textit{Hạn chế về nghiệp vụ:} Giao diện người dùng và quản trị rất cồng kềnh, phức tạp với quá nhiều cấu hình thừa thãi, gây khó khăn cho giảng viên trong việc tạo nhanh đề thi; quy trình sinh đề thi ngẫu nhiên đòi hỏi phải thiết lập danh mục câu hỏi phức tạp trước đó; thiếu tính năng giám sát chống gian lận trực tuyến tích hợp sẵn (không có cơ chế phát hiện và ngăn chặn học viên chuyển tab trình duyệt, sao chép tài liệu hay rời khỏi màn hình làm bài).
+    \end{itemize}
+    
+    \item \textbf{Canvas LMS:}
+    \begin{itemize}
+        \item \textit{Giới thiệu:} Hệ thống quản lý học tập thương mại dựa trên đám mây, nổi tiếng với thiết kế tập trung vào trải nghiệm người dùng cao cấp tại các cơ sở giáo dục quốc tế.
+        \item \textit{Ưu điểm về nghiệp vụ:} Quy trình tổ chức khóa học khoa học, giao diện làm bài thi trực quan giúp học viên dễ dàng theo dõi thời gian và trạng thái câu hỏi; tính năng chấm điểm và phản hồi bài thi rất tốt với công cụ chấm điểm tập trung; giao diện thân thiện và dễ sử dụng.
+        \item \textit{Hạn chế về nghiệp vụ:} Chi phí sử dụng thương mại rất cao; khả năng tùy biến quy trình thi cử và sinh đề tự động theo các tiêu chí kết hợp (như tỷ lệ phân bổ độ khó kết hợp với chủ đề cụ thể) còn nhiều hạn chế và kém linh hoạt; các tính năng giám sát thi cử bảo mật chuyên sâu (như ngăn chặn sao chép, cảnh báo rời màn hình) không được tích hợp sẵn mà bắt buộc phải liên kết với các dịch vụ giám sát trả phí đắt đỏ của bên thứ ba.
+    \end{itemize}
+
+    \item \textbf{Azota:}
+    \begin{itemize}
+        \item \textit{Giới thiệu:} Nền tảng chuyên biệt cho việc giao bài tập và tổ chức thi trực tuyến, được phát triển phục vụ học sinh, giáo viên phổ thông và các trung tâm đào tạo tại Việt Nam.
+        \item \textit{Ưu điểm về nghiệp vụ:} Nghiệp vụ tạo đề thi cực kỳ nhanh và tối giản nhờ tính năng tự động nhận diện và tách câu hỏi từ file PDF hoặc Word tải lên; hỗ trợ học viên làm bài thi mượt mà trên cả thiết bị di động; có tính năng giám sát chuyển tab thi cơ bản và báo cáo số lần vi phạm cho giáo viên.
+        \item \textit{Hạn chế về nghiệp vụ:} Thiếu phân hệ quản lý học tập (LMS) hoàn chỉnh (không hỗ trợ tổ chức khóa học với bài giảng video tương tác, không theo dõi lộ trình tiến độ học tập có cấu trúc); nghiệp vụ giám sát chống gian lận còn đơn giản, dễ bị học sinh vượt qua bằng các thủ thuật cơ bản hoặc sử dụng thiết bị phụ trợ bên ngoài.
+    \end{itemize}
 \end{itemize}
-Từ những hạn chế đó, yêu cầu đặt ra cho nền tảng JQK Study là phải tích hợp đồng bộ giữa việc học và thi, đồng thời nâng cao khả năng quản lý ngân hàng câu hỏi, sinh đề tự động và giám sát bảo mật.
+
+\subsection{Bảng so sánh chi tiết các hệ thống}
+\label{subsection:2.1.2}
+
+Để có cái nhìn hệ thống, Bảng \ref{table:comparison_systems} so sánh các hệ thống hiện hành với giải pháp JQK Study dựa trên các tiêu chí tính năng và nghiệp vụ quan trọng.
+
+\begin{table}[H]
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{|p{2.0cm}|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{3.2cm}|}
+\hline
+\textbf{Tiêu chí} & \textbf{Moodle} & \textbf{Canvas LMS} & \textbf{Azota} & \textbf{JQK Study (Đề xuất)} \\ \hline
+
+\textbf{Quản lý học tập (LMS)} & Đầy đủ (Bài giảng, tài liệu, diễn đàn, theo dõi tiến độ) & Đầy đủ (Khóa học, lộ trình học tập, tài liệu) & Hạn chế (Chỉ hỗ trợ giao bài tập và tài liệu đi kèm đề thi) & Đầy đủ (Khóa học, bài giảng video, theo dõi tiến độ bài học) \\ \hline
+
+\textbf{Quản lý ngân hàng câu hỏi} & Rất mạnh (Phân cấp danh mục câu hỏi phức tạp, nhiều định dạng) & Tốt (Quản lý ngân hàng câu hỏi dùng chung cho khóa học) & Cơ bản (Lưu trữ danh sách câu hỏi trích xuất từ đề thi tải lên) & Tốt (Quản lý ngân hàng câu hỏi theo Chủ đề và Phần thi phân cấp) \\ \hline
+
+\textbf{Sinh đề thi \& Trộn đề} & Có hỗ trợ nhưng giao diện cấu hình sinh đề ngẫu nhiên phức tạp & Có hỗ trợ chia nhóm câu hỏi nhưng thiếu linh hoạt theo nhiều chiều & Trộn câu hỏi và đáp án nhanh từ đề gốc PDF/Word tải lên & Tự động sinh đề thông minh theo tỷ lệ độ khó và chủ đề định sẵn \\ \hline
+
+\textbf{Giám sát chống gian lận} & Không có sẵn cơ chế chặn chuyển tab hay khóa trình duyệt thi & Yêu cầu cài thêm các tiện ích giám sát có phí từ bên thứ ba & Có phát hiện chuyển tab thi nhưng cơ chế giám sát còn đơn giản & Tích hợp sẵn (Ghi nhận hành vi chuyển tab, sao chép, rời màn hình thi) \\ \hline
+
+\textbf{Làm bài \& Chấm điểm} & Nhiều cấu hình nhưng giao diện thi cũ, chấm tự động câu trắc nghiệm & Giao diện thi trực quan hiện đại, chấm tự luận tốt & Đơn giản, chấm tự động trắc nghiệm, chấm tự luận qua ảnh chụp & Hiện đại, tối giản cho học viên; dashboard thống kê điểm và vi phạm cho giảng viên \\ \hline
+
+\textbf{Quản lý lớp học \& Tham gia} & Gán học viên vào khóa học bằng tài khoản hệ thống hoặc mã ghi danh & Đồng bộ tài khoản trường học hoặc tham gia qua liên kết khóa học & Quản lý danh sách lớp đơn giản, học sinh vào thi qua SĐT/mã đề & Học viên tham gia lớp học chủ động qua mã code (Class Code), gán đề theo lớp \\ \hline
+\end{tabular}
+\caption{Bảng so sánh nghiệp vụ hệ thống JQK Study với các giải pháp hiện có}
+\label{table:comparison_systems}
+\end{table}
+
+\subsection{Nhu cầu thực tế và định hướng giải quyết của JQK Study}
+\label{subsection:2.1.3}
+
+Từ kết quả khảo sát thực tế và bảng so sánh trên, có thể rút ra một số nhận định nghiệp vụ quan trọng:
+\begin{itemize}
+    \item Các hệ thống lớn như Moodle hay Canvas tuy mạnh về tính năng quản lý học tập nhưng lại gặp khó khăn về khả năng phục vụ thi cử quy mô lớn (dễ nghẽn mạng khi học viên cùng nộp bài), đồng thời quy trình giám sát bảo mật phức tạp hoặc tốn kém.
+    \item Các ứng dụng như Azota tuy tiện lợi cho việc tổ chức thi nhanh nhưng lại thiếu hụt các tính năng học tập cốt lõi để học viên tự theo dõi bài giảng video và tiến trình học tập của mình.
+    \item Sự tách biệt giữa học (e-learning) và thi (testing) ở nhiều giải pháp hiện tại làm giảm trải nghiệm học tập liền mạch của học viên và tăng tải trọng quản lý của giảng viên.
+\end{itemize}
+
+Chính vì vậy, nền tảng \textbf{JQK Study} được thiết kế nhằm kết hợp đồng bộ hai phân hệ học và thi:
+\begin{enumerate}
+    \item \textbf{Đồng bộ hóa Học \& Thi}: Cho phép học viên vừa học bài giảng video vừa thực hiện làm bài kiểm tra đánh giá trên cùng một nền tảng duy nhất, giúp kết quả thi và tiến độ học tập được cập nhật đồng bộ.
+    \item \textbf{Quy trình giám sát tích hợp sẵn}: Xây dựng trực tiếp các cơ chế tự động ghi nhận hành vi chuyển tab, sao chép nội dung và rời khỏi phòng thi của học viên ngay tại trình duyệt, lưu trữ nhật ký vi phạm trực quan cho giảng viên mà không yêu cầu cài đặt phần mềm bên thứ ba.
+    \item \textbf{Sinh đề tự động thông minh}: Tự động chọn ngẫu nhiên các câu hỏi từ ngân hàng dựa trên cấu hình tỷ lệ độ khó và chủ đề giảng viên đã định sẵn, giúp cá nhân hóa đề thi và đảm bảo tính khách quan.
+    \item \textbf{Đáp ứng quy mô thi đồng thời lớn}: Đảm bảo lưu trữ nháp bài làm tự động (auto-save) định kỳ từ trình duyệt của học viên lên máy chủ, ngăn chặn tối đa sự cố mất bài làm hoặc nghẽn hệ thống khi có lượng lớn học viên nộp bài thi cùng lúc.
+\end{enumerate}
 
 \section{Tổng quan chức năng}
 \label{section:2.2}
@@ -74,11 +144,31 @@ Hai quy trình nghiệp vụ quan trọng nhất của hệ thống là quy trì
 
 \section{Yêu cầu phi chức năng}
 \label{section:2.4}
-Để đảm bảo hệ thống vận hành trơn tru và hỗ trợ hàng ngàn sinh viên thi cùng lúc, hệ thống yêu cầu:
+
+Để đảm bảo hệ thống JQK Study vận hành ổn định, an toàn và có khả năng phục vụ kỳ thi đồng thời quy mô lớn với hàng ngàn học viên, các yêu cầu phi chức năng về mặt kỹ thuật công nghệ được đặc tả chi tiết như sau:
+
 \begin{itemize}
-    \item \textbf{Hiệu năng:} Hệ thống phải có khả năng mở rộng nhanh chóng (scale-out) khi có lượng truy cập tăng đột biến (sử dụng Kubernetes và Microservices).
-    \item \textbf{Bảo mật:} Các API phải được bảo vệ bằng JWT Token. Mật khẩu người dùng được mã hóa an toàn. Quá trình thi cử yêu cầu cơ chế chống gian lận (giám sát thao tác trình duyệt).
-    \item \textbf{Tính sẵn sàng:} Sử dụng Message Queue (Kafka) và Caching (Redis) để đảm bảo không mất mát dữ liệu khi server quá tải.
+    \item \textbf{Hiệu năng và khả năng mở rộng (Performance \& Scalability):}
+    \begin{itemize}
+        \item Hệ thống phải được thiết kế theo kiến trúc vi dịch vụ (Microservices), phân tách rõ ràng các miền nghiệp vụ (User, Course, Exam, Notification) và triển khai bằng ngôn ngữ lập trình Go để đạt tốc độ xử lý nhanh, tối ưu hóa mức độ chiếm dụng tài nguyên hệ thống.
+        \item Có khả năng tự động mở rộng theo chiều ngang (scale-out) thông qua việc đóng gói các dịch vụ thành các container độc lập và điều phối bằng nền tảng Kubernetes để nhanh chóng nâng số lượng máy chủ xử lý khi tải CPU tăng đột biến trong giờ cao điểm làm bài thi.
+        \item Giao tiếp nội bộ giữa các microservices cần sử dụng giao thức gRPC để giảm thiểu độ trễ truyền tin và băng thông mạng so với REST API truyền thống.
+    \end{itemize}
+
+    \item \textbf{Tính sẵn sàng và độ tin cậy (Availability \& Reliability):}
+    \begin{itemize}
+        \item Hệ thống phải duy trì trạng thái hoạt động liên tục (High Availability) với cơ chế cân bằng tải ở API Gateway.
+        \item Sử dụng bộ nhớ đệm Redis để cache thông tin cấu hình đề thi và thông tin tài khoản, giúp giảm tải truy vấn trực tiếp vào cơ sở dữ liệu chính PostgreSQL.
+        \item Tích hợp hệ thống hàng đợi thông điệp Apache Kafka để truyền tin nhắn bất đồng bộ đối với các tác vụ nặng (như ghi nhận nhật ký vi phạm thời gian thực, gửi email thông báo kết quả thi), đảm bảo không xảy ra tình trạng mất mát dữ liệu hoặc nghẽn hàng đợi khi sinh viên nộp bài thi dồn dập.
+    \end{itemize}
+
+    \item \textbf{Bảo mật và an toàn dữ liệu (Security \& Data Integrity):}
+    \begin{itemize}
+        \item Xác thực và phân quyền truy cập thông qua cơ chế mã thông báo bảo mật JWT (JSON Web Token), ngăn chặn các truy cập API trái phép.
+        \item Sử dụng cơ chế kiểm soát truy cập dựa trên vai trò (Role-Based Access Control - RBAC) để phân quyền chặt chẽ các tài nguyên nghiệp vụ tương ứng cho Admin, Instructor và Student.
+        \item Toàn bộ mật khẩu người dùng phải được băm một chiều bằng thuật toán mã hóa bcrypt trước khi lưu trữ vào cơ sở dữ liệu PostgreSQL.
+        \item Dữ liệu bài thi, đáp án làm bài nháp của thí sinh cần được tự động lưu trữ định kỳ lên máy chủ (mỗi 30 giây) để phòng ngừa sự cố mất kết nối mạng hoặc lỗi phần cứng từ phía thiết bị của thí sinh.
+    \end{itemize}
 \end{itemize}
 
 Tóm lại, Chương 2 đã đặc tả chi tiết các yêu cầu và chức năng nghiệp vụ thiết yếu của hệ thống, làm nền tảng cho việc thiết kế kiến trúc và lựa chọn công nghệ ở các chương tiếp theo.
