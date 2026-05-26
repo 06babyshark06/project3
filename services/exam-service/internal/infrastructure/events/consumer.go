@@ -23,26 +23,29 @@ type KafkaConsumer struct {
 }
 
 func NewKafkaConsumer(service domain.ExamService) (*KafkaConsumer, error) {
-	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "")
+	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
 	apiKey := env.GetString("KAFKA_API_KEY", "")
 	apiSecret := env.GetString("KAFKA_API_SECRET", "")
 	consumerGroup := env.GetString("KAFKA_CONSUMER_GROUP", "exam-service-group")
 
-	if bootstrapServer == "" || apiKey == "" || apiSecret == "" {
-		return nil, fmt.Errorf("cấu hình Kafka bị thiếu")
+	if bootstrapServer == "" {
+		return nil, fmt.Errorf("cấu hình KAFKA_BOOTSTRAP_SERVER bị thiếu")
 	}
 
-	config := &kafka.ConfigMap{
+	configMap := kafka.ConfigMap{
 		"bootstrap.servers": bootstrapServer,
-		"security.protocol": "SASL_SSL",
-		"sasl.mechanisms":   "PLAIN",
-		"sasl.username":     apiKey,
-		"sasl.password":     apiSecret,
 		"group.id":          consumerGroup,
 		"auto.offset.reset": "earliest",
 	}
 
-	c, err := kafka.NewConsumer(config)
+	if apiKey != "" && apiSecret != "" {
+		configMap["security.protocol"] = "SASL_SSL"
+		configMap["sasl.mechanisms"] = "PLAIN"
+		configMap["sasl.username"] = apiKey
+		configMap["sasl.password"] = apiSecret
+	}
+
+	c, err := kafka.NewConsumer(&configMap)
 	if err != nil {
 		return nil, err
 	}

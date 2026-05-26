@@ -68,7 +68,7 @@ docker_build_with_restart(
 )
 
 k8s_yaml('./infra/development/k8s/user-service-deployment.yaml')
-k8s_resource('user-service', resource_deps=['user-service-compile', 'postgres'], labels="services")
+k8s_resource('user-service', resource_deps=['user-service-compile', 'postgres', 'kafka'], labels="services")
 
 ### End of User Service ###
 ### Exam Service ###
@@ -99,7 +99,7 @@ docker_build_with_restart(
 )
 
 k8s_yaml('./infra/development/k8s/exam-service-deployment.yaml')
-k8s_resource('exam-service', resource_deps=['exam-service-compile', 'postgres'], labels="services")
+k8s_resource('exam-service', resource_deps=['exam-service-compile', 'postgres', 'kafka'], labels="services")
 
 ### End of Exam Service ###
 ### Course Service ###
@@ -130,7 +130,7 @@ docker_build_with_restart(
 )
 
 k8s_yaml('./infra/development/k8s/course-service-deployment.yaml')
-k8s_resource('course-service', resource_deps=['course-service-compile', 'postgres'], labels="services")
+k8s_resource('course-service', resource_deps=['course-service-compile', 'postgres', 'kafka'], labels="services")
 
 ### End of Course Service ###
 ### Notification Service ###
@@ -161,7 +161,7 @@ docker_build_with_restart(
 )
 
 k8s_yaml('./infra/development/k8s/notification-service-deployment.yaml')
-k8s_resource('notification-service', resource_deps=['notification-service-compile', 'postgres'], labels="services")
+k8s_resource('notification-service', resource_deps=['notification-service-compile', 'postgres', 'kafka'], labels="services")
 
 ### End of Course Service ###
 ### AI Service ###
@@ -235,3 +235,11 @@ k8s_yaml('./infra/development/k8s/pgbouncer-config.yaml')
 
 k8s_yaml('./infra/development/k8s/pgbouncer-deployment.yaml')
 k8s_resource('pgbouncer', port_forwards=6432, labels="postgres")
+
+### Kafka ###
+k8s_yaml('./infra/development/k8s/kafka-deployment.yaml')
+k8s_resource('kafka', port_forwards=9092, labels="kafka")
+
+### Kafka UI ###
+k8s_yaml('./infra/development/k8s/kafka-ui-deployment.yaml')
+k8s_resource('kafka-ui', port_forwards=8080, resource_deps=['kafka'], labels="kafka")

@@ -16,25 +16,28 @@ type KafkaConsumer struct {
 }
 
 func NewKafkaConsumer(service domain.NotificationService) (*KafkaConsumer, error) {
-	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "")
+	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
 	apiKey := env.GetString("KAFKA_API_KEY", "")
 	apiSecret := env.GetString("KAFKA_API_SECRET", "")
 
-	if bootstrapServer == "" || apiKey == "" || apiSecret == "" {
-		log.Fatal("❌ Cấu hình Kafka (Confluent) bị thiếu trong .env")
+	if bootstrapServer == "" {
+		log.Fatal("❌ Cấu hình KAFKA_BOOTSTRAP_SERVER bị thiếu")
 	}
 
-	config := &kafka.ConfigMap{
+	configMap := kafka.ConfigMap{
 		"bootstrap.servers": bootstrapServer,
-		"security.protocol": "SASL_SSL",
-		"sasl.mechanisms":   "PLAIN",
-		"sasl.username":     apiKey,
-		"sasl.password":     apiSecret,
 		"group.id":          "notification_service_group_v1",
 		"auto.offset.reset": "earliest",
 	}
 
-	c, err := kafka.NewConsumer(config)
+	if apiKey != "" && apiSecret != "" {
+		configMap["security.protocol"] = "SASL_SSL"
+		configMap["sasl.mechanisms"] = "PLAIN"
+		configMap["sasl.username"] = apiKey
+		configMap["sasl.password"] = apiSecret
+	}
+
+	c, err := kafka.NewConsumer(&configMap)
 	if err != nil {
 		return nil, err
 	}

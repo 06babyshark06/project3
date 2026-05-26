@@ -13,25 +13,27 @@ type kafkaProducer struct {
 }
 
 func NewKafkaProducer() (domain.EventProducer, error) {
-	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "")
+	bootstrapServer := env.GetString("KAFKA_BOOTSTRAP_SERVER", "localhost:9092")
 	apiKey := env.GetString("KAFKA_API_KEY", "")
 	apiSecret := env.GetString("KAFKA_API_SECRET", "")
 
-	if bootstrapServer == "" || apiKey == "" || apiSecret == "" {
-		log.Fatal("❌ Cấu hình Kafka (Confluent) bị thiếu trong .env của Exam Service")
+	if bootstrapServer == "" {
+		log.Fatal("❌ Cấu hình KAFKA_BOOTSTRAP_SERVER bị thiếu")
 	}
 
-	config := &kafka.ConfigMap{
+	configMap := kafka.ConfigMap{
 		"bootstrap.servers": bootstrapServer,
-		"security.protocol": "SASL_SSL",
-		"sasl.mechanisms":   "PLAIN",
-		"sasl.username":     apiKey,
-		"sasl.password":     apiSecret,
-
-		"acks": "all",
+		"acks":              "all",
 	}
 
-	p, err := kafka.NewProducer(config)
+	if apiKey != "" && apiSecret != "" {
+		configMap["security.protocol"] = "SASL_SSL"
+		configMap["sasl.mechanisms"] = "PLAIN"
+		configMap["sasl.username"] = apiKey
+		configMap["sasl.password"] = apiSecret
+	}
+
+	p, err := kafka.NewProducer(&configMap)
 	if err != nil {
 		return nil, err
 	}
