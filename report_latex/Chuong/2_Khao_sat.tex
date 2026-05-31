@@ -79,8 +79,54 @@ Các tác nhân tham gia vào hệ thống và vai trò của họ bao gồm:
     \item \textbf{Student}: Học viên có thể đăng ký khóa học, tham gia lớp học qua mã code, học các bài giảng video và thực hiện bài thi trắc nghiệm.
 \end{itemize}
 
-\subsection{Quy trình nghiệp vụ}
+Biểu đồ use case tổng quát mô tả các chức năng chính của từng tác nhân trong hệ thống JQK Study được thể hiện ở Hình~\ref{fig:usecase_tongquat}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Hinhve/General.png}
+    \caption{Biểu đồ use case tổng quát của hệ thống JQK Study}
+    \label{fig:usecase_tongquat}
+\end{figure}
+
+
+\subsection{Biểu đồ use case phân rã Quản lý người dùng}
+\label{subsection:2.2.2}
+Biểu đồ use case phân rã phân hệ Quản lý người dùng chi tiết hóa các hoạt động đăng ký, đăng nhập, quản lý thông tin tài khoản và quản lý lớp học trong hệ thống JQK Study, được thể hiện chi tiết ở Hình~\ref{fig:usecase_user}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Hinhve/User.png}
+    \caption{Biểu đồ use case phân rã phân hệ Quản lý người dùng}
+    \label{fig:usecase_user}
+\end{figure}
+
+
+\subsection{Biểu đồ use case phân rã Quản lý ngân hàng câu hỏi và đề thi}
 \label{subsection:2.2.3}
+Biểu đồ use case phân rã phân hệ Quản lý ngân hàng câu hỏi và đề thi mô tả chi tiết các chức năng như quản lý chủ đề, thêm/sửa/xóa câu hỏi, import câu hỏi từ Excel và thiết lập các tiêu chí đề thi để sinh đề tự động trong hệ thống JQK Study, được thể hiện chi tiết ở Hình~\ref{fig:usecase_questions_exams}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Hinhve/Questions and Exams.png}
+    \caption{Biểu đồ use case phân rã phân hệ Quản lý ngân hàng câu hỏi và đề thi}
+    \label{fig:usecase_questions_exams}
+\end{figure}
+
+
+\subsection{Biểu đồ use case phân rã Làm bài thi}
+\label{subsection:2.2.4}
+Biểu đồ use case phân rã phân hệ Làm bài thi mô tả chi tiết các hoạt động của Học viên (Student) khi tham gia phòng thi, trả lời các câu hỏi trắc nghiệm, hệ thống tự động ghi nhận đáp án (auto-save) và ghi nhận hành vi vi phạm (blur tab, copy/paste) trong suốt quá trình làm bài, được thể hiện chi tiết ở Hình~\ref{fig:usecase_taking_exam}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{Hinhve/Taking Exam.png}
+    \caption{Biểu đồ use case phân rã phân hệ Làm bài thi}
+    \label{fig:usecase_taking_exam}
+\end{figure}
+
+
+\subsection{Quy trình nghiệp vụ}
+\label{subsection:2.2.5}
 Hai quy trình nghiệp vụ quan trọng nhất của hệ thống là quy trình \textbf{Tổ chức thi} và quy trình \textbf{Làm bài thi}.
 
 \textbf{1. Quy trình Tổ chức thi (dành cho Giảng viên):}

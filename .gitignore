@@ -62,3 +62,17 @@ build/
 
 # Secrets
 secrets.yaml
+
+# LaTeX
+*.aux
+*.toc
+*.lof
+*.lot
+*.out
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.run.xml
+*-blx.bib
+*.synctex.gz
