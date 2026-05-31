@@ -7,11 +7,11 @@ Chương này trình bày chi tiết về mặt kỹ thuật của hệ thống 
 \label{section:4.1}
 
 \subsection{Lựa chọn kiến trúc phần mềm}
-Hệ thống JQK Study được phát triển dựa trên **kiến trúc Microservices** (kiến trúc vi dịch vụ), chia nhỏ hệ thống thành các khối dịch vụ độc lập chịu trách nhiệm cho từng miền nghiệp vụ riêng biệt. Việc này cho phép mỗi thành phần hoạt động, lưu trữ dữ liệu độc lập và giao tiếp với nhau qua mạng thông qua các giao thức gọi hàm từ xa tốc độ cao gRPC hoặc thông qua hệ thống truyền tin nhắn bất đồng bộ Kafka.
+Hệ thống JQK Study được phát triển dựa trên \textbf{kiến trúc Microservices} (kiến trúc vi dịch vụ), chia nhỏ hệ thống thành các khối dịch vụ độc lập chịu trách nhiệm cho từng miền nghiệp vụ riêng biệt. Việc này cho phép mỗi thành phần hoạt động, lưu trữ dữ liệu độc lập và giao tiếp với nhau qua mạng thông qua các giao thức gọi hàm từ xa tốc độ cao gRPC hoặc thông qua hệ thống truyền tin nhắn bất đồng bộ Kafka.
 
 Cụ thể, hệ thống được chia làm hai tầng chính:
 \begin{itemize}
-    \item \textbf{Tầng Client (Frontend):} Được xây dựng bằng Next.js (chạy ở cổng `4001`), giao tiếp với Backend thông qua các truy vấn REST API gửi tới API Gateway.
+    \item \textbf{Tầng Client (Frontend):} Được xây dựng bằng Next.js (chạy ở cổng `5000`), giao tiếp với Backend thông qua các truy vấn REST API gửi tới API Gateway.
     \item \textbf{Tầng Services (Backend):} Bao gồm API Gateway đóng vai trò điểm điều phối trung tâm và các vi dịch vụ nghiệp vụ nội bộ (chạy ở các cổng gRPC riêng biệt).
 \end{itemize}
 
@@ -29,9 +29,9 @@ Sự phụ thuộc giữa các dịch vụ tuân thủ nguyên tắc lỏng lẻ
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{Hinhve/Picture1.png}
-    \caption{Biểu đồ phân tầng và phụ thuộc gói của hệ thống}
-    \label{fig:Fig1}
+    \includegraphics[width=0.85\textwidth]{Hinhve/Architecture.pdf}
+    \caption{Biểu đồ kiến trúc các dịch vụ backend và luồng giao tiếp hệ thống}
+    \label{fig:backend_architecture}
 \end{figure}
 
 \subsection{Thiết kế chi tiết gói (Package Design)}
@@ -57,9 +57,9 @@ Mỗi vi dịch vụ backend trong Go được tổ chức cấu trúc thư mụ
 \subsection{Thiết kế giao diện}
 Giao diện JQK Study được phát triển theo triết lý hiện đại, tương thích tốt với nhiều kích thước màn hình (Responsive Design) từ thiết bị di động đến máy tính để bàn nhờ TailwindCSS. Các quy chuẩn thiết kế giao diện bao gồm:
 \begin{itemize}
-    \item **Hệ màu:** Sử dụng hệ màu tối (dark mode) làm chủ đạo với các tông màu xám lạnh kết hợp màu xanh ngọc (cyan) tạo nét cao cấp.
-    \item **Màn hình làm bài thi:** Được thiết kế tối giản, tập trung tối đa vào nội dung câu hỏi. Có khu vực cố định hiển thị thời gian đếm ngược trực quan và danh sách trạng thái các câu hỏi đã làm/chưa làm.
-    \item **Giao diện Giảng viên:** Dashboard trực quan sử dụng thư viện biểu đồ Recharts hiển thị thống kê điểm số, phân phối phổ điểm và danh sách cảnh báo vi phạm chi tiết của từng sinh viên.
+    \item \textbf{Hệ màu:} Sử dụng hệ màu tối (dark mode) làm chủ đạo với các tông màu xám lạnh kết hợp màu xanh ngọc (cyan) tạo nét cao cấp.
+    \item \textbf{Màn hình làm bài thi:} Được thiết kế tối giản, tập trung tối đa vào nội dung câu hỏi. Có khu vực cố định hiển thị thời gian đếm ngược trực quan và danh sách trạng thái các câu hỏi đã làm/chưa làm.
+    \item \textbf{Giao diện Giảng viên:} Dashboard trực quan sử dụng thư viện biểu đồ Recharts hiển thị thống kê điểm số, phân phối phổ điểm và danh sách cảnh báo vi phạm chi tiết của từng sinh viên.
 \end{itemize}
 
 \subsection{Thiết kế lớp nghiệp vụ}
@@ -142,13 +142,13 @@ Các công cụ phát triển phần mềm được sử dụng trong đồ án 
 \end{table}
 
 \subsection{Kết quả đạt được}
-Hệ thống JQK Study đã được xây dựng và đóng gói hoàn chỉnh thành 5 Docker Container độc lập: `api-gateway`, `user-service`, `exam-service`, `course-service`, và `notification-service`. Tổng số dòng code Go phía backend khoảng 12,000 dòng và Next.js frontend khoảng 8,500 dòng TypeScript. Hệ thống hoạt động trơn tru trên cụm Kubernetes cục bộ được điều khiển bởi Tilt, tự động quản lý kết nối cơ sở dữ liệu và phục vụ giao diện tại cổng 4001.
+Hệ thống JQK Study đã được xây dựng và đóng gói hoàn chỉnh thành 5 Docker Container độc lập: `api-gateway`, `user-service`, `exam-service`, `course-service`, và `notification-service`. Tổng số dòng code Go phía backend khoảng 12,000 dòng và Next.js frontend khoảng 8,500 dòng TypeScript. Hệ thống hoạt động trơn tru trên cụm Kubernetes cục bộ được điều khiển bởi Tilt, tự động quản lý kết nối cơ sở dữ liệu và phục vụ giao diện tại cổng 5000.
 
 \subsection{Minh họa các chức năng chính}
 Các chức năng chính bao gồm:
-1. **Làm bài thi trực tuyến:** Màn hình làm bài được khóa tương tác bên ngoài, đồng hồ tự động đếm ngược và cập nhật đáp án về server mỗi 30 giây (auto-save).
-2. **Dashboard giám sát vi phạm:** Giảng viên xem được danh sách sinh viên vi phạm kèm số lần chuyển tab cụ thể và thời gian vi phạm chính xác.
-3. **Sinh đề thi tự động:** Giảng viên chọn chủ đề, nhập tỷ lệ độ khó và hệ thống tự động bốc đề ngẫu nhiên từ ngân hàng câu hỏi.
+1. \textbf{Làm bài thi trực tuyến:} Màn hình làm bài được khóa tương tác bên ngoài, đồng hồ tự động đếm ngược và cập nhật đáp án về server mỗi 30 giây (auto-save).
+2. \textbf{Dashboard giám sát vi phạm:} Giảng viên xem được danh sách sinh viên vi phạm kèm số lần chuyển tab cụ thể và thời gian vi phạm chính xác.
+3. \textbf{Sinh đề thi tự động:} Giảng viên chọn chủ đề, nhập tỷ lệ độ khó và hệ thống tự động bốc đề ngẫu nhiên từ ngân hàng câu hỏi.
 
 \section{Kiểm thử và Triển khai}
 \label{section:4.4}

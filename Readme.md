@@ -131,7 +131,7 @@
                                     ┌─────────────────┐
                                     │   Frontend      │
                                     │   (Next.js)     │
-                                    │   :4001         │
+                                    │   :5000         │
                                     └────────┬────────┘
                                              │
                                              │ REST API
@@ -345,7 +345,7 @@ npm run dev
 
 | Service | URL |
 |---------|-----|
-| Frontend | http://localhost:4001 |
+| Frontend | http://localhost:5000 |
 | API Gateway | http://localhost:8081 |
 | PostgreSQL | localhost:5432 |
 | Redis | redis:6379 |
