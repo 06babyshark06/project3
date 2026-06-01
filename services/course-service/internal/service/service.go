@@ -86,6 +86,8 @@ func (s *courseService) CreateSection(ctx context.Context, req *pb.CreateSection
 		return nil, err
 	}
 
+	s.invalidateCourseCache(ctx, req.CourseId)
+
 	return &pb.CreateSectionResponse{
 		Section: &pb.Section{
 			Id:         createdSection.Id,
@@ -121,6 +123,10 @@ func (s *courseService) CreateLesson(ctx context.Context, req *pb.CreateLessonRe
 
 	if err != nil {
 		return nil, err
+	}
+
+	if courseID, err := s.repo.GetCourseIDBySectionID(ctx, req.SectionId); err == nil {
+		s.invalidateCourseCache(ctx, courseID)
 	}
 
 	return &pb.CreateLessonResponse{
@@ -286,6 +292,8 @@ func (s *courseService) EnrollCourse(ctx context.Context, req *pb.EnrollCourseRe
 		return nil, err
 	}
 
+	s.invalidateCourseCache(ctx, req.CourseId)
+
 	eventPayload := contracts.CourseEnrolledEvent{
 		UserID:      req.UserId,
 		CourseID:    req.CourseId,
@@ -349,6 +357,10 @@ func (s *courseService) MarkLessonCompleted(ctx context.Context, req *pb.MarkLes
 
 	if err != nil {
 		return nil, err
+	}
+
+	if courseID, err := s.repo.GetCourseIDByLessonID(ctx, req.LessonId); err == nil {
+		s.invalidateCourseCache(ctx, courseID)
 	}
 
 	return &pb.MarkLessonCompletedResponse{Success: true}, nil
