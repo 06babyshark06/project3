@@ -148,28 +148,264 @@ Hai quy trình nghiệp vụ quan trọng nhất của hệ thống là quy trì
 \section{Đặc tả chức năng}
 \label{section:2.3}
 
-\subsection{Đặc tả Use case Sinh đề thi tự động}
-\textbf{Tiền điều kiện:} Giảng viên đã đăng nhập và có sẵn câu hỏi trong ngân hàng. \\
-\textbf{Luồng sự kiện chính:}
-\begin{enumerate}
-    \item Giảng viên chọn chức năng "Tạo đề thi tự động".
-    \item Hệ thống yêu cầu nhập các tham số: Chủ đề, số lượng câu hỏi, mức độ khó, thời gian thi.
-    \item Giảng viên xác nhận yêu cầu.
-    \item Hệ thống chạy thuật toán chọn ngẫu nhiên các câu hỏi thỏa mãn điều kiện và tạo thành đề thi mới.
-    \item Hệ thống thông báo tạo thành công.
-\end{enumerate}
-\textbf{Hậu điều kiện:} Đề thi mới được lưu vào cơ sở dữ liệu ở trạng thái Nháp.
+Phần này trình bày đặc tả chi tiết cho 9 use case cốt lõi của hệ thống JQK Study. Các use case được mô tả chi tiết dưới dạng bảng cấu trúc gồm: Tên use case, Tác nhân, Mô tả tóm tắt, Tiền điều kiện, Hậu điều kiện, Luồng sự kiện chính, Luồng thay thế và Luồng ngoại lệ.
 
-\subsection{Đặc tả Use case Giám sát và Nộp bài thi}
-\textbf{Tiền điều kiện:} Học viên đang trong phiên làm bài thi. \\
-\textbf{Luồng sự kiện chính:}
-\begin{enumerate}
-    \item Học viên chọn đáp án cho các câu hỏi, hệ thống tự động lưu nháp (auto-save).
-    \item Trình duyệt phát hiện sự kiện 'blur' (chuyển tab), tự động gửi log vi phạm về server.
-    \item Khi học viên bấm "Nộp bài", hệ thống tính toán điểm số dựa trên đáp án đúng.
-    \item Hệ thống lưu trạng thái hoàn thành và danh sách các vi phạm trong quá trình thi.
-\end{enumerate}
-\textbf{Hậu điều kiện:} Điểm số được cập nhật, học viên không thể tiếp tục làm bài thi này.
+\newpage
+\subsection{Đặc tả Use case 1: Tạo lớp học, quản lý học viên}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Tạo lớp học, quản lý học viên \\ \hline
+\textbf{Tác nhân} & Giảng viên \\ \hline
+\textbf{Mô tả tóm tắt} & Giảng viên tạo lớp học mới để giảng dạy và quản lý danh sách học viên tham gia bằng cách duyệt hoặc thêm học viên trực tiếp. \\ \hline
+\textbf{Tiền điều kiện} & Giảng viên đã đăng nhập vào hệ thống. \\ \hline
+\textbf{Hậu điều kiện} & Lớp học mới được tạo thành công và danh sách thành viên của lớp được cập nhật. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Giảng viên chọn chức năng ``Tạo lớp học'' trên thanh điều hướng. \newline
+2. Giảng viên nhập thông tin lớp học gồm tên lớp và mô tả chi tiết. \newline
+3. Hệ thống tự động tạo mã lớp học (Class Code) ngẫu nhiên, duy nhất và lưu thông tin vào cơ sở dữ liệu. \newline
+4. Giảng viên chia sẻ mã lớp học cho học viên tự tham gia. \newline
+5. Giảng viên truy cập trang quản lý lớp học để theo dõi danh sách thành viên hiện tại. \\ \hline
+\textbf{Luồng thay thế} & 
+1. Tại bước 4, giảng viên có thể thêm học viên trực tiếp bằng cách nhập địa chỉ Email của học viên thay vì để học viên tự nhập mã lớp. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Tên lớp học bị bỏ trống: Hệ thống hiển thị cảnh báo lỗi nhập liệu và yêu cầu giảng viên bổ sung thông tin bắt buộc. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Tạo lớp học, quản lý học viên}
+\label{table:uc_create_class_manage_members}
+\par
+\endgroup
+
+\subsection{Đặc tả Use case 2: Đăng tải khóa học, theo dõi tiến độ}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Đăng tải khóa học, theo dõi tiến độ \\ \hline
+\textbf{Tác nhân} & Giảng viên, Học viên \\ \hline
+\textbf{Mô tả tóm tắt} & Giảng viên tạo và đăng tải các chương mục, bài giảng video. Học viên đăng ký học và hệ thống tự động ghi nhận tiến độ xem bài giảng. \\ \hline
+\textbf{Tiền điều kiện} & Giảng viên có quyền biên soạn nội dung; Học viên đã đăng nhập và đăng ký tham gia khóa học. \\ \hline
+\textbf{Hậu điều kiện} & Khóa học được cập nhật nội dung mới công khai; tiến trình học tập của học viên được lưu lại. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Giảng viên khởi tạo khóa học mới, thêm các chương (Sections) và bài học (Lessons). \newline
+2. Giảng viên tải video bài giảng lên hệ thống và cài đặt thời lượng bài học. \newline
+3. Học viên truy cập vào khóa học và chọn bài học cụ thể để học. \newline
+4. Trình duyệt hiển thị video bài giảng. Khi học viên học hết video hoặc nhấn xác nhận hoàn thành, hệ thống gửi yêu cầu ghi nhận hoàn thành bài học. \newline
+5. Hệ thống lưu trạng thái hoàn thành bài học vào bảng \texttt{lesson\_progress} và cập nhật lại tiến độ tổng quát khóa học của học viên. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Lỗi kết nối khi tải tệp video lên máy chủ: Hệ thống thông báo lỗi tải lên và yêu cầu giảng viên kiểm tra tệp tin rồi tải lại. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Đăng tải khóa học, theo dõi tiến độ}
+\label{table:uc_course_publish_progress}
+\par
+\endgroup
+
+\subsection{Đặc tả Use case 3: Cấu hình, sinh đề thi động}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Cấu hình, sinh đề thi động \\ \hline
+\textbf{Tác nhân} & Giảng viên \\ \hline
+\textbf{Mô tả tóm tắt} & Giảng viên thiết lập các điều kiện phân bổ câu hỏi (chương mục, độ khó, điểm số). Hệ thống sẽ tự động chọn ngẫu nhiên và sinh đề thi cá nhân hóa khi học viên bắt đầu làm bài. \\ \hline
+\textbf{Tiền điều kiện} & Giảng viên đã đăng nhập; ngân hàng câu hỏi đã được chuẩn bị đầy đủ câu hỏi có phân loại chủ đề và độ khó rõ ràng. \\ \hline
+\textbf{Hậu điều kiện} & Cấu hình đề thi động được lưu thành công; sẵn sàng để tự động tạo đề thi cho học viên. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Giảng viên chọn tạo đề thi mới và kích hoạt chế độ đề thi động (Dynamic Exam). \newline
+2. Giảng viên cấu hình luật sinh đề bằng cách chỉ định số lượng câu hỏi cần lấy ngẫu nhiên từ mỗi phần (Section), độ khó tương ứng (Dễ, Trung bình, Khó) và trọng số điểm của từng câu hỏi. \newline
+3. Hệ thống kiểm tra số lượng câu hỏi hiện tại trong ngân hàng. Nếu đáp ứng đủ điều kiện, hệ thống lưu cấu hình dưới dạng JSONB. \newline
+4. Giảng viên xuất bản đề thi để sẵn sàng giao bài. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Ngân hàng câu hỏi không đủ số câu thỏa mãn điều kiện cấu hình: Hệ thống đưa ra cảnh báo thiếu câu hỏi và yêu cầu giảng viên bổ sung thêm câu hỏi hoặc giảm số lượng yêu cầu trong ma trận đề thi. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Cấu hình, sinh đề thi động}
+\label{table:uc_configure_dynamic_exam}
+\par
+\endgroup
+
+\subsection{Đặc tả Use case 4: Giao đề thi, quản lý bảng điểm}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Giao đề thi, quản lý bảng điểm \\ \hline
+\textbf{Tác nhân} & Giảng viên \\ \hline
+\textbf{Mô tả tóm tắt} & Giảng viên giao bài kiểm tra/đề thi cho các lớp học đã thiết lập và theo dõi kết quả, quản lý bảng điểm chung của lớp học. \\ \hline
+\textbf{Tiền điều kiện} & Đề thi và lớp học đã được tạo thành công và đang hoạt động. \\ \hline
+\textbf{Hậu điều kiện} & Liên kết giao đề thi được tạo; bảng điểm của lớp được thống kê cập nhật. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Giảng viên chọn một đề thi đã tạo và nhấn nút ``Giao bài cho lớp học''. \newline
+2. Giảng viên chọn lớp học đích từ danh sách lớp. \newline
+3. Hệ thống tạo liên kết đề thi với lớp học và thông báo cho các học viên trong lớp. \newline
+4. Sau khi học viên hoàn thành bài thi, giảng viên truy cập chức năng ``Bảng điểm lớp học'' (Gradebook) để xem điểm số cao nhất của từng học viên cho tất cả các đề thi được giao. \newline
+5. Giảng viên xuất bảng điểm tổng hợp của lớp thi ra file Excel/PDF phục vụ lưu trữ học vụ. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Lớp học được chọn không có bất kỳ học viên nào: Hệ thống vẫn tạo liên kết giao đề thi nhưng hiển thị thông báo nhắc nhở lớp học hiện đang trống. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Giao đề thi, quản lý bảng điểm}
+\label{table:uc_assign_exam_gradebook}
+\par
+\endgroup
+
+\subsection{Đặc tả Use case 5: Làm bài thi trực tuyến, tự động lưu nháp}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Làm bài thi trực tuyến, tự động lưu nháp \\ \hline
+\textbf{Tác nhân} & Học viên \\ \hline
+\textbf{Mô tả tóm tắt} & Học viên thực hiện làm bài kiểm tra trực tuyến trên trình duyệt và hệ thống tự động đồng bộ lưu trữ nháp câu trả lời định kỳ lên máy chủ. \\ \hline
+\textbf{Tiền điều kiện} & Học viên đã đăng ký tham gia lớp học được giao đề thi, đề thi đang trong thời gian mở và học viên còn lượt làm bài. \\ \hline
+\textbf{Hậu điều kiện} & Kết quả làm bài và trạng thái nộp bài được ghi nhận thành công trong cơ sở dữ liệu. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Học viên chọn đề thi và nhấn nút ``Bắt đầu làm bài thi'', điền mật khẩu đề thi nếu có yêu cầu. \newline
+2. Hệ thống khởi tạo lượt thi mới (Submission) trên server, ghi nhận thời gian bắt đầu và hiển thị danh sách câu hỏi cùng đồng hồ đếm ngược. \newline
+3. Học viên chọn phương án trả lời cho các câu hỏi trắc nghiệm hoặc nhập văn bản cho câu tự luận. \newline
+4. Hệ thống tự động kích hoạt tiến trình đồng bộ (Auto-save) sau mỗi 30 giây hoặc khi thay đổi lựa chọn, gửi các câu trả lời tạm thời về server để lưu trữ. \newline
+5. Học viên bấm nút ``Nộp bài'' để kết thúc bài thi. Hệ thống tính điểm và lưu kết quả chính thức. \\ \hline
+\textbf{Luồng thay thế} & 
+1. Tại bước 5, nếu thời gian đếm ngược kết thúc trước khi học viên bấm nộp bài, hệ thống sẽ tự động gửi yêu cầu khóa giao diện và nộp bài cưỡng chế dựa trên đáp án được lưu nháp gần nhất. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Thiết bị học viên bị mất kết nối mạng trong lúc thi: Hệ thống cảnh báo mất kết nối và tạm thời lưu nháp câu trả lời vào LocalStorage của trình duyệt, sau đó tự động đồng bộ lại lên máy chủ khi kết nối mạng được khôi phục. \newline
+2. Phát hiện tài khoản đăng nhập làm bài thi trên một thiết bị khác: Hệ thống phát hiện bất thường và lập tức kết thúc/hủy phiên thi hiện tại ở thiết bị cũ để chống gian lận. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Làm bài thi trực tuyến, tự động lưu nháp}
+\label{table:uc_take_exam_autosave}
+\par
+\endgroup
+
+\subsection{Đặc tả Use case 6: Giám sát vi phạm phòng thi thời gian thực}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Giám sát vi phạm phòng thi thời gian thực \\ \hline
+\textbf{Tác nhân} & Học viên, Giảng viên, Hệ thống \\ \hline
+\textbf{Mô tả tóm tắt} & Hệ thống tự động theo dõi, ngăn chặn các hành vi gian lận của học viên, ghi nhận nhật ký vi phạm và gửi cảnh báo trực tiếp về màn hình của giảng viên theo thời gian thực. \\ \hline
+\textbf{Tiền điều kiện} & Học viên đã bắt đầu bài thi trực tuyến. \\ \hline
+\textbf{Hậu điều kiện} & Toàn bộ nhật ký hành vi vi phạm được ghi lại làm căn cứ đánh giá bài thi; giảng viên được thông báo đầy đủ. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Học viên làm bài thi trong trạng thái bắt buộc chạy chế độ toàn màn hình (Fullscreen). \newline
+2. Trình duyệt của học viên theo dõi các sự kiện hệ thống. Khi học viên có hành vi gian lận (thoát toàn màn hình, chuyển sang tab khác, mở công cụ F12 Developer Tools, thực hiện sao chép/dán câu hỏi), trình duyệt lập tức khóa thao tác và hiển thị cảnh báo. \newline
+3. Trình duyệt gửi API thông báo vi phạm về máy chủ. Backend lưu trữ loại vi phạm và thời gian vào bảng nhật ký vi phạm. \newline
+4. Backend đẩy thông tin sự kiện vi phạm này lên kênh Redis Pub/Sub, chuyển tiếp thông tin trực tiếp tới giảng viên đang kết nối giám sát qua WebSocket. \newline
+5. Giảng viên theo dõi danh sách vi phạm của từng thí sinh đang thi trên màn hình Dashboard giám sát trực tuyến. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Học viên vi phạm quy chế thi tích lũy vượt quá 3 lần: Hệ thống tự động hiển thị thông báo đình chỉ, khóa đề thi và tự động nộp bài thi ngay lập tức. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Giám sát vi phạm phòng thi thời gian thực}
+\label{table:uc_monitor_exam_violations}
+\par
+\endgroup
+
+\subsection{Đặc tả Use case 7: Chấm điểm trắc nghiệm, tự luận}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Chấm điểm trắc nghiệm, tự luận \\ \hline
+\textbf{Tác nhân} & Giảng viên, Hệ thống \\ \hline
+\textbf{Mô tả tóm tắt} & Hệ thống tự động so khớp đáp án để chấm các câu hỏi trắc nghiệm/điền từ ngay khi nộp bài. Giảng viên xem xét và chấm điểm thủ công cho các câu hỏi tự luận để tổng hợp điểm số cuối cùng. \\ \hline
+\textbf{Tiền điều kiện} & Học viên đã hoàn thành và nộp bài thi thành công. \\ \hline
+\textbf{Hậu điều kiện} & Điểm số cuối cùng của bài thi được tính toán chính xác trên thang điểm 10 và cập nhật vào kết quả học tập. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Học viên nộp bài thi. Hệ thống tự động so khớp đáp án lựa chọn của học viên với đáp án đúng để tính điểm phần trắc nghiệm. \newline
+2. Giảng viên truy cập vào phân hệ quản lý bài nộp (Submissions), chọn bài thi có câu hỏi tự luận (Essay/Short Answer) cần chấm điểm. \newline
+3. Giảng viên đọc câu trả lời tự luận của học viên và nhập điểm số tương ứng. \newline
+4. Hệ thống tiếp nhận điểm số tự luận, tính toán lại tổng điểm của bài thi dựa trên trọng số điểm của từng câu hỏi quy về thang điểm 10. \newline
+5. Hệ thống cập nhật điểm số chính thức và lưu trữ kết quả. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & Không có. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Chấm điểm trắc nghiệm, tự luận}
+\label{table:uc_grade_exam_auto_manual}
+\par
+\endgroup
+
+\newpage
+\subsection{Đặc tả Use case 8: AI tự động tạo câu hỏi từ tài liệu}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & AI tự động tạo câu hỏi từ tài liệu \\ \hline
+\textbf{Tác nhân} & Giảng viên \\ \hline
+\textbf{Mô tả tóm tắt} & Giảng viên tải lên các tệp tài liệu giảng dạy. Dịch vụ AI sẽ phân tích nội dung văn bản và tự động sinh ra bộ câu hỏi thi trắc nghiệm hoàn chỉnh kèm giải thích chi tiết. \\ \hline
+\textbf{Tiền điều kiện} & Giảng viên đã đăng nhập và chuẩn bị tệp tài liệu học tập (PDF, DOCX, PPTX, TXT). \\ \hline
+\textbf{Hậu điều kiện} & Các câu hỏi được sinh thành công và có thể lưu trữ trực tiếp vào ngân hàng câu hỏi. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Giảng viên truy cập giao diện tạo câu hỏi và chọn chức năng ``Tạo câu hỏi bằng AI''. \newline
+2. Giảng viên tải lên tệp tài liệu và chọn các cấu hình yêu cầu: số lượng câu hỏi cần tạo, loại câu hỏi (một đáp án đúng, nhiều đáp án đúng, điền từ), mức độ khó, chủ đề tập trung và ngôn ngữ đầu ra. \newline
+3. Dịch vụ AI tiến hành đọc và trích xuất nội dung văn bản thô từ tệp tải lên. \newline
+4. Hệ thống tạo khóa hash và kiểm tra dữ liệu đệm Redis. Nếu không có cache, hệ thống gửi văn bản cùng cấu hình yêu cầu qua API **Gemini 2.5 Flash** để phân tích và sinh câu hỏi theo cấu trúc JSON định sẵn. \newline
+5. Hệ thống tiếp nhận kết quả câu hỏi từ Gemini, phân tích cấu trúc dữ liệu và hiển thị danh sách câu hỏi được sinh ra để giảng viên duyệt lưu vào cơ sở dữ liệu. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. Tệp tài liệu tải lên trống hoặc không chứa văn bản có thể đọc được (ví dụ tệp ảnh quét không có OCR): Hệ thống hiển thị thông báo lỗi trích xuất dữ liệu và yêu cầu thay đổi tệp tin hợp lệ khác. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: AI tự động tạo câu hỏi từ tài liệu}
+\label{table:uc_ai_generate_questions}
+\par
+\endgroup
+
+\newpage
+\subsection{Đặc tả Use case 9: Giải thích câu sai, chat với Gia sư AI}
+\nopagebreak
+\begingroup
+\centering
+\fontsize{11pt}{14pt}\selectfont
+\begin{tabular}{|p{3.2cm}|p{10.8cm}|}
+\hline
+\textbf{Thuộc tính} & \textbf{Nội dung đặc tả} \\ \hline
+\textbf{Tên use case} & Giải thích câu sai, chat với Gia sư AI \\ \hline
+\textbf{Tác nhân} & Học viên \\ \hline
+\textbf{Mô tả tóm tắt} & Học viên yêu cầu AI giải thích cặn kẽ nguyên nhân làm sai câu hỏi trong đề thi và bắt đầu cuộc hội thoại chat trực tuyến với Gia sư AI để củng cố kiến thức xung quanh câu hỏi đó. \\ \hline
+\textbf{Tiền điều kiện} & Học viên đã nộp bài thi và đang truy cập xem chi tiết kết quả bài thi. \\ \hline
+\textbf{Hậu điều kiện} & Trợ lý ảo AI phản hồi giải đáp thắc mắc và lưu lại lịch sử hội thoại trong phiên làm việc. \\ \hline
+\textbf{Luồng sự kiện chính} & 
+1. Học viên xem lại các câu hỏi đã làm trong bài thi và chọn câu hỏi bị trả lời sai hoặc cần tìm hiểu kỹ. \newline
+2. Học viên bấm chọn tính năng ``Giải thích bằng AI''. \newline
+3. Hệ thống gửi thông tin câu hỏi, đáp án đúng và đáp án học viên chọn lên \texttt{ai-service}. Dịch vụ này gọi API Gemini để phân tích lỗi sai logic và trả về lời giải thích chi tiết dưới dạng Markdown. \newline
+4. Học viên có thể tiếp tục nhập câu hỏi thắc mắc vào khung chat để thảo luận sâu hơn. \newline
+5. Hệ thống gửi tin nhắn mới kèm lịch sử chat trước đó sang Gemini và hiển thị phản hồi của Gia sư AI cho học viên. \\ \hline
+\textbf{Luồng thay thế} & Không có. \\ \hline
+\textbf{Luồng ngoại lệ} & 
+1. API Gemini bị quá tải hoặc mất kết nối mạng: Hệ thống hiển thị thông báo lỗi kết nối dịch vụ AI và đề xuất học viên gửi lại câu hỏi sau ít phút. \\ \hline
+\end{tabular}
+\captionof{table}{Đặc tả Use case: Giải thích câu sai, chat với Gia sư AI}
+\label{table:uc_ai_explain_chat}
+\par
+\endgroup
+
 
 \section{Yêu cầu phi chức năng}
 \label{section:2.4}
