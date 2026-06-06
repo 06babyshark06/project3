@@ -664,6 +664,24 @@ func (h *ExamHandler) DeleteQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{"message": "Question deleted"}})
 }
 
+func (h *ExamHandler) DeleteBulkQuestions(c *gin.Context) {
+	var req struct {
+		IDs []int64 `json:"ids" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err := h.examClient.DeleteBulkQuestions(c.Request.Context(), &pb.DeleteBulkQuestionsRequest{QuestionIds: req.IDs})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, contracts.APIResponse{Data: gin.H{"message": "Questions deleted successfully"}})
+}
+
 func (h *ExamHandler) UpdateExam(c *gin.Context) {
 	idStr := c.Param("id")
 	examID, err := strconv.ParseInt(idStr, 10, 64)

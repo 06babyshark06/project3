@@ -60,6 +60,9 @@ func (h *gRPCHandler) UpdateQuestion(ctx context.Context, req *pb.UpdateQuestion
 func (h *gRPCHandler) DeleteQuestion(ctx context.Context, req *pb.DeleteQuestionRequest) (*pb.DeleteQuestionResponse, error) {
 	return h.service.DeleteQuestion(ctx, req)
 }
+func (h *gRPCHandler) DeleteBulkQuestions(ctx context.Context, req *pb.DeleteBulkQuestionsRequest) (*pb.DeleteBulkQuestionsResponse, error) {
+	return h.service.DeleteBulkQuestions(ctx, req)
+}
 
 func (h *gRPCHandler) CreateExam(ctx context.Context, req *pb.CreateExamRequest) (*pb.CreateExamResponse, error) {
 	return h.service.CreateExam(ctx, req)

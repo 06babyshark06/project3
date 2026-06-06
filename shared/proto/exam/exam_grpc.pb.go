@@ -34,6 +34,7 @@ const (
 	ExamService_ImportQuestions_FullMethodName       = "/exam.ExamService/ImportQuestions"
 	ExamService_UpdateQuestion_FullMethodName        = "/exam.ExamService/UpdateQuestion"
 	ExamService_DeleteQuestion_FullMethodName        = "/exam.ExamService/DeleteQuestion"
+	ExamService_DeleteBulkQuestions_FullMethodName   = "/exam.ExamService/DeleteBulkQuestions"
 	ExamService_GetUploadURL_FullMethodName          = "/exam.ExamService/GetUploadURL"
 	ExamService_CreateExam_FullMethodName            = "/exam.ExamService/CreateExam"
 	ExamService_GenerateExam_FullMethodName          = "/exam.ExamService/GenerateExam"
@@ -88,6 +89,7 @@ type ExamServiceClient interface {
 	ImportQuestions(ctx context.Context, in *ImportQuestionsRequest, opts ...grpc.CallOption) (*ImportQuestionsResponse, error)
 	UpdateQuestion(ctx context.Context, in *UpdateQuestionRequest, opts ...grpc.CallOption) (*UpdateQuestionResponse, error)
 	DeleteQuestion(ctx context.Context, in *DeleteQuestionRequest, opts ...grpc.CallOption) (*DeleteQuestionResponse, error)
+	DeleteBulkQuestions(ctx context.Context, in *DeleteBulkQuestionsRequest, opts ...grpc.CallOption) (*DeleteBulkQuestionsResponse, error)
 	GetUploadURL(ctx context.Context, in *GetUploadURLRequest, opts ...grpc.CallOption) (*GetUploadURLResponse, error)
 	CreateExam(ctx context.Context, in *CreateExamRequest, opts ...grpc.CallOption) (*CreateExamResponse, error)
 	GenerateExam(ctx context.Context, in *GenerateExamRequest, opts ...grpc.CallOption) (*CreateExamResponse, error)
@@ -275,6 +277,16 @@ func (c *examServiceClient) DeleteQuestion(ctx context.Context, in *DeleteQuesti
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteQuestionResponse)
 	err := c.cc.Invoke(ctx, ExamService_DeleteQuestion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *examServiceClient) DeleteBulkQuestions(ctx context.Context, in *DeleteBulkQuestionsRequest, opts ...grpc.CallOption) (*DeleteBulkQuestionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBulkQuestionsResponse)
+	err := c.cc.Invoke(ctx, ExamService_DeleteBulkQuestions_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -630,6 +642,7 @@ type ExamServiceServer interface {
 	ImportQuestions(context.Context, *ImportQuestionsRequest) (*ImportQuestionsResponse, error)
 	UpdateQuestion(context.Context, *UpdateQuestionRequest) (*UpdateQuestionResponse, error)
 	DeleteQuestion(context.Context, *DeleteQuestionRequest) (*DeleteQuestionResponse, error)
+	DeleteBulkQuestions(context.Context, *DeleteBulkQuestionsRequest) (*DeleteBulkQuestionsResponse, error)
 	GetUploadURL(context.Context, *GetUploadURLRequest) (*GetUploadURLResponse, error)
 	CreateExam(context.Context, *CreateExamRequest) (*CreateExamResponse, error)
 	GenerateExam(context.Context, *GenerateExamRequest) (*CreateExamResponse, error)
@@ -717,6 +730,9 @@ func (UnimplementedExamServiceServer) UpdateQuestion(context.Context, *UpdateQue
 }
 func (UnimplementedExamServiceServer) DeleteQuestion(context.Context, *DeleteQuestionRequest) (*DeleteQuestionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteQuestion not implemented")
+}
+func (UnimplementedExamServiceServer) DeleteBulkQuestions(context.Context, *DeleteBulkQuestionsRequest) (*DeleteBulkQuestionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBulkQuestions not implemented")
 }
 func (UnimplementedExamServiceServer) GetUploadURL(context.Context, *GetUploadURLRequest) (*GetUploadURLResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUploadURL not implemented")
@@ -1104,6 +1120,24 @@ func _ExamService_DeleteQuestion_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ExamServiceServer).DeleteQuestion(ctx, req.(*DeleteQuestionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ExamService_DeleteBulkQuestions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBulkQuestionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExamServiceServer).DeleteBulkQuestions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExamService_DeleteBulkQuestions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExamServiceServer).DeleteBulkQuestions(ctx, req.(*DeleteBulkQuestionsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1768,6 +1802,10 @@ var ExamService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteQuestion",
 			Handler:    _ExamService_DeleteQuestion_Handler,
+		},
+		{
+			MethodName: "DeleteBulkQuestions",
+			Handler:    _ExamService_DeleteBulkQuestions_Handler,
 		},
 		{
 			MethodName: "GetUploadURL",

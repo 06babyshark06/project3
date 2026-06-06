@@ -21,6 +21,7 @@ service ExamService {
   rpc ImportQuestions(ImportQuestionsRequest) returns (ImportQuestionsResponse);
   rpc UpdateQuestion(UpdateQuestionRequest) returns (UpdateQuestionResponse);
   rpc DeleteQuestion(DeleteQuestionRequest) returns (DeleteQuestionResponse);
+  rpc DeleteBulkQuestions(DeleteBulkQuestionsRequest) returns (DeleteBulkQuestionsResponse);
 
   rpc GetUploadURL(GetUploadURLRequest) returns (GetUploadURLResponse);
 
@@ -211,6 +212,8 @@ message UpdateQuestionRequest { int64 question_id = 1; string content = 2; strin
 message UpdateQuestionResponse { bool success = 1; }
 message DeleteQuestionRequest { int64 question_id = 1; }
 message DeleteQuestionResponse { bool success = 1; }
+message DeleteBulkQuestionsRequest { repeated int64 question_ids = 1; }
+message DeleteBulkQuestionsResponse { bool success = 1; }
 
 message ExamListItem { int64 id = 1; string title = 2; int32 duration_minutes = 3; int64 topic_id = 4; int64 creator_id = 5; string status = 6; }
 message GetExamsRequest { int32 page = 1; int32 limit = 2; int64 creator_id = 3; string status = 4; }

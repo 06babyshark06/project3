@@ -153,6 +153,7 @@ func main() {
 				instructorOnly.POST("/questions/bulk", examHandler.CreateBulkQuestions)
 				instructorOnly.PUT("/questions/:id", examHandler.UpdateQuestion)
 				instructorOnly.DELETE("/questions/:id", examHandler.DeleteQuestion)
+				instructorOnly.DELETE("/questions", examHandler.DeleteBulkQuestions)
 				instructorOnly.GET("/questions/export", examHandler.ExportQuestions)
 
 				instructorOnly.POST("/exams", examHandler.CreateExam)

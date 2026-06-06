@@ -63,7 +63,11 @@ func (r *examRepository) CreateSection(ctx context.Context, tx *gorm.DB, section
 }
 func (r *examRepository) GetSectionsByTopic(ctx context.Context, topicID int64) ([]*domain.SectionModel, error) {
 	var sections []*domain.SectionModel
-	if err := database.DB.WithContext(ctx).Where("topic_id = ?", topicID).Order("id ASC").Find(&sections).Error; err != nil {
+	query := database.DB.WithContext(ctx)
+	if topicID > 0 {
+		query = query.Where("topic_id = ?", topicID)
+	}
+	if err := query.Order("id ASC").Find(&sections).Error; err != nil {
 		return nil, err
 	}
 	return sections, nil
@@ -111,6 +115,21 @@ func (r *examRepository) DeleteQuestion(ctx context.Context, tx *gorm.DB, questi
 	tx.WithContext(ctx).Where("question_id = ?", questionID).Delete(&domain.ChoiceModel{})
 	tx.WithContext(ctx).Where("question_id = ?", questionID).Delete(&domain.ExamQuestionModel{})
 	return tx.WithContext(ctx).Delete(&domain.QuestionModel{}, questionID).Error
+}
+func (r *examRepository) DeleteQuestions(ctx context.Context, tx *gorm.DB, questionIDs []int64) error {
+	if len(questionIDs) == 0 {
+		return nil
+	}
+	if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ChoiceModel{}).Error; err != nil {
+		return err
+	}
+	if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.ExamQuestionModel{}).Error; err != nil {
+		return err
+	}
+	if err := tx.WithContext(ctx).Where("question_id IN ?", questionIDs).Delete(&domain.UserAnswerModel{}).Error; err != nil {
+		return err
+	}
+	return tx.WithContext(ctx).Delete(&domain.QuestionModel{}, questionIDs).Error
 }
 
 func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int, topicID int64) ([]int64, error) {
@@ -431,7 +450,8 @@ func (r *examRepository) GetQuestions(ctx context.Context, sectionID int64, topi
 		Joins("LEFT JOIN question_type_models qt ON q.type_id = qt.id").
 		Joins("LEFT JOIN question_difficulty_models qd ON q.difficulty_id = qd.id").
 		Joins("LEFT JOIN exam_sections s ON q.section_id = s.id").
-		Joins("LEFT JOIN topic_models t ON s.topic_id = t.id")
+		Joins("LEFT JOIN topic_models t ON s.topic_id = t.id").
+		Where("q.deleted_at IS NULL")
 
 	if creatorID > 0 {
 		query = query.Where("q.creator_id = ?", creatorID)

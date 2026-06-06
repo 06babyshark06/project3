@@ -1290,6 +1290,16 @@ func (s *examService) DeleteQuestion(ctx context.Context, req *pb.DeleteQuestion
 	return &pb.DeleteQuestionResponse{Success: true}, nil
 }
 
+func (s *examService) DeleteBulkQuestions(ctx context.Context, req *pb.DeleteBulkQuestionsRequest) (*pb.DeleteBulkQuestionsResponse, error) {
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		return s.repo.DeleteQuestions(ctx, tx, req.QuestionIds)
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DeleteBulkQuestionsResponse{Success: true}, nil
+}
+
 func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest) (*pb.UpdateExamResponse, error) {
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		updates := make(map[string]interface{})

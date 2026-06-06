@@ -2481,6 +2481,94 @@ func (x *DeleteQuestionResponse) GetSuccess() bool {
 	return false
 }
 
+type DeleteBulkQuestionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	QuestionIds   []int64                `protobuf:"varint,1,rep,packed,name=question_ids,json=questionIds,proto3" json:"question_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBulkQuestionsRequest) Reset() {
+	*x = DeleteBulkQuestionsRequest{}
+	mi := &file_exam_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBulkQuestionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBulkQuestionsRequest) ProtoMessage() {}
+
+func (x *DeleteBulkQuestionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBulkQuestionsRequest.ProtoReflect.Descriptor instead.
+func (*DeleteBulkQuestionsRequest) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *DeleteBulkQuestionsRequest) GetQuestionIds() []int64 {
+	if x != nil {
+		return x.QuestionIds
+	}
+	return nil
+}
+
+type DeleteBulkQuestionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBulkQuestionsResponse) Reset() {
+	*x = DeleteBulkQuestionsResponse{}
+	mi := &file_exam_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBulkQuestionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBulkQuestionsResponse) ProtoMessage() {}
+
+func (x *DeleteBulkQuestionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exam_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBulkQuestionsResponse.ProtoReflect.Descriptor instead.
+func (*DeleteBulkQuestionsResponse) Descriptor() ([]byte, []int) {
+	return file_exam_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *DeleteBulkQuestionsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 type ExamListItem struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Id              int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -2495,7 +2583,7 @@ type ExamListItem struct {
 
 func (x *ExamListItem) Reset() {
 	*x = ExamListItem{}
-	mi := &file_exam_proto_msgTypes[41]
+	mi := &file_exam_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2507,7 +2595,7 @@ func (x *ExamListItem) String() string {
 func (*ExamListItem) ProtoMessage() {}
 
 func (x *ExamListItem) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[41]
+	mi := &file_exam_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2520,7 +2608,7 @@ func (x *ExamListItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExamListItem.ProtoReflect.Descriptor instead.
 func (*ExamListItem) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{41}
+	return file_exam_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ExamListItem) GetId() int64 {
@@ -2577,7 +2665,7 @@ type GetExamsRequest struct {
 
 func (x *GetExamsRequest) Reset() {
 	*x = GetExamsRequest{}
-	mi := &file_exam_proto_msgTypes[42]
+	mi := &file_exam_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2589,7 +2677,7 @@ func (x *GetExamsRequest) String() string {
 func (*GetExamsRequest) ProtoMessage() {}
 
 func (x *GetExamsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[42]
+	mi := &file_exam_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2602,7 +2690,7 @@ func (x *GetExamsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamsRequest.ProtoReflect.Descriptor instead.
 func (*GetExamsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{42}
+	return file_exam_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *GetExamsRequest) GetPage() int32 {
@@ -2645,7 +2733,7 @@ type GetExamsResponse struct {
 
 func (x *GetExamsResponse) Reset() {
 	*x = GetExamsResponse{}
-	mi := &file_exam_proto_msgTypes[43]
+	mi := &file_exam_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2657,7 +2745,7 @@ func (x *GetExamsResponse) String() string {
 func (*GetExamsResponse) ProtoMessage() {}
 
 func (x *GetExamsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[43]
+	mi := &file_exam_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2670,7 +2758,7 @@ func (x *GetExamsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamsResponse.ProtoReflect.Descriptor instead.
 func (*GetExamsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{43}
+	return file_exam_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *GetExamsResponse) GetExams() []*ExamListItem {
@@ -2716,7 +2804,7 @@ type UpdateExamRequest struct {
 
 func (x *UpdateExamRequest) Reset() {
 	*x = UpdateExamRequest{}
-	mi := &file_exam_proto_msgTypes[44]
+	mi := &file_exam_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2728,7 +2816,7 @@ func (x *UpdateExamRequest) String() string {
 func (*UpdateExamRequest) ProtoMessage() {}
 
 func (x *UpdateExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[44]
+	mi := &file_exam_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2741,7 +2829,7 @@ func (x *UpdateExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateExamRequest.ProtoReflect.Descriptor instead.
 func (*UpdateExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{44}
+	return file_exam_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *UpdateExamRequest) GetExamId() int64 {
@@ -2802,7 +2890,7 @@ type UpdateExamResponse struct {
 
 func (x *UpdateExamResponse) Reset() {
 	*x = UpdateExamResponse{}
-	mi := &file_exam_proto_msgTypes[45]
+	mi := &file_exam_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2814,7 +2902,7 @@ func (x *UpdateExamResponse) String() string {
 func (*UpdateExamResponse) ProtoMessage() {}
 
 func (x *UpdateExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[45]
+	mi := &file_exam_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2827,7 +2915,7 @@ func (x *UpdateExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateExamResponse.ProtoReflect.Descriptor instead.
 func (*UpdateExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{45}
+	return file_exam_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *UpdateExamResponse) GetSuccess() bool {
@@ -2846,7 +2934,7 @@ type DeleteExamRequest struct {
 
 func (x *DeleteExamRequest) Reset() {
 	*x = DeleteExamRequest{}
-	mi := &file_exam_proto_msgTypes[46]
+	mi := &file_exam_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2858,7 +2946,7 @@ func (x *DeleteExamRequest) String() string {
 func (*DeleteExamRequest) ProtoMessage() {}
 
 func (x *DeleteExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[46]
+	mi := &file_exam_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2871,7 +2959,7 @@ func (x *DeleteExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteExamRequest.ProtoReflect.Descriptor instead.
 func (*DeleteExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{46}
+	return file_exam_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *DeleteExamRequest) GetExamId() int64 {
@@ -2890,7 +2978,7 @@ type DeleteExamResponse struct {
 
 func (x *DeleteExamResponse) Reset() {
 	*x = DeleteExamResponse{}
-	mi := &file_exam_proto_msgTypes[47]
+	mi := &file_exam_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2902,7 +2990,7 @@ func (x *DeleteExamResponse) String() string {
 func (*DeleteExamResponse) ProtoMessage() {}
 
 func (x *DeleteExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[47]
+	mi := &file_exam_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2915,7 +3003,7 @@ func (x *DeleteExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteExamResponse.ProtoReflect.Descriptor instead.
 func (*DeleteExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{47}
+	return file_exam_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *DeleteExamResponse) GetSuccess() bool {
@@ -2935,7 +3023,7 @@ type PublishExamRequest struct {
 
 func (x *PublishExamRequest) Reset() {
 	*x = PublishExamRequest{}
-	mi := &file_exam_proto_msgTypes[48]
+	mi := &file_exam_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2947,7 +3035,7 @@ func (x *PublishExamRequest) String() string {
 func (*PublishExamRequest) ProtoMessage() {}
 
 func (x *PublishExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[48]
+	mi := &file_exam_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2960,7 +3048,7 @@ func (x *PublishExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishExamRequest.ProtoReflect.Descriptor instead.
 func (*PublishExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{48}
+	return file_exam_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *PublishExamRequest) GetExamId() int64 {
@@ -2986,7 +3074,7 @@ type PublishExamResponse struct {
 
 func (x *PublishExamResponse) Reset() {
 	*x = PublishExamResponse{}
-	mi := &file_exam_proto_msgTypes[49]
+	mi := &file_exam_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2998,7 +3086,7 @@ func (x *PublishExamResponse) String() string {
 func (*PublishExamResponse) ProtoMessage() {}
 
 func (x *PublishExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[49]
+	mi := &file_exam_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3011,7 +3099,7 @@ func (x *PublishExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublishExamResponse.ProtoReflect.Descriptor instead.
 func (*PublishExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{49}
+	return file_exam_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *PublishExamResponse) GetSuccess() bool {
@@ -3032,7 +3120,7 @@ type UserAnswer struct {
 
 func (x *UserAnswer) Reset() {
 	*x = UserAnswer{}
-	mi := &file_exam_proto_msgTypes[50]
+	mi := &file_exam_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3044,7 +3132,7 @@ func (x *UserAnswer) String() string {
 func (*UserAnswer) ProtoMessage() {}
 
 func (x *UserAnswer) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[50]
+	mi := &file_exam_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3057,7 +3145,7 @@ func (x *UserAnswer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserAnswer.ProtoReflect.Descriptor instead.
 func (*UserAnswer) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{50}
+	return file_exam_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *UserAnswer) GetQuestionId() int64 {
@@ -3096,7 +3184,7 @@ type SubmitExamRequest struct {
 
 func (x *SubmitExamRequest) Reset() {
 	*x = SubmitExamRequest{}
-	mi := &file_exam_proto_msgTypes[51]
+	mi := &file_exam_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3108,7 +3196,7 @@ func (x *SubmitExamRequest) String() string {
 func (*SubmitExamRequest) ProtoMessage() {}
 
 func (x *SubmitExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[51]
+	mi := &file_exam_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3121,7 +3209,7 @@ func (x *SubmitExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitExamRequest.ProtoReflect.Descriptor instead.
 func (*SubmitExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{51}
+	return file_exam_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *SubmitExamRequest) GetExamId() int64 {
@@ -3185,7 +3273,7 @@ type SubmitExamResponse struct {
 
 func (x *SubmitExamResponse) Reset() {
 	*x = SubmitExamResponse{}
-	mi := &file_exam_proto_msgTypes[52]
+	mi := &file_exam_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3197,7 +3285,7 @@ func (x *SubmitExamResponse) String() string {
 func (*SubmitExamResponse) ProtoMessage() {}
 
 func (x *SubmitExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[52]
+	mi := &file_exam_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3210,7 +3298,7 @@ func (x *SubmitExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmitExamResponse.ProtoReflect.Descriptor instead.
 func (*SubmitExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{52}
+	return file_exam_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *SubmitExamResponse) GetSubmissionId() int64 {
@@ -3251,7 +3339,7 @@ type GetSubmissionRequest struct {
 
 func (x *GetSubmissionRequest) Reset() {
 	*x = GetSubmissionRequest{}
-	mi := &file_exam_proto_msgTypes[53]
+	mi := &file_exam_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3263,7 +3351,7 @@ func (x *GetSubmissionRequest) String() string {
 func (*GetSubmissionRequest) ProtoMessage() {}
 
 func (x *GetSubmissionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[53]
+	mi := &file_exam_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3276,7 +3364,7 @@ func (x *GetSubmissionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmissionRequest.ProtoReflect.Descriptor instead.
 func (*GetSubmissionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{53}
+	return file_exam_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *GetSubmissionRequest) GetSubmissionId() int64 {
@@ -3312,7 +3400,7 @@ type SubmissionDetail struct {
 
 func (x *SubmissionDetail) Reset() {
 	*x = SubmissionDetail{}
-	mi := &file_exam_proto_msgTypes[54]
+	mi := &file_exam_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3324,7 +3412,7 @@ func (x *SubmissionDetail) String() string {
 func (*SubmissionDetail) ProtoMessage() {}
 
 func (x *SubmissionDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[54]
+	mi := &file_exam_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3337,7 +3425,7 @@ func (x *SubmissionDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmissionDetail.ProtoReflect.Descriptor instead.
 func (*SubmissionDetail) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{54}
+	return file_exam_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *SubmissionDetail) GetQuestionId() int64 {
@@ -3430,7 +3518,7 @@ type ChoiceReview struct {
 
 func (x *ChoiceReview) Reset() {
 	*x = ChoiceReview{}
-	mi := &file_exam_proto_msgTypes[55]
+	mi := &file_exam_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3442,7 +3530,7 @@ func (x *ChoiceReview) String() string {
 func (*ChoiceReview) ProtoMessage() {}
 
 func (x *ChoiceReview) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[55]
+	mi := &file_exam_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3455,7 +3543,7 @@ func (x *ChoiceReview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChoiceReview.ProtoReflect.Descriptor instead.
 func (*ChoiceReview) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{55}
+	return file_exam_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *ChoiceReview) GetId() int64 {
@@ -3509,7 +3597,7 @@ type GetSubmissionResponse struct {
 
 func (x *GetSubmissionResponse) Reset() {
 	*x = GetSubmissionResponse{}
-	mi := &file_exam_proto_msgTypes[56]
+	mi := &file_exam_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3521,7 +3609,7 @@ func (x *GetSubmissionResponse) String() string {
 func (*GetSubmissionResponse) ProtoMessage() {}
 
 func (x *GetSubmissionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[56]
+	mi := &file_exam_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3534,7 +3622,7 @@ func (x *GetSubmissionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubmissionResponse.ProtoReflect.Descriptor instead.
 func (*GetSubmissionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{56}
+	return file_exam_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *GetSubmissionResponse) GetId() int64 {
@@ -3602,7 +3690,7 @@ type GetUserExamStatsRequest struct {
 
 func (x *GetUserExamStatsRequest) Reset() {
 	*x = GetUserExamStatsRequest{}
-	mi := &file_exam_proto_msgTypes[57]
+	mi := &file_exam_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3614,7 +3702,7 @@ func (x *GetUserExamStatsRequest) String() string {
 func (*GetUserExamStatsRequest) ProtoMessage() {}
 
 func (x *GetUserExamStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[57]
+	mi := &file_exam_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3627,7 +3715,7 @@ func (x *GetUserExamStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserExamStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetUserExamStatsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{57}
+	return file_exam_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *GetUserExamStatsRequest) GetUserId() int64 {
@@ -3646,7 +3734,7 @@ type GetUserExamStatsResponse struct {
 
 func (x *GetUserExamStatsResponse) Reset() {
 	*x = GetUserExamStatsResponse{}
-	mi := &file_exam_proto_msgTypes[58]
+	mi := &file_exam_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3658,7 +3746,7 @@ func (x *GetUserExamStatsResponse) String() string {
 func (*GetUserExamStatsResponse) ProtoMessage() {}
 
 func (x *GetUserExamStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[58]
+	mi := &file_exam_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3671,7 +3759,7 @@ func (x *GetUserExamStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserExamStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserExamStatsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{58}
+	return file_exam_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *GetUserExamStatsResponse) GetTotalExamsTaken() int64 {
@@ -3689,7 +3777,7 @@ type GetExamCountRequest struct {
 
 func (x *GetExamCountRequest) Reset() {
 	*x = GetExamCountRequest{}
-	mi := &file_exam_proto_msgTypes[59]
+	mi := &file_exam_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3701,7 +3789,7 @@ func (x *GetExamCountRequest) String() string {
 func (*GetExamCountRequest) ProtoMessage() {}
 
 func (x *GetExamCountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[59]
+	mi := &file_exam_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3714,7 +3802,7 @@ func (x *GetExamCountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamCountRequest.ProtoReflect.Descriptor instead.
 func (*GetExamCountRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{59}
+	return file_exam_proto_rawDescGZIP(), []int{61}
 }
 
 type GetExamCountResponse struct {
@@ -3726,7 +3814,7 @@ type GetExamCountResponse struct {
 
 func (x *GetExamCountResponse) Reset() {
 	*x = GetExamCountResponse{}
-	mi := &file_exam_proto_msgTypes[60]
+	mi := &file_exam_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3738,7 +3826,7 @@ func (x *GetExamCountResponse) String() string {
 func (*GetExamCountResponse) ProtoMessage() {}
 
 func (x *GetExamCountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[60]
+	mi := &file_exam_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3751,7 +3839,7 @@ func (x *GetExamCountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamCountResponse.ProtoReflect.Descriptor instead.
 func (*GetExamCountResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{60}
+	return file_exam_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *GetExamCountResponse) GetCount() int64 {
@@ -3776,7 +3864,7 @@ type SaveAnswerRequest struct {
 
 func (x *SaveAnswerRequest) Reset() {
 	*x = SaveAnswerRequest{}
-	mi := &file_exam_proto_msgTypes[61]
+	mi := &file_exam_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3788,7 +3876,7 @@ func (x *SaveAnswerRequest) String() string {
 func (*SaveAnswerRequest) ProtoMessage() {}
 
 func (x *SaveAnswerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[61]
+	mi := &file_exam_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3801,7 +3889,7 @@ func (x *SaveAnswerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveAnswerRequest.ProtoReflect.Descriptor instead.
 func (*SaveAnswerRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{61}
+	return file_exam_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *SaveAnswerRequest) GetUserId() int64 {
@@ -3862,7 +3950,7 @@ type SaveAnswerResponse struct {
 
 func (x *SaveAnswerResponse) Reset() {
 	*x = SaveAnswerResponse{}
-	mi := &file_exam_proto_msgTypes[62]
+	mi := &file_exam_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3874,7 +3962,7 @@ func (x *SaveAnswerResponse) String() string {
 func (*SaveAnswerResponse) ProtoMessage() {}
 
 func (x *SaveAnswerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[62]
+	mi := &file_exam_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3887,7 +3975,7 @@ func (x *SaveAnswerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SaveAnswerResponse.ProtoReflect.Descriptor instead.
 func (*SaveAnswerResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{62}
+	return file_exam_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *SaveAnswerResponse) GetSuccess() bool {
@@ -3909,7 +3997,7 @@ type LogViolationRequest struct {
 
 func (x *LogViolationRequest) Reset() {
 	*x = LogViolationRequest{}
-	mi := &file_exam_proto_msgTypes[63]
+	mi := &file_exam_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3921,7 +4009,7 @@ func (x *LogViolationRequest) String() string {
 func (*LogViolationRequest) ProtoMessage() {}
 
 func (x *LogViolationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[63]
+	mi := &file_exam_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3934,7 +4022,7 @@ func (x *LogViolationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogViolationRequest.ProtoReflect.Descriptor instead.
 func (*LogViolationRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{63}
+	return file_exam_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *LogViolationRequest) GetUserId() int64 {
@@ -3974,7 +4062,7 @@ type LogViolationResponse struct {
 
 func (x *LogViolationResponse) Reset() {
 	*x = LogViolationResponse{}
-	mi := &file_exam_proto_msgTypes[64]
+	mi := &file_exam_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3986,7 +4074,7 @@ func (x *LogViolationResponse) String() string {
 func (*LogViolationResponse) ProtoMessage() {}
 
 func (x *LogViolationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[64]
+	mi := &file_exam_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3999,7 +4087,7 @@ func (x *LogViolationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogViolationResponse.ProtoReflect.Descriptor instead.
 func (*LogViolationResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{64}
+	return file_exam_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *LogViolationResponse) GetSuccess() bool {
@@ -4021,7 +4109,7 @@ type GradeEssayRequest struct {
 
 func (x *GradeEssayRequest) Reset() {
 	*x = GradeEssayRequest{}
-	mi := &file_exam_proto_msgTypes[65]
+	mi := &file_exam_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4033,7 +4121,7 @@ func (x *GradeEssayRequest) String() string {
 func (*GradeEssayRequest) ProtoMessage() {}
 
 func (x *GradeEssayRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[65]
+	mi := &file_exam_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4046,7 +4134,7 @@ func (x *GradeEssayRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GradeEssayRequest.ProtoReflect.Descriptor instead.
 func (*GradeEssayRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{65}
+	return file_exam_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *GradeEssayRequest) GetSubmissionId() int64 {
@@ -4086,7 +4174,7 @@ type GradeEssayResponse struct {
 
 func (x *GradeEssayResponse) Reset() {
 	*x = GradeEssayResponse{}
-	mi := &file_exam_proto_msgTypes[66]
+	mi := &file_exam_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4098,7 +4186,7 @@ func (x *GradeEssayResponse) String() string {
 func (*GradeEssayResponse) ProtoMessage() {}
 
 func (x *GradeEssayResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[66]
+	mi := &file_exam_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4111,7 +4199,7 @@ func (x *GradeEssayResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GradeEssayResponse.ProtoReflect.Descriptor instead.
 func (*GradeEssayResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{66}
+	return file_exam_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *GradeEssayResponse) GetSuccess() bool {
@@ -4130,7 +4218,7 @@ type GetExamStatsDetailedRequest struct {
 
 func (x *GetExamStatsDetailedRequest) Reset() {
 	*x = GetExamStatsDetailedRequest{}
-	mi := &file_exam_proto_msgTypes[67]
+	mi := &file_exam_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4142,7 +4230,7 @@ func (x *GetExamStatsDetailedRequest) String() string {
 func (*GetExamStatsDetailedRequest) ProtoMessage() {}
 
 func (x *GetExamStatsDetailedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[67]
+	mi := &file_exam_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4155,7 +4243,7 @@ func (x *GetExamStatsDetailedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamStatsDetailedRequest.ProtoReflect.Descriptor instead.
 func (*GetExamStatsDetailedRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{67}
+	return file_exam_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *GetExamStatsDetailedRequest) GetExamId() int64 {
@@ -4179,7 +4267,7 @@ type GetExamStatsDetailedResponse struct {
 
 func (x *GetExamStatsDetailedResponse) Reset() {
 	*x = GetExamStatsDetailedResponse{}
-	mi := &file_exam_proto_msgTypes[68]
+	mi := &file_exam_proto_msgTypes[70]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4191,7 +4279,7 @@ func (x *GetExamStatsDetailedResponse) String() string {
 func (*GetExamStatsDetailedResponse) ProtoMessage() {}
 
 func (x *GetExamStatsDetailedResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[68]
+	mi := &file_exam_proto_msgTypes[70]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4204,7 +4292,7 @@ func (x *GetExamStatsDetailedResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamStatsDetailedResponse.ProtoReflect.Descriptor instead.
 func (*GetExamStatsDetailedResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{68}
+	return file_exam_proto_rawDescGZIP(), []int{70}
 }
 
 func (x *GetExamStatsDetailedResponse) GetTotalStudents() int64 {
@@ -4267,7 +4355,7 @@ type SubmissionSummary struct {
 
 func (x *SubmissionSummary) Reset() {
 	*x = SubmissionSummary{}
-	mi := &file_exam_proto_msgTypes[69]
+	mi := &file_exam_proto_msgTypes[71]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4279,7 +4367,7 @@ func (x *SubmissionSummary) String() string {
 func (*SubmissionSummary) ProtoMessage() {}
 
 func (x *SubmissionSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[69]
+	mi := &file_exam_proto_msgTypes[71]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4292,7 +4380,7 @@ func (x *SubmissionSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubmissionSummary.ProtoReflect.Descriptor instead.
 func (*SubmissionSummary) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{69}
+	return file_exam_proto_rawDescGZIP(), []int{71}
 }
 
 func (x *SubmissionSummary) GetSubmissionId() int64 {
@@ -4378,7 +4466,7 @@ type GetExamSubmissionsRequest struct {
 
 func (x *GetExamSubmissionsRequest) Reset() {
 	*x = GetExamSubmissionsRequest{}
-	mi := &file_exam_proto_msgTypes[70]
+	mi := &file_exam_proto_msgTypes[72]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4390,7 +4478,7 @@ func (x *GetExamSubmissionsRequest) String() string {
 func (*GetExamSubmissionsRequest) ProtoMessage() {}
 
 func (x *GetExamSubmissionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[70]
+	mi := &file_exam_proto_msgTypes[72]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4403,7 +4491,7 @@ func (x *GetExamSubmissionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamSubmissionsRequest.ProtoReflect.Descriptor instead.
 func (*GetExamSubmissionsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{70}
+	return file_exam_proto_rawDescGZIP(), []int{72}
 }
 
 func (x *GetExamSubmissionsRequest) GetExamId() int64 {
@@ -4453,7 +4541,7 @@ type GetExamSubmissionsResponse struct {
 
 func (x *GetExamSubmissionsResponse) Reset() {
 	*x = GetExamSubmissionsResponse{}
-	mi := &file_exam_proto_msgTypes[71]
+	mi := &file_exam_proto_msgTypes[73]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4465,7 +4553,7 @@ func (x *GetExamSubmissionsResponse) String() string {
 func (*GetExamSubmissionsResponse) ProtoMessage() {}
 
 func (x *GetExamSubmissionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[71]
+	mi := &file_exam_proto_msgTypes[73]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4478,7 +4566,7 @@ func (x *GetExamSubmissionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamSubmissionsResponse.ProtoReflect.Descriptor instead.
 func (*GetExamSubmissionsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{71}
+	return file_exam_proto_rawDescGZIP(), []int{73}
 }
 
 func (x *GetExamSubmissionsResponse) GetSubmissions() []*SubmissionSummary {
@@ -4519,7 +4607,7 @@ type ExportExamResultsRequest struct {
 
 func (x *ExportExamResultsRequest) Reset() {
 	*x = ExportExamResultsRequest{}
-	mi := &file_exam_proto_msgTypes[72]
+	mi := &file_exam_proto_msgTypes[74]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4531,7 +4619,7 @@ func (x *ExportExamResultsRequest) String() string {
 func (*ExportExamResultsRequest) ProtoMessage() {}
 
 func (x *ExportExamResultsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[72]
+	mi := &file_exam_proto_msgTypes[74]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4544,7 +4632,7 @@ func (x *ExportExamResultsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportExamResultsRequest.ProtoReflect.Descriptor instead.
 func (*ExportExamResultsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{72}
+	return file_exam_proto_rawDescGZIP(), []int{74}
 }
 
 func (x *ExportExamResultsRequest) GetExamId() int64 {
@@ -4570,7 +4658,7 @@ type ExportExamResultsResponse struct {
 
 func (x *ExportExamResultsResponse) Reset() {
 	*x = ExportExamResultsResponse{}
-	mi := &file_exam_proto_msgTypes[73]
+	mi := &file_exam_proto_msgTypes[75]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4582,7 +4670,7 @@ func (x *ExportExamResultsResponse) String() string {
 func (*ExportExamResultsResponse) ProtoMessage() {}
 
 func (x *ExportExamResultsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[73]
+	mi := &file_exam_proto_msgTypes[75]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4595,7 +4683,7 @@ func (x *ExportExamResultsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportExamResultsResponse.ProtoReflect.Descriptor instead.
 func (*ExportExamResultsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{73}
+	return file_exam_proto_rawDescGZIP(), []int{75}
 }
 
 func (x *ExportExamResultsResponse) GetFileUrl() string {
@@ -4619,7 +4707,7 @@ type GetQuestionsRequest struct {
 
 func (x *GetQuestionsRequest) Reset() {
 	*x = GetQuestionsRequest{}
-	mi := &file_exam_proto_msgTypes[74]
+	mi := &file_exam_proto_msgTypes[76]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4631,7 +4719,7 @@ func (x *GetQuestionsRequest) String() string {
 func (*GetQuestionsRequest) ProtoMessage() {}
 
 func (x *GetQuestionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[74]
+	mi := &file_exam_proto_msgTypes[76]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4644,7 +4732,7 @@ func (x *GetQuestionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetQuestionsRequest.ProtoReflect.Descriptor instead.
 func (*GetQuestionsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{74}
+	return file_exam_proto_rawDescGZIP(), []int{76}
 }
 
 func (x *GetQuestionsRequest) GetPage() int32 {
@@ -4707,7 +4795,7 @@ type QuestionListItem struct {
 
 func (x *QuestionListItem) Reset() {
 	*x = QuestionListItem{}
-	mi := &file_exam_proto_msgTypes[75]
+	mi := &file_exam_proto_msgTypes[77]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4719,7 +4807,7 @@ func (x *QuestionListItem) String() string {
 func (*QuestionListItem) ProtoMessage() {}
 
 func (x *QuestionListItem) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[75]
+	mi := &file_exam_proto_msgTypes[77]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4732,7 +4820,7 @@ func (x *QuestionListItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use QuestionListItem.ProtoReflect.Descriptor instead.
 func (*QuestionListItem) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{75}
+	return file_exam_proto_rawDescGZIP(), []int{77}
 }
 
 func (x *QuestionListItem) GetId() int64 {
@@ -4817,7 +4905,7 @@ type GetQuestionsResponse struct {
 
 func (x *GetQuestionsResponse) Reset() {
 	*x = GetQuestionsResponse{}
-	mi := &file_exam_proto_msgTypes[76]
+	mi := &file_exam_proto_msgTypes[78]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4829,7 +4917,7 @@ func (x *GetQuestionsResponse) String() string {
 func (*GetQuestionsResponse) ProtoMessage() {}
 
 func (x *GetQuestionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[76]
+	mi := &file_exam_proto_msgTypes[78]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4842,7 +4930,7 @@ func (x *GetQuestionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetQuestionsResponse.ProtoReflect.Descriptor instead.
 func (*GetQuestionsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{76}
+	return file_exam_proto_rawDescGZIP(), []int{78}
 }
 
 func (x *GetQuestionsResponse) GetQuestions() []*QuestionListItem {
@@ -4885,7 +4973,7 @@ type ExamViolation struct {
 
 func (x *ExamViolation) Reset() {
 	*x = ExamViolation{}
-	mi := &file_exam_proto_msgTypes[77]
+	mi := &file_exam_proto_msgTypes[79]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4897,7 +4985,7 @@ func (x *ExamViolation) String() string {
 func (*ExamViolation) ProtoMessage() {}
 
 func (x *ExamViolation) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[77]
+	mi := &file_exam_proto_msgTypes[79]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4910,7 +4998,7 @@ func (x *ExamViolation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExamViolation.ProtoReflect.Descriptor instead.
 func (*ExamViolation) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{77}
+	return file_exam_proto_rawDescGZIP(), []int{79}
 }
 
 func (x *ExamViolation) GetId() int64 {
@@ -4950,7 +5038,7 @@ type GetExamViolationsRequest struct {
 
 func (x *GetExamViolationsRequest) Reset() {
 	*x = GetExamViolationsRequest{}
-	mi := &file_exam_proto_msgTypes[78]
+	mi := &file_exam_proto_msgTypes[80]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4962,7 +5050,7 @@ func (x *GetExamViolationsRequest) String() string {
 func (*GetExamViolationsRequest) ProtoMessage() {}
 
 func (x *GetExamViolationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[78]
+	mi := &file_exam_proto_msgTypes[80]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4975,7 +5063,7 @@ func (x *GetExamViolationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamViolationsRequest.ProtoReflect.Descriptor instead.
 func (*GetExamViolationsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{78}
+	return file_exam_proto_rawDescGZIP(), []int{80}
 }
 
 func (x *GetExamViolationsRequest) GetExamId() int64 {
@@ -4994,7 +5082,7 @@ type GetExamViolationsResponse struct {
 
 func (x *GetExamViolationsResponse) Reset() {
 	*x = GetExamViolationsResponse{}
-	mi := &file_exam_proto_msgTypes[79]
+	mi := &file_exam_proto_msgTypes[81]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5006,7 +5094,7 @@ func (x *GetExamViolationsResponse) String() string {
 func (*GetExamViolationsResponse) ProtoMessage() {}
 
 func (x *GetExamViolationsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[79]
+	mi := &file_exam_proto_msgTypes[81]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5019,7 +5107,7 @@ func (x *GetExamViolationsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamViolationsResponse.ProtoReflect.Descriptor instead.
 func (*GetExamViolationsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{79}
+	return file_exam_proto_rawDescGZIP(), []int{81}
 }
 
 func (x *GetExamViolationsResponse) GetViolations() []*ExamViolation {
@@ -5042,7 +5130,7 @@ type ExportQuestionsRequest struct {
 
 func (x *ExportQuestionsRequest) Reset() {
 	*x = ExportQuestionsRequest{}
-	mi := &file_exam_proto_msgTypes[80]
+	mi := &file_exam_proto_msgTypes[82]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5054,7 +5142,7 @@ func (x *ExportQuestionsRequest) String() string {
 func (*ExportQuestionsRequest) ProtoMessage() {}
 
 func (x *ExportQuestionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[80]
+	mi := &file_exam_proto_msgTypes[82]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5067,7 +5155,7 @@ func (x *ExportQuestionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportQuestionsRequest.ProtoReflect.Descriptor instead.
 func (*ExportQuestionsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{80}
+	return file_exam_proto_rawDescGZIP(), []int{82}
 }
 
 func (x *ExportQuestionsRequest) GetSectionId() int64 {
@@ -5114,7 +5202,7 @@ type ExportQuestionsResponse struct {
 
 func (x *ExportQuestionsResponse) Reset() {
 	*x = ExportQuestionsResponse{}
-	mi := &file_exam_proto_msgTypes[81]
+	mi := &file_exam_proto_msgTypes[83]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5126,7 +5214,7 @@ func (x *ExportQuestionsResponse) String() string {
 func (*ExportQuestionsResponse) ProtoMessage() {}
 
 func (x *ExportQuestionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[81]
+	mi := &file_exam_proto_msgTypes[83]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5139,7 +5227,7 @@ func (x *ExportQuestionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportQuestionsResponse.ProtoReflect.Descriptor instead.
 func (*ExportQuestionsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{81}
+	return file_exam_proto_rawDescGZIP(), []int{83}
 }
 
 func (x *ExportQuestionsResponse) GetFileUrl() string {
@@ -5161,7 +5249,7 @@ type StartExamRequest struct {
 
 func (x *StartExamRequest) Reset() {
 	*x = StartExamRequest{}
-	mi := &file_exam_proto_msgTypes[82]
+	mi := &file_exam_proto_msgTypes[84]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5173,7 +5261,7 @@ func (x *StartExamRequest) String() string {
 func (*StartExamRequest) ProtoMessage() {}
 
 func (x *StartExamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[82]
+	mi := &file_exam_proto_msgTypes[84]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5186,7 +5274,7 @@ func (x *StartExamRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartExamRequest.ProtoReflect.Descriptor instead.
 func (*StartExamRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{82}
+	return file_exam_proto_rawDescGZIP(), []int{84}
 }
 
 func (x *StartExamRequest) GetExamId() int64 {
@@ -5228,7 +5316,7 @@ type AnswerDetail struct {
 
 func (x *AnswerDetail) Reset() {
 	*x = AnswerDetail{}
-	mi := &file_exam_proto_msgTypes[83]
+	mi := &file_exam_proto_msgTypes[85]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5240,7 +5328,7 @@ func (x *AnswerDetail) String() string {
 func (*AnswerDetail) ProtoMessage() {}
 
 func (x *AnswerDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[83]
+	mi := &file_exam_proto_msgTypes[85]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5253,7 +5341,7 @@ func (x *AnswerDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AnswerDetail.ProtoReflect.Descriptor instead.
 func (*AnswerDetail) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{83}
+	return file_exam_proto_rawDescGZIP(), []int{85}
 }
 
 func (x *AnswerDetail) GetQuestionId() int64 {
@@ -5289,7 +5377,7 @@ type StartExamResponse struct {
 
 func (x *StartExamResponse) Reset() {
 	*x = StartExamResponse{}
-	mi := &file_exam_proto_msgTypes[84]
+	mi := &file_exam_proto_msgTypes[86]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5301,7 +5389,7 @@ func (x *StartExamResponse) String() string {
 func (*StartExamResponse) ProtoMessage() {}
 
 func (x *StartExamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[84]
+	mi := &file_exam_proto_msgTypes[86]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5314,7 +5402,7 @@ func (x *StartExamResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartExamResponse.ProtoReflect.Descriptor instead.
 func (*StartExamResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{84}
+	return file_exam_proto_rawDescGZIP(), []int{86}
 }
 
 func (x *StartExamResponse) GetSubmissionId() int64 {
@@ -5354,7 +5442,7 @@ type Int64List struct {
 
 func (x *Int64List) Reset() {
 	*x = Int64List{}
-	mi := &file_exam_proto_msgTypes[85]
+	mi := &file_exam_proto_msgTypes[87]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5366,7 +5454,7 @@ func (x *Int64List) String() string {
 func (*Int64List) ProtoMessage() {}
 
 func (x *Int64List) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[85]
+	mi := &file_exam_proto_msgTypes[87]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5379,7 +5467,7 @@ func (x *Int64List) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Int64List.ProtoReflect.Descriptor instead.
 func (*Int64List) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{85}
+	return file_exam_proto_rawDescGZIP(), []int{87}
 }
 
 func (x *Int64List) GetValues() []int64 {
@@ -5399,7 +5487,7 @@ type GetAccessRequestsRequest struct {
 
 func (x *GetAccessRequestsRequest) Reset() {
 	*x = GetAccessRequestsRequest{}
-	mi := &file_exam_proto_msgTypes[86]
+	mi := &file_exam_proto_msgTypes[88]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5411,7 +5499,7 @@ func (x *GetAccessRequestsRequest) String() string {
 func (*GetAccessRequestsRequest) ProtoMessage() {}
 
 func (x *GetAccessRequestsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[86]
+	mi := &file_exam_proto_msgTypes[88]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5424,7 +5512,7 @@ func (x *GetAccessRequestsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAccessRequestsRequest.ProtoReflect.Descriptor instead.
 func (*GetAccessRequestsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{86}
+	return file_exam_proto_rawDescGZIP(), []int{88}
 }
 
 func (x *GetAccessRequestsRequest) GetExamId() int64 {
@@ -5454,7 +5542,7 @@ type AccessRequestItem struct {
 
 func (x *AccessRequestItem) Reset() {
 	*x = AccessRequestItem{}
-	mi := &file_exam_proto_msgTypes[87]
+	mi := &file_exam_proto_msgTypes[89]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5466,7 +5554,7 @@ func (x *AccessRequestItem) String() string {
 func (*AccessRequestItem) ProtoMessage() {}
 
 func (x *AccessRequestItem) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[87]
+	mi := &file_exam_proto_msgTypes[89]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5479,7 +5567,7 @@ func (x *AccessRequestItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccessRequestItem.ProtoReflect.Descriptor instead.
 func (*AccessRequestItem) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{87}
+	return file_exam_proto_rawDescGZIP(), []int{89}
 }
 
 func (x *AccessRequestItem) GetId() int64 {
@@ -5526,7 +5614,7 @@ type GetAccessRequestsResponse struct {
 
 func (x *GetAccessRequestsResponse) Reset() {
 	*x = GetAccessRequestsResponse{}
-	mi := &file_exam_proto_msgTypes[88]
+	mi := &file_exam_proto_msgTypes[90]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5538,7 +5626,7 @@ func (x *GetAccessRequestsResponse) String() string {
 func (*GetAccessRequestsResponse) ProtoMessage() {}
 
 func (x *GetAccessRequestsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[88]
+	mi := &file_exam_proto_msgTypes[90]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5551,7 +5639,7 @@ func (x *GetAccessRequestsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAccessRequestsResponse.ProtoReflect.Descriptor instead.
 func (*GetAccessRequestsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{88}
+	return file_exam_proto_rawDescGZIP(), []int{90}
 }
 
 func (x *GetAccessRequestsResponse) GetRequests() []*AccessRequestItem {
@@ -5572,7 +5660,7 @@ type UpdateTopicRequest struct {
 
 func (x *UpdateTopicRequest) Reset() {
 	*x = UpdateTopicRequest{}
-	mi := &file_exam_proto_msgTypes[89]
+	mi := &file_exam_proto_msgTypes[91]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5584,7 +5672,7 @@ func (x *UpdateTopicRequest) String() string {
 func (*UpdateTopicRequest) ProtoMessage() {}
 
 func (x *UpdateTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[89]
+	mi := &file_exam_proto_msgTypes[91]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5597,7 +5685,7 @@ func (x *UpdateTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTopicRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTopicRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{89}
+	return file_exam_proto_rawDescGZIP(), []int{91}
 }
 
 func (x *UpdateTopicRequest) GetId() int64 {
@@ -5630,7 +5718,7 @@ type UpdateTopicResponse struct {
 
 func (x *UpdateTopicResponse) Reset() {
 	*x = UpdateTopicResponse{}
-	mi := &file_exam_proto_msgTypes[90]
+	mi := &file_exam_proto_msgTypes[92]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5642,7 +5730,7 @@ func (x *UpdateTopicResponse) String() string {
 func (*UpdateTopicResponse) ProtoMessage() {}
 
 func (x *UpdateTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[90]
+	mi := &file_exam_proto_msgTypes[92]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5655,7 +5743,7 @@ func (x *UpdateTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTopicResponse.ProtoReflect.Descriptor instead.
 func (*UpdateTopicResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{90}
+	return file_exam_proto_rawDescGZIP(), []int{92}
 }
 
 func (x *UpdateTopicResponse) GetSuccess() bool {
@@ -5674,7 +5762,7 @@ type DeleteTopicRequest struct {
 
 func (x *DeleteTopicRequest) Reset() {
 	*x = DeleteTopicRequest{}
-	mi := &file_exam_proto_msgTypes[91]
+	mi := &file_exam_proto_msgTypes[93]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5686,7 +5774,7 @@ func (x *DeleteTopicRequest) String() string {
 func (*DeleteTopicRequest) ProtoMessage() {}
 
 func (x *DeleteTopicRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[91]
+	mi := &file_exam_proto_msgTypes[93]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5699,7 +5787,7 @@ func (x *DeleteTopicRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTopicRequest.ProtoReflect.Descriptor instead.
 func (*DeleteTopicRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{91}
+	return file_exam_proto_rawDescGZIP(), []int{93}
 }
 
 func (x *DeleteTopicRequest) GetId() int64 {
@@ -5718,7 +5806,7 @@ type DeleteTopicResponse struct {
 
 func (x *DeleteTopicResponse) Reset() {
 	*x = DeleteTopicResponse{}
-	mi := &file_exam_proto_msgTypes[92]
+	mi := &file_exam_proto_msgTypes[94]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5730,7 +5818,7 @@ func (x *DeleteTopicResponse) String() string {
 func (*DeleteTopicResponse) ProtoMessage() {}
 
 func (x *DeleteTopicResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[92]
+	mi := &file_exam_proto_msgTypes[94]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5743,7 +5831,7 @@ func (x *DeleteTopicResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteTopicResponse.ProtoReflect.Descriptor instead.
 func (*DeleteTopicResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{92}
+	return file_exam_proto_rawDescGZIP(), []int{94}
 }
 
 func (x *DeleteTopicResponse) GetSuccess() bool {
@@ -5764,7 +5852,7 @@ type UpdateSectionRequest struct {
 
 func (x *UpdateSectionRequest) Reset() {
 	*x = UpdateSectionRequest{}
-	mi := &file_exam_proto_msgTypes[93]
+	mi := &file_exam_proto_msgTypes[95]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5776,7 +5864,7 @@ func (x *UpdateSectionRequest) String() string {
 func (*UpdateSectionRequest) ProtoMessage() {}
 
 func (x *UpdateSectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[93]
+	mi := &file_exam_proto_msgTypes[95]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5789,7 +5877,7 @@ func (x *UpdateSectionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSectionRequest.ProtoReflect.Descriptor instead.
 func (*UpdateSectionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{93}
+	return file_exam_proto_rawDescGZIP(), []int{95}
 }
 
 func (x *UpdateSectionRequest) GetId() int64 {
@@ -5822,7 +5910,7 @@ type UpdateSectionResponse struct {
 
 func (x *UpdateSectionResponse) Reset() {
 	*x = UpdateSectionResponse{}
-	mi := &file_exam_proto_msgTypes[94]
+	mi := &file_exam_proto_msgTypes[96]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5834,7 +5922,7 @@ func (x *UpdateSectionResponse) String() string {
 func (*UpdateSectionResponse) ProtoMessage() {}
 
 func (x *UpdateSectionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[94]
+	mi := &file_exam_proto_msgTypes[96]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5847,7 +5935,7 @@ func (x *UpdateSectionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateSectionResponse.ProtoReflect.Descriptor instead.
 func (*UpdateSectionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{94}
+	return file_exam_proto_rawDescGZIP(), []int{96}
 }
 
 func (x *UpdateSectionResponse) GetSuccess() bool {
@@ -5866,7 +5954,7 @@ type DeleteSectionRequest struct {
 
 func (x *DeleteSectionRequest) Reset() {
 	*x = DeleteSectionRequest{}
-	mi := &file_exam_proto_msgTypes[95]
+	mi := &file_exam_proto_msgTypes[97]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5878,7 +5966,7 @@ func (x *DeleteSectionRequest) String() string {
 func (*DeleteSectionRequest) ProtoMessage() {}
 
 func (x *DeleteSectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[95]
+	mi := &file_exam_proto_msgTypes[97]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5891,7 +5979,7 @@ func (x *DeleteSectionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSectionRequest.ProtoReflect.Descriptor instead.
 func (*DeleteSectionRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{95}
+	return file_exam_proto_rawDescGZIP(), []int{97}
 }
 
 func (x *DeleteSectionRequest) GetId() int64 {
@@ -5910,7 +5998,7 @@ type DeleteSectionResponse struct {
 
 func (x *DeleteSectionResponse) Reset() {
 	*x = DeleteSectionResponse{}
-	mi := &file_exam_proto_msgTypes[96]
+	mi := &file_exam_proto_msgTypes[98]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5922,7 +6010,7 @@ func (x *DeleteSectionResponse) String() string {
 func (*DeleteSectionResponse) ProtoMessage() {}
 
 func (x *DeleteSectionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[96]
+	mi := &file_exam_proto_msgTypes[98]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5935,7 +6023,7 @@ func (x *DeleteSectionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteSectionResponse.ProtoReflect.Descriptor instead.
 func (*DeleteSectionResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{96}
+	return file_exam_proto_rawDescGZIP(), []int{98}
 }
 
 func (x *DeleteSectionResponse) GetSuccess() bool {
@@ -5956,7 +6044,7 @@ type GetExamsByClassRequest struct {
 
 func (x *GetExamsByClassRequest) Reset() {
 	*x = GetExamsByClassRequest{}
-	mi := &file_exam_proto_msgTypes[97]
+	mi := &file_exam_proto_msgTypes[99]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5968,7 +6056,7 @@ func (x *GetExamsByClassRequest) String() string {
 func (*GetExamsByClassRequest) ProtoMessage() {}
 
 func (x *GetExamsByClassRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[97]
+	mi := &file_exam_proto_msgTypes[99]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5981,7 +6069,7 @@ func (x *GetExamsByClassRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamsByClassRequest.ProtoReflect.Descriptor instead.
 func (*GetExamsByClassRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{97}
+	return file_exam_proto_rawDescGZIP(), []int{99}
 }
 
 func (x *GetExamsByClassRequest) GetClassId() int64 {
@@ -6014,7 +6102,7 @@ type GetExamsByClassResponse struct {
 
 func (x *GetExamsByClassResponse) Reset() {
 	*x = GetExamsByClassResponse{}
-	mi := &file_exam_proto_msgTypes[98]
+	mi := &file_exam_proto_msgTypes[100]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6026,7 +6114,7 @@ func (x *GetExamsByClassResponse) String() string {
 func (*GetExamsByClassResponse) ProtoMessage() {}
 
 func (x *GetExamsByClassResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[98]
+	mi := &file_exam_proto_msgTypes[100]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6039,7 +6127,7 @@ func (x *GetExamsByClassResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamsByClassResponse.ProtoReflect.Descriptor instead.
 func (*GetExamsByClassResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{98}
+	return file_exam_proto_rawDescGZIP(), []int{100}
 }
 
 func (x *GetExamsByClassResponse) GetExams() []*Exam {
@@ -6059,7 +6147,7 @@ type AssignExamToClassRequest struct {
 
 func (x *AssignExamToClassRequest) Reset() {
 	*x = AssignExamToClassRequest{}
-	mi := &file_exam_proto_msgTypes[99]
+	mi := &file_exam_proto_msgTypes[101]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6071,7 +6159,7 @@ func (x *AssignExamToClassRequest) String() string {
 func (*AssignExamToClassRequest) ProtoMessage() {}
 
 func (x *AssignExamToClassRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[99]
+	mi := &file_exam_proto_msgTypes[101]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6084,7 +6172,7 @@ func (x *AssignExamToClassRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AssignExamToClassRequest.ProtoReflect.Descriptor instead.
 func (*AssignExamToClassRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{99}
+	return file_exam_proto_rawDescGZIP(), []int{101}
 }
 
 func (x *AssignExamToClassRequest) GetExamId() int64 {
@@ -6110,7 +6198,7 @@ type AssignExamToClassResponse struct {
 
 func (x *AssignExamToClassResponse) Reset() {
 	*x = AssignExamToClassResponse{}
-	mi := &file_exam_proto_msgTypes[100]
+	mi := &file_exam_proto_msgTypes[102]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6122,7 +6210,7 @@ func (x *AssignExamToClassResponse) String() string {
 func (*AssignExamToClassResponse) ProtoMessage() {}
 
 func (x *AssignExamToClassResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[100]
+	mi := &file_exam_proto_msgTypes[102]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6135,7 +6223,7 @@ func (x *AssignExamToClassResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AssignExamToClassResponse.ProtoReflect.Descriptor instead.
 func (*AssignExamToClassResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{100}
+	return file_exam_proto_rawDescGZIP(), []int{102}
 }
 
 func (x *AssignExamToClassResponse) GetSuccess() bool {
@@ -6154,7 +6242,7 @@ type GetInstructorExamsRequest struct {
 
 func (x *GetInstructorExamsRequest) Reset() {
 	*x = GetInstructorExamsRequest{}
-	mi := &file_exam_proto_msgTypes[101]
+	mi := &file_exam_proto_msgTypes[103]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6166,7 +6254,7 @@ func (x *GetInstructorExamsRequest) String() string {
 func (*GetInstructorExamsRequest) ProtoMessage() {}
 
 func (x *GetInstructorExamsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[101]
+	mi := &file_exam_proto_msgTypes[103]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6179,7 +6267,7 @@ func (x *GetInstructorExamsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInstructorExamsRequest.ProtoReflect.Descriptor instead.
 func (*GetInstructorExamsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{101}
+	return file_exam_proto_rawDescGZIP(), []int{103}
 }
 
 func (x *GetInstructorExamsRequest) GetTeacherId() int64 {
@@ -6198,7 +6286,7 @@ type GetInstructorExamsResponse struct {
 
 func (x *GetInstructorExamsResponse) Reset() {
 	*x = GetInstructorExamsResponse{}
-	mi := &file_exam_proto_msgTypes[102]
+	mi := &file_exam_proto_msgTypes[104]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6210,7 +6298,7 @@ func (x *GetInstructorExamsResponse) String() string {
 func (*GetInstructorExamsResponse) ProtoMessage() {}
 
 func (x *GetInstructorExamsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[102]
+	mi := &file_exam_proto_msgTypes[104]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6223,7 +6311,7 @@ func (x *GetInstructorExamsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetInstructorExamsResponse.ProtoReflect.Descriptor instead.
 func (*GetInstructorExamsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{102}
+	return file_exam_proto_rawDescGZIP(), []int{104}
 }
 
 func (x *GetInstructorExamsResponse) GetExams() []*Exam {
@@ -6254,7 +6342,7 @@ type Exam struct {
 
 func (x *Exam) Reset() {
 	*x = Exam{}
-	mi := &file_exam_proto_msgTypes[103]
+	mi := &file_exam_proto_msgTypes[105]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6266,7 +6354,7 @@ func (x *Exam) String() string {
 func (*Exam) ProtoMessage() {}
 
 func (x *Exam) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[103]
+	mi := &file_exam_proto_msgTypes[105]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6279,7 +6367,7 @@ func (x *Exam) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Exam.ProtoReflect.Descriptor instead.
 func (*Exam) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{103}
+	return file_exam_proto_rawDescGZIP(), []int{105}
 }
 
 func (x *Exam) GetId() int64 {
@@ -6382,7 +6470,7 @@ type GetExamPreviewRequest struct {
 
 func (x *GetExamPreviewRequest) Reset() {
 	*x = GetExamPreviewRequest{}
-	mi := &file_exam_proto_msgTypes[104]
+	mi := &file_exam_proto_msgTypes[106]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6394,7 +6482,7 @@ func (x *GetExamPreviewRequest) String() string {
 func (*GetExamPreviewRequest) ProtoMessage() {}
 
 func (x *GetExamPreviewRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[104]
+	mi := &file_exam_proto_msgTypes[106]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6407,7 +6495,7 @@ func (x *GetExamPreviewRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExamPreviewRequest.ProtoReflect.Descriptor instead.
 func (*GetExamPreviewRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{104}
+	return file_exam_proto_rawDescGZIP(), []int{106}
 }
 
 func (x *GetExamPreviewRequest) GetExamId() int64 {
@@ -6427,7 +6515,7 @@ type GetRecentSubmissionsRequest struct {
 
 func (x *GetRecentSubmissionsRequest) Reset() {
 	*x = GetRecentSubmissionsRequest{}
-	mi := &file_exam_proto_msgTypes[105]
+	mi := &file_exam_proto_msgTypes[107]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6439,7 +6527,7 @@ func (x *GetRecentSubmissionsRequest) String() string {
 func (*GetRecentSubmissionsRequest) ProtoMessage() {}
 
 func (x *GetRecentSubmissionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[105]
+	mi := &file_exam_proto_msgTypes[107]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6452,7 +6540,7 @@ func (x *GetRecentSubmissionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRecentSubmissionsRequest.ProtoReflect.Descriptor instead.
 func (*GetRecentSubmissionsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{105}
+	return file_exam_proto_rawDescGZIP(), []int{107}
 }
 
 func (x *GetRecentSubmissionsRequest) GetInstructorId() int64 {
@@ -6485,7 +6573,7 @@ type RecentSubmissionItem struct {
 
 func (x *RecentSubmissionItem) Reset() {
 	*x = RecentSubmissionItem{}
-	mi := &file_exam_proto_msgTypes[106]
+	mi := &file_exam_proto_msgTypes[108]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6497,7 +6585,7 @@ func (x *RecentSubmissionItem) String() string {
 func (*RecentSubmissionItem) ProtoMessage() {}
 
 func (x *RecentSubmissionItem) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[106]
+	mi := &file_exam_proto_msgTypes[108]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6510,7 +6598,7 @@ func (x *RecentSubmissionItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RecentSubmissionItem.ProtoReflect.Descriptor instead.
 func (*RecentSubmissionItem) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{106}
+	return file_exam_proto_rawDescGZIP(), []int{108}
 }
 
 func (x *RecentSubmissionItem) GetSubmissionId() int64 {
@@ -6578,7 +6666,7 @@ type GetRecentSubmissionsResponse struct {
 
 func (x *GetRecentSubmissionsResponse) Reset() {
 	*x = GetRecentSubmissionsResponse{}
-	mi := &file_exam_proto_msgTypes[107]
+	mi := &file_exam_proto_msgTypes[109]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6590,7 +6678,7 @@ func (x *GetRecentSubmissionsResponse) String() string {
 func (*GetRecentSubmissionsResponse) ProtoMessage() {}
 
 func (x *GetRecentSubmissionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[107]
+	mi := &file_exam_proto_msgTypes[109]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6603,7 +6691,7 @@ func (x *GetRecentSubmissionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRecentSubmissionsResponse.ProtoReflect.Descriptor instead.
 func (*GetRecentSubmissionsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{107}
+	return file_exam_proto_rawDescGZIP(), []int{109}
 }
 
 func (x *GetRecentSubmissionsResponse) GetSubmissions() []*RecentSubmissionItem {
@@ -6622,7 +6710,7 @@ type GetMySubmissionsRequest struct {
 
 func (x *GetMySubmissionsRequest) Reset() {
 	*x = GetMySubmissionsRequest{}
-	mi := &file_exam_proto_msgTypes[108]
+	mi := &file_exam_proto_msgTypes[110]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6634,7 +6722,7 @@ func (x *GetMySubmissionsRequest) String() string {
 func (*GetMySubmissionsRequest) ProtoMessage() {}
 
 func (x *GetMySubmissionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[108]
+	mi := &file_exam_proto_msgTypes[110]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6647,7 +6735,7 @@ func (x *GetMySubmissionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMySubmissionsRequest.ProtoReflect.Descriptor instead.
 func (*GetMySubmissionsRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{108}
+	return file_exam_proto_rawDescGZIP(), []int{110}
 }
 
 func (x *GetMySubmissionsRequest) GetUserId() int64 {
@@ -6666,7 +6754,7 @@ type GetMySubmissionsResponse struct {
 
 func (x *GetMySubmissionsResponse) Reset() {
 	*x = GetMySubmissionsResponse{}
-	mi := &file_exam_proto_msgTypes[109]
+	mi := &file_exam_proto_msgTypes[111]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6678,7 +6766,7 @@ func (x *GetMySubmissionsResponse) String() string {
 func (*GetMySubmissionsResponse) ProtoMessage() {}
 
 func (x *GetMySubmissionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[109]
+	mi := &file_exam_proto_msgTypes[111]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6691,7 +6779,7 @@ func (x *GetMySubmissionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMySubmissionsResponse.ProtoReflect.Descriptor instead.
 func (*GetMySubmissionsResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{109}
+	return file_exam_proto_rawDescGZIP(), []int{111}
 }
 
 func (x *GetMySubmissionsResponse) GetSubmissions() []*SubmissionSummary {
@@ -6711,7 +6799,7 @@ type GetClassGradebookRequest struct {
 
 func (x *GetClassGradebookRequest) Reset() {
 	*x = GetClassGradebookRequest{}
-	mi := &file_exam_proto_msgTypes[110]
+	mi := &file_exam_proto_msgTypes[112]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6723,7 +6811,7 @@ func (x *GetClassGradebookRequest) String() string {
 func (*GetClassGradebookRequest) ProtoMessage() {}
 
 func (x *GetClassGradebookRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[110]
+	mi := &file_exam_proto_msgTypes[112]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6736,7 +6824,7 @@ func (x *GetClassGradebookRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClassGradebookRequest.ProtoReflect.Descriptor instead.
 func (*GetClassGradebookRequest) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{110}
+	return file_exam_proto_rawDescGZIP(), []int{112}
 }
 
 func (x *GetClassGradebookRequest) GetClassId() int64 {
@@ -6764,7 +6852,7 @@ type ExamScore struct {
 
 func (x *ExamScore) Reset() {
 	*x = ExamScore{}
-	mi := &file_exam_proto_msgTypes[111]
+	mi := &file_exam_proto_msgTypes[113]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6776,7 +6864,7 @@ func (x *ExamScore) String() string {
 func (*ExamScore) ProtoMessage() {}
 
 func (x *ExamScore) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[111]
+	mi := &file_exam_proto_msgTypes[113]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6789,7 +6877,7 @@ func (x *ExamScore) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExamScore.ProtoReflect.Descriptor instead.
 func (*ExamScore) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{111}
+	return file_exam_proto_rawDescGZIP(), []int{113}
 }
 
 func (x *ExamScore) GetExamId() int64 {
@@ -6823,7 +6911,7 @@ type StudentGrade struct {
 
 func (x *StudentGrade) Reset() {
 	*x = StudentGrade{}
-	mi := &file_exam_proto_msgTypes[112]
+	mi := &file_exam_proto_msgTypes[114]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6835,7 +6923,7 @@ func (x *StudentGrade) String() string {
 func (*StudentGrade) ProtoMessage() {}
 
 func (x *StudentGrade) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[112]
+	mi := &file_exam_proto_msgTypes[114]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6848,7 +6936,7 @@ func (x *StudentGrade) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StudentGrade.ProtoReflect.Descriptor instead.
 func (*StudentGrade) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{112}
+	return file_exam_proto_rawDescGZIP(), []int{114}
 }
 
 func (x *StudentGrade) GetStudentId() int64 {
@@ -6875,7 +6963,7 @@ type GetClassGradebookResponse struct {
 
 func (x *GetClassGradebookResponse) Reset() {
 	*x = GetClassGradebookResponse{}
-	mi := &file_exam_proto_msgTypes[113]
+	mi := &file_exam_proto_msgTypes[115]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6887,7 +6975,7 @@ func (x *GetClassGradebookResponse) String() string {
 func (*GetClassGradebookResponse) ProtoMessage() {}
 
 func (x *GetClassGradebookResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_exam_proto_msgTypes[113]
+	mi := &file_exam_proto_msgTypes[115]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6900,7 +6988,7 @@ func (x *GetClassGradebookResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetClassGradebookResponse.ProtoReflect.Descriptor instead.
 func (*GetClassGradebookResponse) Descriptor() ([]byte, []int) {
-	return file_exam_proto_rawDescGZIP(), []int{113}
+	return file_exam_proto_rawDescGZIP(), []int{115}
 }
 
 func (x *GetClassGradebookResponse) GetExams() []*Exam {
@@ -7117,6 +7205,10 @@ const file_exam_proto_rawDesc = "" +
 	"\vquestion_id\x18\x01 \x01(\x03R\n" +
 	"questionId\"2\n" +
 	"\x16DeleteQuestionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"?\n" +
+	"\x1aDeleteBulkQuestionsRequest\x12!\n" +
+	"\fquestion_ids\x18\x01 \x03(\x03R\vquestionIds\"7\n" +
+	"\x1bDeleteBulkQuestionsResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xb1\x01\n" +
 	"\fExamListItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
@@ -7478,7 +7570,7 @@ const file_exam_proto_rawDesc = "" +
 	"\x19GetClassGradebookResponse\x12 \n" +
 	"\x05exams\x18\x01 \x03(\v2\n" +
 	".exam.ExamR\x05exams\x12*\n" +
-	"\x06grades\x18\x02 \x03(\v2\x12.exam.StudentGradeR\x06grades2\xd2\x1c\n" +
+	"\x06grades\x18\x02 \x03(\v2\x12.exam.StudentGradeR\x06grades2\xae\x1d\n" +
 	"\vExamService\x12B\n" +
 	"\vCreateTopic\x12\x18.exam.CreateTopicRequest\x1a\x19.exam.CreateTopicResponse\x12<\n" +
 	"\tGetTopics\x12\x16.exam.GetTopicsRequest\x1a\x17.exam.GetTopicsResponse\x12H\n" +
@@ -7494,7 +7586,8 @@ const file_exam_proto_rawDesc = "" +
 	"\vGetQuestion\x12\x18.exam.GetQuestionRequest\x1a\x19.exam.GetQuestionResponse\x12N\n" +
 	"\x0fImportQuestions\x12\x1c.exam.ImportQuestionsRequest\x1a\x1d.exam.ImportQuestionsResponse\x12K\n" +
 	"\x0eUpdateQuestion\x12\x1b.exam.UpdateQuestionRequest\x1a\x1c.exam.UpdateQuestionResponse\x12K\n" +
-	"\x0eDeleteQuestion\x12\x1b.exam.DeleteQuestionRequest\x1a\x1c.exam.DeleteQuestionResponse\x12E\n" +
+	"\x0eDeleteQuestion\x12\x1b.exam.DeleteQuestionRequest\x1a\x1c.exam.DeleteQuestionResponse\x12Z\n" +
+	"\x13DeleteBulkQuestions\x12 .exam.DeleteBulkQuestionsRequest\x1a!.exam.DeleteBulkQuestionsResponse\x12E\n" +
 	"\fGetUploadURL\x12\x19.exam.GetUploadURLRequest\x1a\x1a.exam.GetUploadURLResponse\x12?\n" +
 	"\n" +
 	"CreateExam\x12\x17.exam.CreateExamRequest\x1a\x18.exam.CreateExamResponse\x12C\n" +
@@ -7547,7 +7640,7 @@ func file_exam_proto_rawDescGZIP() []byte {
 	return file_exam_proto_rawDescData
 }
 
-var file_exam_proto_msgTypes = make([]protoimpl.MessageInfo, 115)
+var file_exam_proto_msgTypes = make([]protoimpl.MessageInfo, 117)
 var file_exam_proto_goTypes = []any{
 	(*Topic)(nil),                        // 0: exam.Topic
 	(*Section)(nil),                      // 1: exam.Section
@@ -7590,80 +7683,82 @@ var file_exam_proto_goTypes = []any{
 	(*UpdateQuestionResponse)(nil),       // 38: exam.UpdateQuestionResponse
 	(*DeleteQuestionRequest)(nil),        // 39: exam.DeleteQuestionRequest
 	(*DeleteQuestionResponse)(nil),       // 40: exam.DeleteQuestionResponse
-	(*ExamListItem)(nil),                 // 41: exam.ExamListItem
-	(*GetExamsRequest)(nil),              // 42: exam.GetExamsRequest
-	(*GetExamsResponse)(nil),             // 43: exam.GetExamsResponse
-	(*UpdateExamRequest)(nil),            // 44: exam.UpdateExamRequest
-	(*UpdateExamResponse)(nil),           // 45: exam.UpdateExamResponse
-	(*DeleteExamRequest)(nil),            // 46: exam.DeleteExamRequest
-	(*DeleteExamResponse)(nil),           // 47: exam.DeleteExamResponse
-	(*PublishExamRequest)(nil),           // 48: exam.PublishExamRequest
-	(*PublishExamResponse)(nil),          // 49: exam.PublishExamResponse
-	(*UserAnswer)(nil),                   // 50: exam.UserAnswer
-	(*SubmitExamRequest)(nil),            // 51: exam.SubmitExamRequest
-	(*SubmitExamResponse)(nil),           // 52: exam.SubmitExamResponse
-	(*GetSubmissionRequest)(nil),         // 53: exam.GetSubmissionRequest
-	(*SubmissionDetail)(nil),             // 54: exam.SubmissionDetail
-	(*ChoiceReview)(nil),                 // 55: exam.ChoiceReview
-	(*GetSubmissionResponse)(nil),        // 56: exam.GetSubmissionResponse
-	(*GetUserExamStatsRequest)(nil),      // 57: exam.GetUserExamStatsRequest
-	(*GetUserExamStatsResponse)(nil),     // 58: exam.GetUserExamStatsResponse
-	(*GetExamCountRequest)(nil),          // 59: exam.GetExamCountRequest
-	(*GetExamCountResponse)(nil),         // 60: exam.GetExamCountResponse
-	(*SaveAnswerRequest)(nil),            // 61: exam.SaveAnswerRequest
-	(*SaveAnswerResponse)(nil),           // 62: exam.SaveAnswerResponse
-	(*LogViolationRequest)(nil),          // 63: exam.LogViolationRequest
-	(*LogViolationResponse)(nil),         // 64: exam.LogViolationResponse
-	(*GradeEssayRequest)(nil),            // 65: exam.GradeEssayRequest
-	(*GradeEssayResponse)(nil),           // 66: exam.GradeEssayResponse
-	(*GetExamStatsDetailedRequest)(nil),  // 67: exam.GetExamStatsDetailedRequest
-	(*GetExamStatsDetailedResponse)(nil), // 68: exam.GetExamStatsDetailedResponse
-	(*SubmissionSummary)(nil),            // 69: exam.SubmissionSummary
-	(*GetExamSubmissionsRequest)(nil),    // 70: exam.GetExamSubmissionsRequest
-	(*GetExamSubmissionsResponse)(nil),   // 71: exam.GetExamSubmissionsResponse
-	(*ExportExamResultsRequest)(nil),     // 72: exam.ExportExamResultsRequest
-	(*ExportExamResultsResponse)(nil),    // 73: exam.ExportExamResultsResponse
-	(*GetQuestionsRequest)(nil),          // 74: exam.GetQuestionsRequest
-	(*QuestionListItem)(nil),             // 75: exam.QuestionListItem
-	(*GetQuestionsResponse)(nil),         // 76: exam.GetQuestionsResponse
-	(*ExamViolation)(nil),                // 77: exam.ExamViolation
-	(*GetExamViolationsRequest)(nil),     // 78: exam.GetExamViolationsRequest
-	(*GetExamViolationsResponse)(nil),    // 79: exam.GetExamViolationsResponse
-	(*ExportQuestionsRequest)(nil),       // 80: exam.ExportQuestionsRequest
-	(*ExportQuestionsResponse)(nil),      // 81: exam.ExportQuestionsResponse
-	(*StartExamRequest)(nil),             // 82: exam.StartExamRequest
-	(*AnswerDetail)(nil),                 // 83: exam.AnswerDetail
-	(*StartExamResponse)(nil),            // 84: exam.StartExamResponse
-	(*Int64List)(nil),                    // 85: exam.Int64List
-	(*GetAccessRequestsRequest)(nil),     // 86: exam.GetAccessRequestsRequest
-	(*AccessRequestItem)(nil),            // 87: exam.AccessRequestItem
-	(*GetAccessRequestsResponse)(nil),    // 88: exam.GetAccessRequestsResponse
-	(*UpdateTopicRequest)(nil),           // 89: exam.UpdateTopicRequest
-	(*UpdateTopicResponse)(nil),          // 90: exam.UpdateTopicResponse
-	(*DeleteTopicRequest)(nil),           // 91: exam.DeleteTopicRequest
-	(*DeleteTopicResponse)(nil),          // 92: exam.DeleteTopicResponse
-	(*UpdateSectionRequest)(nil),         // 93: exam.UpdateSectionRequest
-	(*UpdateSectionResponse)(nil),        // 94: exam.UpdateSectionResponse
-	(*DeleteSectionRequest)(nil),         // 95: exam.DeleteSectionRequest
-	(*DeleteSectionResponse)(nil),        // 96: exam.DeleteSectionResponse
-	(*GetExamsByClassRequest)(nil),       // 97: exam.GetExamsByClassRequest
-	(*GetExamsByClassResponse)(nil),      // 98: exam.GetExamsByClassResponse
-	(*AssignExamToClassRequest)(nil),     // 99: exam.AssignExamToClassRequest
-	(*AssignExamToClassResponse)(nil),    // 100: exam.AssignExamToClassResponse
-	(*GetInstructorExamsRequest)(nil),    // 101: exam.GetInstructorExamsRequest
-	(*GetInstructorExamsResponse)(nil),   // 102: exam.GetInstructorExamsResponse
-	(*Exam)(nil),                         // 103: exam.Exam
-	(*GetExamPreviewRequest)(nil),        // 104: exam.GetExamPreviewRequest
-	(*GetRecentSubmissionsRequest)(nil),  // 105: exam.GetRecentSubmissionsRequest
-	(*RecentSubmissionItem)(nil),         // 106: exam.RecentSubmissionItem
-	(*GetRecentSubmissionsResponse)(nil), // 107: exam.GetRecentSubmissionsResponse
-	(*GetMySubmissionsRequest)(nil),      // 108: exam.GetMySubmissionsRequest
-	(*GetMySubmissionsResponse)(nil),     // 109: exam.GetMySubmissionsResponse
-	(*GetClassGradebookRequest)(nil),     // 110: exam.GetClassGradebookRequest
-	(*ExamScore)(nil),                    // 111: exam.ExamScore
-	(*StudentGrade)(nil),                 // 112: exam.StudentGrade
-	(*GetClassGradebookResponse)(nil),    // 113: exam.GetClassGradebookResponse
-	nil,                                  // 114: exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
+	(*DeleteBulkQuestionsRequest)(nil),   // 41: exam.DeleteBulkQuestionsRequest
+	(*DeleteBulkQuestionsResponse)(nil),  // 42: exam.DeleteBulkQuestionsResponse
+	(*ExamListItem)(nil),                 // 43: exam.ExamListItem
+	(*GetExamsRequest)(nil),              // 44: exam.GetExamsRequest
+	(*GetExamsResponse)(nil),             // 45: exam.GetExamsResponse
+	(*UpdateExamRequest)(nil),            // 46: exam.UpdateExamRequest
+	(*UpdateExamResponse)(nil),           // 47: exam.UpdateExamResponse
+	(*DeleteExamRequest)(nil),            // 48: exam.DeleteExamRequest
+	(*DeleteExamResponse)(nil),           // 49: exam.DeleteExamResponse
+	(*PublishExamRequest)(nil),           // 50: exam.PublishExamRequest
+	(*PublishExamResponse)(nil),          // 51: exam.PublishExamResponse
+	(*UserAnswer)(nil),                   // 52: exam.UserAnswer
+	(*SubmitExamRequest)(nil),            // 53: exam.SubmitExamRequest
+	(*SubmitExamResponse)(nil),           // 54: exam.SubmitExamResponse
+	(*GetSubmissionRequest)(nil),         // 55: exam.GetSubmissionRequest
+	(*SubmissionDetail)(nil),             // 56: exam.SubmissionDetail
+	(*ChoiceReview)(nil),                 // 57: exam.ChoiceReview
+	(*GetSubmissionResponse)(nil),        // 58: exam.GetSubmissionResponse
+	(*GetUserExamStatsRequest)(nil),      // 59: exam.GetUserExamStatsRequest
+	(*GetUserExamStatsResponse)(nil),     // 60: exam.GetUserExamStatsResponse
+	(*GetExamCountRequest)(nil),          // 61: exam.GetExamCountRequest
+	(*GetExamCountResponse)(nil),         // 62: exam.GetExamCountResponse
+	(*SaveAnswerRequest)(nil),            // 63: exam.SaveAnswerRequest
+	(*SaveAnswerResponse)(nil),           // 64: exam.SaveAnswerResponse
+	(*LogViolationRequest)(nil),          // 65: exam.LogViolationRequest
+	(*LogViolationResponse)(nil),         // 66: exam.LogViolationResponse
+	(*GradeEssayRequest)(nil),            // 67: exam.GradeEssayRequest
+	(*GradeEssayResponse)(nil),           // 68: exam.GradeEssayResponse
+	(*GetExamStatsDetailedRequest)(nil),  // 69: exam.GetExamStatsDetailedRequest
+	(*GetExamStatsDetailedResponse)(nil), // 70: exam.GetExamStatsDetailedResponse
+	(*SubmissionSummary)(nil),            // 71: exam.SubmissionSummary
+	(*GetExamSubmissionsRequest)(nil),    // 72: exam.GetExamSubmissionsRequest
+	(*GetExamSubmissionsResponse)(nil),   // 73: exam.GetExamSubmissionsResponse
+	(*ExportExamResultsRequest)(nil),     // 74: exam.ExportExamResultsRequest
+	(*ExportExamResultsResponse)(nil),    // 75: exam.ExportExamResultsResponse
+	(*GetQuestionsRequest)(nil),          // 76: exam.GetQuestionsRequest
+	(*QuestionListItem)(nil),             // 77: exam.QuestionListItem
+	(*GetQuestionsResponse)(nil),         // 78: exam.GetQuestionsResponse
+	(*ExamViolation)(nil),                // 79: exam.ExamViolation
+	(*GetExamViolationsRequest)(nil),     // 80: exam.GetExamViolationsRequest
+	(*GetExamViolationsResponse)(nil),    // 81: exam.GetExamViolationsResponse
+	(*ExportQuestionsRequest)(nil),       // 82: exam.ExportQuestionsRequest
+	(*ExportQuestionsResponse)(nil),      // 83: exam.ExportQuestionsResponse
+	(*StartExamRequest)(nil),             // 84: exam.StartExamRequest
+	(*AnswerDetail)(nil),                 // 85: exam.AnswerDetail
+	(*StartExamResponse)(nil),            // 86: exam.StartExamResponse
+	(*Int64List)(nil),                    // 87: exam.Int64List
+	(*GetAccessRequestsRequest)(nil),     // 88: exam.GetAccessRequestsRequest
+	(*AccessRequestItem)(nil),            // 89: exam.AccessRequestItem
+	(*GetAccessRequestsResponse)(nil),    // 90: exam.GetAccessRequestsResponse
+	(*UpdateTopicRequest)(nil),           // 91: exam.UpdateTopicRequest
+	(*UpdateTopicResponse)(nil),          // 92: exam.UpdateTopicResponse
+	(*DeleteTopicRequest)(nil),           // 93: exam.DeleteTopicRequest
+	(*DeleteTopicResponse)(nil),          // 94: exam.DeleteTopicResponse
+	(*UpdateSectionRequest)(nil),         // 95: exam.UpdateSectionRequest
+	(*UpdateSectionResponse)(nil),        // 96: exam.UpdateSectionResponse
+	(*DeleteSectionRequest)(nil),         // 97: exam.DeleteSectionRequest
+	(*DeleteSectionResponse)(nil),        // 98: exam.DeleteSectionResponse
+	(*GetExamsByClassRequest)(nil),       // 99: exam.GetExamsByClassRequest
+	(*GetExamsByClassResponse)(nil),      // 100: exam.GetExamsByClassResponse
+	(*AssignExamToClassRequest)(nil),     // 101: exam.AssignExamToClassRequest
+	(*AssignExamToClassResponse)(nil),    // 102: exam.AssignExamToClassResponse
+	(*GetInstructorExamsRequest)(nil),    // 103: exam.GetInstructorExamsRequest
+	(*GetInstructorExamsResponse)(nil),   // 104: exam.GetInstructorExamsResponse
+	(*Exam)(nil),                         // 105: exam.Exam
+	(*GetExamPreviewRequest)(nil),        // 106: exam.GetExamPreviewRequest
+	(*GetRecentSubmissionsRequest)(nil),  // 107: exam.GetRecentSubmissionsRequest
+	(*RecentSubmissionItem)(nil),         // 108: exam.RecentSubmissionItem
+	(*GetRecentSubmissionsResponse)(nil), // 109: exam.GetRecentSubmissionsResponse
+	(*GetMySubmissionsRequest)(nil),      // 110: exam.GetMySubmissionsRequest
+	(*GetMySubmissionsResponse)(nil),     // 111: exam.GetMySubmissionsResponse
+	(*GetClassGradebookRequest)(nil),     // 112: exam.GetClassGradebookRequest
+	(*ExamScore)(nil),                    // 113: exam.ExamScore
+	(*StudentGrade)(nil),                 // 114: exam.StudentGrade
+	(*GetClassGradebookResponse)(nil),    // 115: exam.GetClassGradebookResponse
+	nil,                                  // 116: exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
 }
 var file_exam_proto_depIdxs = []int32{
 	0,   // 0: exam.CreateTopicResponse.topic:type_name -> exam.Topic
@@ -7682,124 +7777,126 @@ var file_exam_proto_depIdxs = []int32{
 	26,  // 13: exam.GetExamDetailsResponse.questions:type_name -> exam.QuestionDetails
 	26,  // 14: exam.GetQuestionResponse.question:type_name -> exam.QuestionDetails
 	10,  // 15: exam.UpdateQuestionRequest.choices:type_name -> exam.ChoiceInput
-	41,  // 16: exam.GetExamsResponse.exams:type_name -> exam.ExamListItem
+	43,  // 16: exam.GetExamsResponse.exams:type_name -> exam.ExamListItem
 	19,  // 17: exam.UpdateExamRequest.settings:type_name -> exam.ExamSettings
 	20,  // 18: exam.UpdateExamRequest.questions:type_name -> exam.QuestionAssignment
-	50,  // 19: exam.SubmitExamRequest.answers:type_name -> exam.UserAnswer
-	55,  // 20: exam.SubmissionDetail.choices:type_name -> exam.ChoiceReview
-	54,  // 21: exam.GetSubmissionResponse.details:type_name -> exam.SubmissionDetail
-	114, // 22: exam.GetExamStatsDetailedResponse.score_distribution:type_name -> exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
-	69,  // 23: exam.GetExamSubmissionsResponse.submissions:type_name -> exam.SubmissionSummary
-	75,  // 24: exam.GetQuestionsResponse.questions:type_name -> exam.QuestionListItem
-	77,  // 25: exam.GetExamViolationsResponse.violations:type_name -> exam.ExamViolation
+	52,  // 19: exam.SubmitExamRequest.answers:type_name -> exam.UserAnswer
+	57,  // 20: exam.SubmissionDetail.choices:type_name -> exam.ChoiceReview
+	56,  // 21: exam.GetSubmissionResponse.details:type_name -> exam.SubmissionDetail
+	116, // 22: exam.GetExamStatsDetailedResponse.score_distribution:type_name -> exam.GetExamStatsDetailedResponse.ScoreDistributionEntry
+	71,  // 23: exam.GetExamSubmissionsResponse.submissions:type_name -> exam.SubmissionSummary
+	77,  // 24: exam.GetQuestionsResponse.questions:type_name -> exam.QuestionListItem
+	79,  // 25: exam.GetExamViolationsResponse.violations:type_name -> exam.ExamViolation
 	26,  // 26: exam.StartExamResponse.questions:type_name -> exam.QuestionDetails
-	83,  // 27: exam.StartExamResponse.current_answers:type_name -> exam.AnswerDetail
-	87,  // 28: exam.GetAccessRequestsResponse.requests:type_name -> exam.AccessRequestItem
-	103, // 29: exam.GetExamsByClassResponse.exams:type_name -> exam.Exam
-	103, // 30: exam.GetInstructorExamsResponse.exams:type_name -> exam.Exam
-	106, // 31: exam.GetRecentSubmissionsResponse.submissions:type_name -> exam.RecentSubmissionItem
-	69,  // 32: exam.GetMySubmissionsResponse.submissions:type_name -> exam.SubmissionSummary
-	111, // 33: exam.StudentGrade.scores:type_name -> exam.ExamScore
-	103, // 34: exam.GetClassGradebookResponse.exams:type_name -> exam.Exam
-	112, // 35: exam.GetClassGradebookResponse.grades:type_name -> exam.StudentGrade
+	85,  // 27: exam.StartExamResponse.current_answers:type_name -> exam.AnswerDetail
+	89,  // 28: exam.GetAccessRequestsResponse.requests:type_name -> exam.AccessRequestItem
+	105, // 29: exam.GetExamsByClassResponse.exams:type_name -> exam.Exam
+	105, // 30: exam.GetInstructorExamsResponse.exams:type_name -> exam.Exam
+	108, // 31: exam.GetRecentSubmissionsResponse.submissions:type_name -> exam.RecentSubmissionItem
+	71,  // 32: exam.GetMySubmissionsResponse.submissions:type_name -> exam.SubmissionSummary
+	113, // 33: exam.StudentGrade.scores:type_name -> exam.ExamScore
+	105, // 34: exam.GetClassGradebookResponse.exams:type_name -> exam.Exam
+	114, // 35: exam.GetClassGradebookResponse.grades:type_name -> exam.StudentGrade
 	2,   // 36: exam.ExamService.CreateTopic:input_type -> exam.CreateTopicRequest
 	4,   // 37: exam.ExamService.GetTopics:input_type -> exam.GetTopicsRequest
 	6,   // 38: exam.ExamService.CreateSection:input_type -> exam.CreateSectionRequest
 	8,   // 39: exam.ExamService.GetSections:input_type -> exam.GetSectionsRequest
-	89,  // 40: exam.ExamService.UpdateTopic:input_type -> exam.UpdateTopicRequest
-	91,  // 41: exam.ExamService.DeleteTopic:input_type -> exam.DeleteTopicRequest
-	93,  // 42: exam.ExamService.UpdateSection:input_type -> exam.UpdateSectionRequest
-	95,  // 43: exam.ExamService.DeleteSection:input_type -> exam.DeleteSectionRequest
-	74,  // 44: exam.ExamService.GetQuestions:input_type -> exam.GetQuestionsRequest
+	91,  // 40: exam.ExamService.UpdateTopic:input_type -> exam.UpdateTopicRequest
+	93,  // 41: exam.ExamService.DeleteTopic:input_type -> exam.DeleteTopicRequest
+	95,  // 42: exam.ExamService.UpdateSection:input_type -> exam.UpdateSectionRequest
+	97,  // 43: exam.ExamService.DeleteSection:input_type -> exam.DeleteSectionRequest
+	76,  // 44: exam.ExamService.GetQuestions:input_type -> exam.GetQuestionsRequest
 	11,  // 45: exam.ExamService.CreateQuestion:input_type -> exam.CreateQuestionRequest
 	13,  // 46: exam.ExamService.CreateBulkQuestions:input_type -> exam.CreateBulkQuestionsRequest
 	35,  // 47: exam.ExamService.GetQuestion:input_type -> exam.GetQuestionRequest
 	17,  // 48: exam.ExamService.ImportQuestions:input_type -> exam.ImportQuestionsRequest
 	37,  // 49: exam.ExamService.UpdateQuestion:input_type -> exam.UpdateQuestionRequest
 	39,  // 50: exam.ExamService.DeleteQuestion:input_type -> exam.DeleteQuestionRequest
-	15,  // 51: exam.ExamService.GetUploadURL:input_type -> exam.GetUploadURLRequest
-	21,  // 52: exam.ExamService.CreateExam:input_type -> exam.CreateExamRequest
-	23,  // 53: exam.ExamService.GenerateExam:input_type -> exam.GenerateExamRequest
-	27,  // 54: exam.ExamService.GetExamDetails:input_type -> exam.GetExamDetailsRequest
-	42,  // 55: exam.ExamService.GetExams:input_type -> exam.GetExamsRequest
-	44,  // 56: exam.ExamService.UpdateExam:input_type -> exam.UpdateExamRequest
-	46,  // 57: exam.ExamService.DeleteExam:input_type -> exam.DeleteExamRequest
-	48,  // 58: exam.ExamService.PublishExam:input_type -> exam.PublishExamRequest
-	29,  // 59: exam.ExamService.RequestExamAccess:input_type -> exam.RequestExamAccessRequest
-	31,  // 60: exam.ExamService.ApproveExamAccess:input_type -> exam.ApproveExamAccessRequest
-	33,  // 61: exam.ExamService.CheckExamAccess:input_type -> exam.CheckExamAccessRequest
-	86,  // 62: exam.ExamService.GetAccessRequests:input_type -> exam.GetAccessRequestsRequest
-	51,  // 63: exam.ExamService.SubmitExam:input_type -> exam.SubmitExamRequest
-	53,  // 64: exam.ExamService.GetSubmission:input_type -> exam.GetSubmissionRequest
-	57,  // 65: exam.ExamService.GetUserExamStats:input_type -> exam.GetUserExamStatsRequest
-	59,  // 66: exam.ExamService.GetExamCount:input_type -> exam.GetExamCountRequest
-	61,  // 67: exam.ExamService.SaveAnswer:input_type -> exam.SaveAnswerRequest
-	63,  // 68: exam.ExamService.LogViolation:input_type -> exam.LogViolationRequest
-	67,  // 69: exam.ExamService.GetExamStatsDetailed:input_type -> exam.GetExamStatsDetailedRequest
-	70,  // 70: exam.ExamService.GetExamSubmissions:input_type -> exam.GetExamSubmissionsRequest
-	72,  // 71: exam.ExamService.ExportExamResults:input_type -> exam.ExportExamResultsRequest
-	78,  // 72: exam.ExamService.GetExamViolations:input_type -> exam.GetExamViolationsRequest
-	80,  // 73: exam.ExamService.ExportQuestions:input_type -> exam.ExportQuestionsRequest
-	82,  // 74: exam.ExamService.StartExam:input_type -> exam.StartExamRequest
-	97,  // 75: exam.ExamService.GetExamsByClass:input_type -> exam.GetExamsByClassRequest
-	99,  // 76: exam.ExamService.AssignExamToClass:input_type -> exam.AssignExamToClassRequest
-	99,  // 77: exam.ExamService.UnassignExamFromClass:input_type -> exam.AssignExamToClassRequest
-	101, // 78: exam.ExamService.GetInstructorExams:input_type -> exam.GetInstructorExamsRequest
-	104, // 79: exam.ExamService.GetExamPreview:input_type -> exam.GetExamPreviewRequest
-	105, // 80: exam.ExamService.GetRecentSubmissions:input_type -> exam.GetRecentSubmissionsRequest
-	108, // 81: exam.ExamService.GetMySubmissions:input_type -> exam.GetMySubmissionsRequest
-	65,  // 82: exam.ExamService.GradeEssay:input_type -> exam.GradeEssayRequest
-	110, // 83: exam.ExamService.GetClassGradebook:input_type -> exam.GetClassGradebookRequest
-	3,   // 84: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
-	5,   // 85: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
-	7,   // 86: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
-	9,   // 87: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
-	90,  // 88: exam.ExamService.UpdateTopic:output_type -> exam.UpdateTopicResponse
-	92,  // 89: exam.ExamService.DeleteTopic:output_type -> exam.DeleteTopicResponse
-	94,  // 90: exam.ExamService.UpdateSection:output_type -> exam.UpdateSectionResponse
-	96,  // 91: exam.ExamService.DeleteSection:output_type -> exam.DeleteSectionResponse
-	76,  // 92: exam.ExamService.GetQuestions:output_type -> exam.GetQuestionsResponse
-	12,  // 93: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
-	14,  // 94: exam.ExamService.CreateBulkQuestions:output_type -> exam.CreateBulkQuestionsResponse
-	36,  // 95: exam.ExamService.GetQuestion:output_type -> exam.GetQuestionResponse
-	18,  // 96: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
-	38,  // 97: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
-	40,  // 98: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
-	16,  // 99: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
-	24,  // 100: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
-	24,  // 101: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
-	28,  // 102: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
-	43,  // 103: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
-	45,  // 104: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
-	47,  // 105: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
-	49,  // 106: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
-	30,  // 107: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
-	32,  // 108: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
-	34,  // 109: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
-	88,  // 110: exam.ExamService.GetAccessRequests:output_type -> exam.GetAccessRequestsResponse
-	52,  // 111: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
-	56,  // 112: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
-	58,  // 113: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
-	60,  // 114: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
-	62,  // 115: exam.ExamService.SaveAnswer:output_type -> exam.SaveAnswerResponse
-	64,  // 116: exam.ExamService.LogViolation:output_type -> exam.LogViolationResponse
-	68,  // 117: exam.ExamService.GetExamStatsDetailed:output_type -> exam.GetExamStatsDetailedResponse
-	71,  // 118: exam.ExamService.GetExamSubmissions:output_type -> exam.GetExamSubmissionsResponse
-	73,  // 119: exam.ExamService.ExportExamResults:output_type -> exam.ExportExamResultsResponse
-	79,  // 120: exam.ExamService.GetExamViolations:output_type -> exam.GetExamViolationsResponse
-	81,  // 121: exam.ExamService.ExportQuestions:output_type -> exam.ExportQuestionsResponse
-	84,  // 122: exam.ExamService.StartExam:output_type -> exam.StartExamResponse
-	98,  // 123: exam.ExamService.GetExamsByClass:output_type -> exam.GetExamsByClassResponse
-	100, // 124: exam.ExamService.AssignExamToClass:output_type -> exam.AssignExamToClassResponse
-	100, // 125: exam.ExamService.UnassignExamFromClass:output_type -> exam.AssignExamToClassResponse
-	102, // 126: exam.ExamService.GetInstructorExams:output_type -> exam.GetInstructorExamsResponse
-	28,  // 127: exam.ExamService.GetExamPreview:output_type -> exam.GetExamDetailsResponse
-	107, // 128: exam.ExamService.GetRecentSubmissions:output_type -> exam.GetRecentSubmissionsResponse
-	109, // 129: exam.ExamService.GetMySubmissions:output_type -> exam.GetMySubmissionsResponse
-	66,  // 130: exam.ExamService.GradeEssay:output_type -> exam.GradeEssayResponse
-	113, // 131: exam.ExamService.GetClassGradebook:output_type -> exam.GetClassGradebookResponse
-	84,  // [84:132] is the sub-list for method output_type
-	36,  // [36:84] is the sub-list for method input_type
+	41,  // 51: exam.ExamService.DeleteBulkQuestions:input_type -> exam.DeleteBulkQuestionsRequest
+	15,  // 52: exam.ExamService.GetUploadURL:input_type -> exam.GetUploadURLRequest
+	21,  // 53: exam.ExamService.CreateExam:input_type -> exam.CreateExamRequest
+	23,  // 54: exam.ExamService.GenerateExam:input_type -> exam.GenerateExamRequest
+	27,  // 55: exam.ExamService.GetExamDetails:input_type -> exam.GetExamDetailsRequest
+	44,  // 56: exam.ExamService.GetExams:input_type -> exam.GetExamsRequest
+	46,  // 57: exam.ExamService.UpdateExam:input_type -> exam.UpdateExamRequest
+	48,  // 58: exam.ExamService.DeleteExam:input_type -> exam.DeleteExamRequest
+	50,  // 59: exam.ExamService.PublishExam:input_type -> exam.PublishExamRequest
+	29,  // 60: exam.ExamService.RequestExamAccess:input_type -> exam.RequestExamAccessRequest
+	31,  // 61: exam.ExamService.ApproveExamAccess:input_type -> exam.ApproveExamAccessRequest
+	33,  // 62: exam.ExamService.CheckExamAccess:input_type -> exam.CheckExamAccessRequest
+	88,  // 63: exam.ExamService.GetAccessRequests:input_type -> exam.GetAccessRequestsRequest
+	53,  // 64: exam.ExamService.SubmitExam:input_type -> exam.SubmitExamRequest
+	55,  // 65: exam.ExamService.GetSubmission:input_type -> exam.GetSubmissionRequest
+	59,  // 66: exam.ExamService.GetUserExamStats:input_type -> exam.GetUserExamStatsRequest
+	61,  // 67: exam.ExamService.GetExamCount:input_type -> exam.GetExamCountRequest
+	63,  // 68: exam.ExamService.SaveAnswer:input_type -> exam.SaveAnswerRequest
+	65,  // 69: exam.ExamService.LogViolation:input_type -> exam.LogViolationRequest
+	69,  // 70: exam.ExamService.GetExamStatsDetailed:input_type -> exam.GetExamStatsDetailedRequest
+	72,  // 71: exam.ExamService.GetExamSubmissions:input_type -> exam.GetExamSubmissionsRequest
+	74,  // 72: exam.ExamService.ExportExamResults:input_type -> exam.ExportExamResultsRequest
+	80,  // 73: exam.ExamService.GetExamViolations:input_type -> exam.GetExamViolationsRequest
+	82,  // 74: exam.ExamService.ExportQuestions:input_type -> exam.ExportQuestionsRequest
+	84,  // 75: exam.ExamService.StartExam:input_type -> exam.StartExamRequest
+	99,  // 76: exam.ExamService.GetExamsByClass:input_type -> exam.GetExamsByClassRequest
+	101, // 77: exam.ExamService.AssignExamToClass:input_type -> exam.AssignExamToClassRequest
+	101, // 78: exam.ExamService.UnassignExamFromClass:input_type -> exam.AssignExamToClassRequest
+	103, // 79: exam.ExamService.GetInstructorExams:input_type -> exam.GetInstructorExamsRequest
+	106, // 80: exam.ExamService.GetExamPreview:input_type -> exam.GetExamPreviewRequest
+	107, // 81: exam.ExamService.GetRecentSubmissions:input_type -> exam.GetRecentSubmissionsRequest
+	110, // 82: exam.ExamService.GetMySubmissions:input_type -> exam.GetMySubmissionsRequest
+	67,  // 83: exam.ExamService.GradeEssay:input_type -> exam.GradeEssayRequest
+	112, // 84: exam.ExamService.GetClassGradebook:input_type -> exam.GetClassGradebookRequest
+	3,   // 85: exam.ExamService.CreateTopic:output_type -> exam.CreateTopicResponse
+	5,   // 86: exam.ExamService.GetTopics:output_type -> exam.GetTopicsResponse
+	7,   // 87: exam.ExamService.CreateSection:output_type -> exam.CreateSectionResponse
+	9,   // 88: exam.ExamService.GetSections:output_type -> exam.GetSectionsResponse
+	92,  // 89: exam.ExamService.UpdateTopic:output_type -> exam.UpdateTopicResponse
+	94,  // 90: exam.ExamService.DeleteTopic:output_type -> exam.DeleteTopicResponse
+	96,  // 91: exam.ExamService.UpdateSection:output_type -> exam.UpdateSectionResponse
+	98,  // 92: exam.ExamService.DeleteSection:output_type -> exam.DeleteSectionResponse
+	78,  // 93: exam.ExamService.GetQuestions:output_type -> exam.GetQuestionsResponse
+	12,  // 94: exam.ExamService.CreateQuestion:output_type -> exam.CreateQuestionResponse
+	14,  // 95: exam.ExamService.CreateBulkQuestions:output_type -> exam.CreateBulkQuestionsResponse
+	36,  // 96: exam.ExamService.GetQuestion:output_type -> exam.GetQuestionResponse
+	18,  // 97: exam.ExamService.ImportQuestions:output_type -> exam.ImportQuestionsResponse
+	38,  // 98: exam.ExamService.UpdateQuestion:output_type -> exam.UpdateQuestionResponse
+	40,  // 99: exam.ExamService.DeleteQuestion:output_type -> exam.DeleteQuestionResponse
+	42,  // 100: exam.ExamService.DeleteBulkQuestions:output_type -> exam.DeleteBulkQuestionsResponse
+	16,  // 101: exam.ExamService.GetUploadURL:output_type -> exam.GetUploadURLResponse
+	24,  // 102: exam.ExamService.CreateExam:output_type -> exam.CreateExamResponse
+	24,  // 103: exam.ExamService.GenerateExam:output_type -> exam.CreateExamResponse
+	28,  // 104: exam.ExamService.GetExamDetails:output_type -> exam.GetExamDetailsResponse
+	45,  // 105: exam.ExamService.GetExams:output_type -> exam.GetExamsResponse
+	47,  // 106: exam.ExamService.UpdateExam:output_type -> exam.UpdateExamResponse
+	49,  // 107: exam.ExamService.DeleteExam:output_type -> exam.DeleteExamResponse
+	51,  // 108: exam.ExamService.PublishExam:output_type -> exam.PublishExamResponse
+	30,  // 109: exam.ExamService.RequestExamAccess:output_type -> exam.RequestExamAccessResponse
+	32,  // 110: exam.ExamService.ApproveExamAccess:output_type -> exam.ApproveExamAccessResponse
+	34,  // 111: exam.ExamService.CheckExamAccess:output_type -> exam.CheckExamAccessResponse
+	90,  // 112: exam.ExamService.GetAccessRequests:output_type -> exam.GetAccessRequestsResponse
+	54,  // 113: exam.ExamService.SubmitExam:output_type -> exam.SubmitExamResponse
+	58,  // 114: exam.ExamService.GetSubmission:output_type -> exam.GetSubmissionResponse
+	60,  // 115: exam.ExamService.GetUserExamStats:output_type -> exam.GetUserExamStatsResponse
+	62,  // 116: exam.ExamService.GetExamCount:output_type -> exam.GetExamCountResponse
+	64,  // 117: exam.ExamService.SaveAnswer:output_type -> exam.SaveAnswerResponse
+	66,  // 118: exam.ExamService.LogViolation:output_type -> exam.LogViolationResponse
+	70,  // 119: exam.ExamService.GetExamStatsDetailed:output_type -> exam.GetExamStatsDetailedResponse
+	73,  // 120: exam.ExamService.GetExamSubmissions:output_type -> exam.GetExamSubmissionsResponse
+	75,  // 121: exam.ExamService.ExportExamResults:output_type -> exam.ExportExamResultsResponse
+	81,  // 122: exam.ExamService.GetExamViolations:output_type -> exam.GetExamViolationsResponse
+	83,  // 123: exam.ExamService.ExportQuestions:output_type -> exam.ExportQuestionsResponse
+	86,  // 124: exam.ExamService.StartExam:output_type -> exam.StartExamResponse
+	100, // 125: exam.ExamService.GetExamsByClass:output_type -> exam.GetExamsByClassResponse
+	102, // 126: exam.ExamService.AssignExamToClass:output_type -> exam.AssignExamToClassResponse
+	102, // 127: exam.ExamService.UnassignExamFromClass:output_type -> exam.AssignExamToClassResponse
+	104, // 128: exam.ExamService.GetInstructorExams:output_type -> exam.GetInstructorExamsResponse
+	28,  // 129: exam.ExamService.GetExamPreview:output_type -> exam.GetExamDetailsResponse
+	109, // 130: exam.ExamService.GetRecentSubmissions:output_type -> exam.GetRecentSubmissionsResponse
+	111, // 131: exam.ExamService.GetMySubmissions:output_type -> exam.GetMySubmissionsResponse
+	68,  // 132: exam.ExamService.GradeEssay:output_type -> exam.GradeEssayResponse
+	115, // 133: exam.ExamService.GetClassGradebook:output_type -> exam.GetClassGradebookResponse
+	85,  // [85:134] is the sub-list for method output_type
+	36,  // [36:85] is the sub-list for method input_type
 	36,  // [36:36] is the sub-list for extension type_name
 	36,  // [36:36] is the sub-list for extension extendee
 	0,   // [0:36] is the sub-list for field type_name
@@ -7816,7 +7913,7 @@ func file_exam_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_exam_proto_rawDesc), len(file_exam_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   115,
+			NumMessages:   117,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

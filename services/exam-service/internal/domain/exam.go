@@ -216,6 +216,7 @@ type ExamRepository interface {
 	UpdateQuestion(ctx context.Context, tx *gorm.DB, qID int64, updates map[string]interface{}) error
 	DeleteChoicesByQuestionID(ctx context.Context, tx *gorm.DB, qID int64) error
 	DeleteQuestion(ctx context.Context, tx *gorm.DB, questionID int64) error
+	DeleteQuestions(ctx context.Context, tx *gorm.DB, questionIDs []int64) error
 
 	CreateExam(ctx context.Context, tx *gorm.DB, exam *ExamModel) (*ExamModel, error)
 	LinkQuestionsToExam(ctx context.Context, tx *gorm.DB, examID int64, questions []*ExamQuestionModel) error
@@ -284,6 +285,7 @@ type ExamService interface {
 	ImportQuestions(ctx context.Context, req *pb.ImportQuestionsRequest) (*pb.ImportQuestionsResponse, error)
 	UpdateQuestion(ctx context.Context, req *pb.UpdateQuestionRequest) (*pb.UpdateQuestionResponse, error)
 	DeleteQuestion(ctx context.Context, req *pb.DeleteQuestionRequest) (*pb.DeleteQuestionResponse, error)
+	DeleteBulkQuestions(ctx context.Context, req *pb.DeleteBulkQuestionsRequest) (*pb.DeleteBulkQuestionsResponse, error)
 	GetUploadURL(ctx context.Context, req *pb.GetUploadURLRequest) (*pb.GetUploadURLResponse, error)
 
 	CreateExam(ctx context.Context, req *pb.CreateExamRequest) (*pb.CreateExamResponse, error)
