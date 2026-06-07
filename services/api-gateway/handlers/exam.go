@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -975,6 +976,32 @@ func (h *ExamHandler) GetExamViolations(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	userIDs := make([]int64, 0)
+	seen := make(map[int64]bool)
+	for _, v := range resp.Violations {
+		if v.UserId > 0 && !seen[v.UserId] {
+			seen[v.UserId] = true
+			userIDs = append(userIDs, v.UserId)
+		}
+	}
+
+	if len(userIDs) > 0 {
+		userMap := make(map[int64]string)
+		for _, uid := range userIDs {
+			profile, err := h.userClient.GetProfile(c.Request.Context(), &pbUser.GetProfileRequest{UserId: uid})
+			if err == nil && profile != nil {
+				userMap[uid] = profile.FullName
+			}
+		}
+
+		for _, v := range resp.Violations {
+			if name, ok := userMap[v.UserId]; ok {
+				v.UserFullName = name
+			}
+		}
+	}
+
 	c.JSON(http.StatusOK, contracts.APIResponse{Data: resp.Violations})
 }
 
@@ -1088,8 +1115,8 @@ func (h *ExamHandler) GetAccessRequests(c *gin.Context) {
 func (h *ExamHandler) UpdateTopic(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	var req struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
+		Name        *string `json:"name"`
+		Description *string `json:"description"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -1117,8 +1144,8 @@ func (h *ExamHandler) DeleteTopic(c *gin.Context) {
 func (h *ExamHandler) UpdateSection(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	var req struct {
-		Name        string `json:"name"`
-		Description string `json:"description"`
+		Name        *string `json:"name"`
+		Description *string `json:"description"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -1363,10 +1390,42 @@ func (h *ExamHandler) MonitorExamViolationsWS(c *gin.Context) {
 		}
 	}()
 
+	userCache := make(map[int64]string)
+
 	for {
 		select {
 		case msg := <-ch:
-			err := conn.WriteMessage(websocket.TextMessage, []byte(msg.Payload))
+			payload := []byte(msg.Payload)
+			var data map[string]interface{}
+			if err := json.Unmarshal(payload, &data); err == nil {
+				if uIDVal, ok := data["user_id"]; ok {
+					var uID int64
+					switch val := uIDVal.(type) {
+					case float64:
+						uID = int64(val)
+					case int64:
+						uID = val
+					}
+					if uID > 0 {
+						name, ok := userCache[uID]
+						if !ok {
+							profile, err := h.userClient.GetProfile(ctx, &pbUser.GetProfileRequest{UserId: uID})
+							if err == nil && profile != nil {
+								name = profile.FullName
+								userCache[uID] = name
+							}
+						}
+						if name != "" {
+							data["user_full_name"] = name
+						}
+					}
+				}
+				if enrichedPayload, err := json.Marshal(data); err == nil {
+					payload = enrichedPayload
+				}
+			}
+
+			err := conn.WriteMessage(websocket.TextMessage, payload)
 			if err != nil {
 				log.Println("write WS error:", err)
 				cancel()

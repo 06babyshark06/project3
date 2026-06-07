@@ -607,6 +607,40 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 		} else {
 			exam.DynamicConfig = req.Settings.DynamicConfig
 		}
+
+		if req.Settings.IsDynamic {
+			var configs []struct {
+				SectionId  int64   `json:"section_id"`
+				Count      int     `json:"count"`
+				Difficulty string  `json:"difficulty"`
+				Points     float64 `json:"points"`
+			}
+			if req.Settings.DynamicConfig != "" && req.Settings.DynamicConfig != "{}" {
+				if err := json.Unmarshal([]byte(req.Settings.DynamicConfig), &configs); err != nil {
+					return fmt.Errorf("cấu hình sinh đề không hợp lệ: %v", err)
+				}
+				for i, cfg := range configs {
+					ids, err := s.repo.GetQuestionIDsForSection(ctx, cfg.SectionId, cfg.Difficulty, req.TopicId)
+					if err != nil {
+						return fmt.Errorf("lỗi khi kiểm tra ngân hàng câu hỏi: %v", err)
+					}
+					if len(ids) < cfg.Count {
+						sectionName := "Tất cả chương"
+						if cfg.SectionId > 0 {
+							sec, errSec := s.repo.GetSectionByID(ctx, cfg.SectionId)
+							if errSec == nil && sec != nil {
+								sectionName = fmt.Sprintf("chương '%s'", sec.Name)
+							}
+						}
+						diffLabel := cfg.Difficulty
+						if diffLabel == "all" || diffLabel == "" {
+							diffLabel = "tất cả độ khó"
+						}
+						return fmt.Errorf("quy tắc %d: Không đủ câu hỏi trong ngân hàng. Yêu cầu %d câu (%s, %s), nhưng chỉ có %d câu.", i+1, cfg.Count, sectionName, diffLabel, len(ids))
+					}
+				}
+			}
+		}
 		if req.Settings.StartTime != "" {
 			t, _ := time.Parse(time.RFC3339, req.Settings.StartTime)
 			exam.StartTime = &t
@@ -1349,6 +1383,51 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 				t, err := time.Parse(time.RFC3339, req.Settings.EndTime)
 				if err == nil {
 					updates["end_time"] = &t
+				}
+			}
+		}
+
+		if req.Settings != nil && req.Settings.IsDynamic {
+			var topicID int64
+			if req.TopicId > 0 {
+				topicID = req.TopicId
+			} else {
+				existing, err := s.repo.GetExamDetails(ctx, req.ExamId)
+				if err != nil {
+					return err
+				}
+				topicID = existing.TopicID
+			}
+
+			var configs []struct {
+				SectionId  int64   `json:"section_id"`
+				Count      int     `json:"count"`
+				Difficulty string  `json:"difficulty"`
+				Points     float64 `json:"points"`
+			}
+			if req.Settings.DynamicConfig != "" && req.Settings.DynamicConfig != "{}" {
+				if err := json.Unmarshal([]byte(req.Settings.DynamicConfig), &configs); err != nil {
+					return fmt.Errorf("cấu hình sinh đề không hợp lệ: %v", err)
+				}
+				for i, cfg := range configs {
+					ids, err := s.repo.GetQuestionIDsForSection(ctx, cfg.SectionId, cfg.Difficulty, topicID)
+					if err != nil {
+						return fmt.Errorf("lỗi khi kiểm tra ngân hàng câu hỏi: %v", err)
+					}
+					if len(ids) < cfg.Count {
+						sectionName := "Tất cả chương"
+						if cfg.SectionId > 0 {
+							sec, errSec := s.repo.GetSectionByID(ctx, cfg.SectionId)
+							if errSec == nil && sec != nil {
+								sectionName = fmt.Sprintf("chương '%s'", sec.Name)
+							}
+						}
+						diffLabel := cfg.Difficulty
+						if diffLabel == "all" || diffLabel == "" {
+							diffLabel = "tất cả độ khó"
+						}
+						return fmt.Errorf("quy tắc %d: Không đủ câu hỏi trong ngân hàng. Yêu cầu %d câu (%s, %s), nhưng chỉ có %d câu.", i+1, cfg.Count, sectionName, diffLabel, len(ids))
+					}
 				}
 			}
 		}
@@ -2191,11 +2270,11 @@ func (s *examService) GetAccessRequests(ctx context.Context, req *pb.GetAccessRe
 
 func (s *examService) UpdateTopic(ctx context.Context, req *pb.UpdateTopicRequest) (*pb.UpdateTopicResponse, error) {
 	updates := make(map[string]interface{})
-	if req.Name != "" {
-		updates["name"] = req.Name
+	if req.Name != nil {
+		updates["name"] = *req.Name
 	}
-	if req.Description != "" {
-		updates["description"] = req.Description
+	if req.Description != nil {
+		updates["description"] = *req.Description
 	}
 
 	err := s.repo.UpdateTopic(ctx, req.Id, updates)
@@ -2211,11 +2290,11 @@ func (s *examService) DeleteTopic(ctx context.Context, req *pb.DeleteTopicReques
 
 func (s *examService) UpdateSection(ctx context.Context, req *pb.UpdateSectionRequest) (*pb.UpdateSectionResponse, error) {
 	updates := make(map[string]interface{})
-	if req.Name != "" {
-		updates["name"] = req.Name
+	if req.Name != nil {
+		updates["name"] = *req.Name
 	}
-	if req.Description != "" {
-		updates["description"] = req.Description
+	if req.Description != nil {
+		updates["description"] = *req.Description
 	}
 
 	err := s.repo.UpdateSection(ctx, req.Id, updates)

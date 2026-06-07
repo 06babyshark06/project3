@@ -134,7 +134,7 @@ func (r *examRepository) DeleteQuestions(ctx context.Context, tx *gorm.DB, quest
 
 func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectionID int64, difficulty string, limit int, topicID int64) ([]int64, error) {
 	var questionIDs []int64
-	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("id")
+	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("question_models.id")
 
 	if sectionID > 0 {
 		query = query.Where("section_id = ?", sectionID)
@@ -146,13 +146,13 @@ func (r *examRepository) GetRandomQuestionsBySection(ctx context.Context, sectio
 		query = query.Joins("JOIN question_difficulty_models d ON question_models.difficulty_id = d.id").Where("d.difficulty = ?", difficulty)
 	}
 
-	err := query.Order("RANDOM()").Limit(limit).Pluck("id", &questionIDs).Error
+	err := query.Order("RANDOM()").Limit(limit).Pluck("question_models.id", &questionIDs).Error
 	return questionIDs, err
 }
 
 func (r *examRepository) GetQuestionIDsForSection(ctx context.Context, sectionID int64, difficulty string, topicID int64) ([]int64, error) {
 	var questionIDs []int64
-	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("id")
+	query := database.DB.WithContext(ctx).Model(&domain.QuestionModel{}).Select("question_models.id")
 
 	if sectionID > 0 {
 		query = query.Where("section_id = ?", sectionID)
@@ -164,7 +164,7 @@ func (r *examRepository) GetQuestionIDsForSection(ctx context.Context, sectionID
 		query = query.Joins("JOIN question_difficulty_models d ON question_models.difficulty_id = d.id").Where("d.difficulty = ?", difficulty)
 	}
 
-	err := query.Pluck("id", &questionIDs).Error
+	err := query.Pluck("question_models.id", &questionIDs).Error
 	return questionIDs, err
 }
 

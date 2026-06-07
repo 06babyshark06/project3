@@ -350,6 +350,7 @@ message ExamViolation {
   int64 user_id = 2;
   string violation_type = 3;
   string violation_time = 4;
+  string user_full_name = 5;
 }
 
 message GetExamViolationsRequest {
@@ -413,13 +414,13 @@ message GetAccessRequestsResponse {
   repeated AccessRequestItem requests = 1;
 }
 
-message UpdateTopicRequest { int64 id = 1; string name = 2; string description = 3; }
+message UpdateTopicRequest { int64 id = 1; optional string name = 2; optional string description = 3; }
 message UpdateTopicResponse { bool success = 1; }
 
 message DeleteTopicRequest { int64 id = 1; }
 message DeleteTopicResponse { bool success = 1; }
 
-message UpdateSectionRequest { int64 id = 1; string name = 2; string description = 3; }
+message UpdateSectionRequest { int64 id = 1; optional string name = 2; optional string description = 3; }
 message UpdateSectionResponse { bool success = 1; }
 
 message DeleteSectionRequest { int64 id = 1; }
