@@ -126,7 +126,7 @@ message ImportQuestionsResponse { int32 success_count = 1; int32 error_count = 2
 message ExamSettings {
   int32 duration_minutes = 1;
   int32 max_attempts = 2;
-  string password = 3;
+  optional string password = 3;
   string start_time = 4;
   string end_time = 5;
   bool shuffle_questions = 6;
@@ -219,7 +219,7 @@ message ExamListItem { int64 id = 1; string title = 2; int32 duration_minutes = 
 message GetExamsRequest { int32 page = 1; int32 limit = 2; int64 creator_id = 3; string status = 4; }
 message GetExamsResponse { repeated ExamListItem exams = 1; int64 total = 2; int32 page = 3; int32 total_pages = 4; }
 
-message UpdateExamRequest { int64 exam_id = 1; string title = 2; string description = 3; ExamSettings settings = 4; int64 topic_id = 5; repeated QuestionAssignment questions = 6; string status = 7;}
+message UpdateExamRequest { int64 exam_id = 1; string title = 2; optional string description = 3; ExamSettings settings = 4; int64 topic_id = 5; repeated QuestionAssignment questions = 6; string status = 7;}
 message UpdateExamResponse { bool success = 1; }
 message DeleteExamRequest { int64 exam_id = 1; }
 message DeleteExamResponse { bool success = 1; }

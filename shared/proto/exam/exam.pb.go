@@ -1045,7 +1045,7 @@ type ExamSettings struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
 	DurationMinutes       int32                  `protobuf:"varint,1,opt,name=duration_minutes,json=durationMinutes,proto3" json:"duration_minutes,omitempty"`
 	MaxAttempts           int32                  `protobuf:"varint,2,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
-	Password              string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Password              *string                `protobuf:"bytes,3,opt,name=password,proto3,oneof" json:"password,omitempty"`
 	StartTime             string                 `protobuf:"bytes,4,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`
 	EndTime               string                 `protobuf:"bytes,5,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`
 	ShuffleQuestions      bool                   `protobuf:"varint,6,opt,name=shuffle_questions,json=shuffleQuestions,proto3" json:"shuffle_questions,omitempty"`
@@ -1102,8 +1102,8 @@ func (x *ExamSettings) GetMaxAttempts() int32 {
 }
 
 func (x *ExamSettings) GetPassword() string {
-	if x != nil {
-		return x.Password
+	if x != nil && x.Password != nil {
+		return *x.Password
 	}
 	return ""
 }
@@ -2793,7 +2793,7 @@ type UpdateExamRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ExamId        int64                  `protobuf:"varint,1,opt,name=exam_id,json=examId,proto3" json:"exam_id,omitempty"`
 	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	Settings      *ExamSettings          `protobuf:"bytes,4,opt,name=settings,proto3" json:"settings,omitempty"`
 	TopicId       int64                  `protobuf:"varint,5,opt,name=topic_id,json=topicId,proto3" json:"topic_id,omitempty"`
 	Questions     []*QuestionAssignment  `protobuf:"bytes,6,rep,name=questions,proto3" json:"questions,omitempty"`
@@ -2847,8 +2847,8 @@ func (x *UpdateExamRequest) GetTitle() string {
 }
 
 func (x *UpdateExamRequest) GetDescription() string {
-	if x != nil {
-		return x.Description
+	if x != nil && x.Description != nil {
+		return *x.Description
 	}
 	return ""
 }
@@ -7087,11 +7087,11 @@ const file_exam_proto_rawDesc = "" +
 	"\x17ImportQuestionsResponse\x12#\n" +
 	"\rsuccess_count\x18\x01 \x01(\x05R\fsuccessCount\x12\x1f\n" +
 	"\verror_count\x18\x02 \x01(\x05R\n" +
-	"errorCount\"\x8a\x03\n" +
+	"errorCount\"\x9c\x03\n" +
 	"\fExamSettings\x12)\n" +
 	"\x10duration_minutes\x18\x01 \x01(\x05R\x0fdurationMinutes\x12!\n" +
-	"\fmax_attempts\x18\x02 \x01(\x05R\vmaxAttempts\x12\x1a\n" +
-	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x1d\n" +
+	"\fmax_attempts\x18\x02 \x01(\x05R\vmaxAttempts\x12\x1f\n" +
+	"\bpassword\x18\x03 \x01(\tH\x00R\bpassword\x88\x01\x01\x12\x1d\n" +
 	"\n" +
 	"start_time\x18\x04 \x01(\tR\tstartTime\x12\x19\n" +
 	"\bend_time\x18\x05 \x01(\tR\aendTime\x12+\n" +
@@ -7101,7 +7101,8 @@ const file_exam_proto_rawDesc = "" +
 	"\n" +
 	"is_dynamic\x18\t \x01(\bR\tisDynamic\x12%\n" +
 	"\x0edynamic_config\x18\n" +
-	" \x01(\tR\rdynamicConfig\"M\n" +
+	" \x01(\tR\rdynamicConfigB\v\n" +
+	"\t_password\"M\n" +
 	"\x12QuestionAssignment\x12\x1f\n" +
 	"\vquestion_id\x18\x01 \x01(\x03R\n" +
 	"questionId\x12\x16\n" +
@@ -7237,15 +7238,16 @@ const file_exam_proto_rawDesc = "" +
 	"\x05total\x18\x02 \x01(\x03R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1f\n" +
 	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
-	"totalPages\"\xff\x01\n" +
+	"totalPages\"\x94\x02\n" +
 	"\x11UpdateExamRequest\x12\x17\n" +
 	"\aexam_id\x18\x01 \x01(\x03R\x06examId\x12\x14\n" +
-	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12.\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12%\n" +
+	"\vdescription\x18\x03 \x01(\tH\x00R\vdescription\x88\x01\x01\x12.\n" +
 	"\bsettings\x18\x04 \x01(\v2\x12.exam.ExamSettingsR\bsettings\x12\x19\n" +
 	"\btopic_id\x18\x05 \x01(\x03R\atopicId\x126\n" +
 	"\tquestions\x18\x06 \x03(\v2\x18.exam.QuestionAssignmentR\tquestions\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\".\n" +
+	"\x06status\x18\a \x01(\tR\x06statusB\x0e\n" +
+	"\f_description\".\n" +
 	"\x12UpdateExamResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\",\n" +
 	"\x11DeleteExamRequest\x12\x17\n" +
@@ -7920,6 +7922,8 @@ func file_exam_proto_init() {
 	if File_exam_proto != nil {
 		return
 	}
+	file_exam_proto_msgTypes[19].OneofWrappers = []any{}
+	file_exam_proto_msgTypes[46].OneofWrappers = []any{}
 	file_exam_proto_msgTypes[91].OneofWrappers = []any{}
 	file_exam_proto_msgTypes[95].OneofWrappers = []any{}
 	type x struct{}

@@ -496,7 +496,12 @@ func (s *examService) GenerateExam(ctx context.Context, req *pb.GenerateExamRequ
 		exam := &domain.ExamModel{
 			Title: req.Title, Description: req.Description,
 			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
-			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
+			Password: func() string {
+				if req.Settings != nil && req.Settings.Password != nil {
+					return *req.Settings.Password
+				}
+				return ""
+			}(), ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
 			TopicID: req.TopicId, CreatorID: req.CreatorId,
 			IsDynamic: isDynamic, DynamicConfig: dynamicConfig,
@@ -597,7 +602,12 @@ func (s *examService) CreateExam(ctx context.Context, req *pb.CreateExamRequest)
 		exam := &domain.ExamModel{
 			Title: req.Title, Description: req.Description,
 			DurationMinutes: int(req.Settings.DurationMinutes), MaxAttempts: int(req.Settings.MaxAttempts),
-			Password: req.Settings.Password, ShuffleQuestions: req.Settings.ShuffleQuestions,
+			Password: func() string {
+				if req.Settings.Password != nil {
+					return *req.Settings.Password
+				}
+				return ""
+			}(), ShuffleQuestions: req.Settings.ShuffleQuestions,
 			ShowResultImmediately: req.Settings.ShowResultImmediately, RequiresApproval: req.Settings.RequiresApproval,
 			IsDynamic: req.Settings.IsDynamic,
 			TopicID: req.TopicId, CreatorID: req.CreatorId, Status: req.Status,
@@ -702,7 +712,7 @@ func (s *examService) GetExamDetails(ctx context.Context, req *pb.GetExamDetails
 		Settings: &pb.ExamSettings{
 			DurationMinutes:       int32(examModel.DurationMinutes),
 			MaxAttempts:           int32(examModel.MaxAttempts),
-			Password:              examModel.Password,
+			Password:              &examModel.Password,
 			StartTime:             startTime,
 			EndTime:               endTime,
 			ShuffleQuestions:      examModel.ShuffleQuestions,
@@ -1341,8 +1351,8 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 		if req.Title != "" {
 			updates["title"] = req.Title
 		}
-		if req.Description != "" {
-			updates["description"] = req.Description
+		if req.Description != nil {
+			updates["description"] = *req.Description
 		}
 		if req.Status != "" {
 			updates["status"] = req.Status
@@ -1360,8 +1370,8 @@ func (s *examService) UpdateExam(ctx context.Context, req *pb.UpdateExamRequest)
 			if req.Settings.MaxAttempts > 0 {
 				updates["max_attempts"] = req.Settings.MaxAttempts
 			}
-			if req.Settings.Password != "" {
-				updates["password"] = req.Settings.Password
+			if req.Settings.Password != nil {
+				updates["password"] = *req.Settings.Password
 			}
 			updates["shuffle_questions"] = req.Settings.ShuffleQuestions
 			updates["show_result_immediately"] = req.Settings.ShowResultImmediately

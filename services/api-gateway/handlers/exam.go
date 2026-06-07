@@ -366,7 +366,7 @@ func (h *ExamHandler) CreateExam(c *gin.Context) {
 		Settings: &pb.ExamSettings{
 			DurationMinutes:       int32(req.Settings.DurationMinutes),
 			MaxAttempts:           int32(req.Settings.MaxAttempts),
-			Password:              req.Settings.Password,
+			Password:              &req.Settings.Password,
 			StartTime:             req.Settings.StartTime,
 			EndTime:               req.Settings.EndTime,
 			ShuffleQuestions:      req.Settings.ShuffleQuestions,
@@ -693,23 +693,23 @@ func (h *ExamHandler) UpdateExam(c *gin.Context) {
 
 	var req struct {
 		Title       string  `json:"title"`
-		Description string  `json:"description"`
+		Description *string `json:"description"`
 		TopicId     int64   `json:"topic_id"`
 		Questions   []struct {
 			QuestionId int64   `json:"question_id"`
 			Points     float32 `json:"points"`
 		} `json:"questions"`
 		Settings    struct {
-			DurationMinutes       int    `json:"duration_minutes"`
-			MaxAttempts           int    `json:"max_attempts"`
-			Password              string `json:"password"`
-			StartTime             string `json:"start_time"`
-			EndTime               string `json:"end_time"`
-			ShuffleQuestions      bool   `json:"shuffle_questions"`
-			ShowResultImmediately bool   `json:"show_result_immediately"`
-			RequiresApproval      bool   `json:"requires_approval"`
-			IsDynamic             bool   `json:"is_dynamic"`
-			DynamicConfig         string `json:"dynamic_config"`
+			DurationMinutes       int     `json:"duration_minutes"`
+			MaxAttempts           int     `json:"max_attempts"`
+			Password              *string `json:"password"`
+			StartTime             string  `json:"start_time"`
+			EndTime               string  `json:"end_time"`
+			ShuffleQuestions      bool    `json:"shuffle_questions"`
+			ShowResultImmediately bool    `json:"show_result_immediately"`
+			RequiresApproval      bool    `json:"requires_approval"`
+			IsDynamic             bool    `json:"is_dynamic"`
+			DynamicConfig         string  `json:"dynamic_config"`
 		} `json:"settings"`
 		Status string `json:"status"`
 	}
