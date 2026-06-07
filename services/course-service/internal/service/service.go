@@ -495,9 +495,20 @@ func (s *courseService) DeleteLesson(ctx context.Context, req *pb.DeleteLessonRe
 func (s *courseService) UpdateLesson(ctx context.Context, req *pb.UpdateLessonRequest) (*pb.UpdateLessonResponse, error) {
     err := database.DB.Transaction(func(tx *gorm.DB) error {
         updates := map[string]interface{}{
-            "title": req.Title,
+            "title":       req.Title,
             "content_url": req.ContentUrl,
         }
+
+        if req.LessonType != "" {
+            lessonType, err := s.repo.GetLessonType(ctx, req.LessonType)
+            if err != nil {
+                if err = tx.WithContext(ctx).Where("type = ?", req.LessonType).First(&lessonType).Error; err != nil {
+                    return errors.New("lesson type không hợp lệ")
+                }
+            }
+            updates["type_id"] = lessonType.Id
+        }
+
         return s.repo.UpdateLesson(ctx, tx, req.LessonId, updates)
     })
     if err != nil { return nil, err }

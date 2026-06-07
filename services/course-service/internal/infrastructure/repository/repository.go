@@ -329,8 +329,7 @@ func (r *courseRepository) GetCourseIDBySectionID(ctx context.Context, sectionID
 func (r *courseRepository) GetCourseIDByLessonID(ctx context.Context, lessonID int64) (int64, error) {
 	var lesson domain.LessonModel
 	if err := database.DB.WithContext(ctx).
-		Select("section_models.course_id").
-		Joins("JOIN section_models ON section_models.id = lesson_models.section_id").
+		Preload("Section").
 		First(&lesson, lessonID).Error; err != nil {
 		return 0, err
 	}
