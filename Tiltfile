@@ -6,6 +6,10 @@ load('ext://restart_process', 'docker_build_with_restart')
 # Uncomment to use secrets
 # k8s_yaml('./infra/development/k8s/secrets.yaml')
 
+# Apply PVCs via local command so they persist across tilt down
+local('kubectl apply -f ./infra/development/k8s/postgres-pvc.yaml')
+local('kubectl apply -f ./infra/development/k8s/redis-pvc.yaml')
+
 k8s_yaml('./infra/development/k8s/app-config.yaml')
 
 ### End of K8s Config ###

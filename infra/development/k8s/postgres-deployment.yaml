@@ -36,9 +36,13 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: POSTGRES_DB
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql
       volumes:
         - name: postgres-storage
-          emptyDir: {}  
+          persistentVolumeClaim:
+            claimName: postgres-pvc
 
 ---
 

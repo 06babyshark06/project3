@@ -20,9 +20,13 @@ spec:
           imagePullPolicy: Never   # Dùng image build local
           ports:
             - containerPort: 6379
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
       volumes:
         - name: redis-storage
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: redis-pvc
 
 
 ---
